@@ -16,3 +16,6 @@ gradle-app.setting
 .project
 # JDT-specific (Eclipse Java Development Tools)
 .classpath
+*.env
+.env
+.DS_Store

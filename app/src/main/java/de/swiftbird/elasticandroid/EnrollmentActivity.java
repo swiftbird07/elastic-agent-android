@@ -132,7 +132,7 @@ public class EnrollmentActivity extends AppCompatActivity {
         String certificatePattern = "-----BEGIN CERTIFICATE-----.+-----END CERTIFICATE-----";
 
         // Validate certificate
-        if (!certificate.matches(certificatePattern)) {
+        if (!certificate.matches(certificatePattern) && !certificate.isEmpty()) {
             Log.w(TAG, "Invalid characters in certificate.");
             Toast.makeText(this, "Certificate contains invalid characters. Please provide a valid certificate.", Toast.LENGTH_LONG).show();
             return; // Exit the method or handle accordingly

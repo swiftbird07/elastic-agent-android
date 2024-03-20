@@ -2,7 +2,8 @@
     <!-- Base application theme. -->
     <style name="Base.Theme.ElasticAgentAndroid" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <!-- Color is Elastic Agent Green -->
+        <item name="colorPrimary">@color/elastic_agent_green</item>
     </style>
 
     <style name="Theme.ElasticAgentAndroid" parent="Base.Theme.ElasticAgentAndroid" />

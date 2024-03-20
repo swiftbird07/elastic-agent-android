@@ -55,7 +55,7 @@ public class EnrollmentRepository {
         Log.i(TAG, "Starting enrollment process...");
         Log.d(TAG, "User provided Server URL: " + request.getServerUrl());
         Log.d(TAG, "User provided Hostname: " + request.getHostname());
-        Log.d(TAG, "User provided Tags: " + request.getTags());
+        Log.d(TAG, "User provided certificate: " + request.getTags());
         //Log.i(TAG, "User provided Token: " + request.getToken())
 
         // First call API info endpoint:

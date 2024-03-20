@@ -4,15 +4,15 @@ public class EnrollmentRequest {
     private String serverUrl;
     private String token;
     private String hostname;
-    private String tags;
+    private String certificate;
     private boolean checkCert;
     private boolean fingerprintRootCA;
 
-    protected EnrollmentRequest(String serverUrl, String token, String hostname, String tags, boolean checkCert, boolean fingerprintRootCA){
+    protected EnrollmentRequest(String serverUrl, String token, String hostname, String certificate, boolean checkCert, boolean fingerprintRootCA){
         this.serverUrl = serverUrl;
         this.token = token;
         this.hostname = hostname;
-        this.tags = tags;
+        this.certificate = certificate;
         this.checkCert = checkCert;
         this.fingerprintRootCA = fingerprintRootCA;
     }
@@ -27,7 +27,7 @@ public class EnrollmentRequest {
     }
 
     public String getTags() {
-        return tags;
+        return certificate;
     }
 
     public boolean getCheckCert() {

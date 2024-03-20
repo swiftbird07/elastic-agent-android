@@ -19,6 +19,7 @@ import org.json.JSONObject;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.text.MessageFormat;
 import java.util.Base64;
 
 import de.swiftbird.elasticandroid.R.id;
@@ -95,11 +96,11 @@ public class EnrollmentActivity extends AppCompatActivity {
         String serverUrl = etServerUrl.getText().toString().trim();
         String token = etToken.getText().toString().trim();
         String hostname = etHostname.getText().toString().trim();
-        String tags = etTags.getText().toString().trim();
+        String certificate = etTags.getText().toString().trim();
         boolean checkCA = swCheckCA.isChecked();
         boolean pinRootCA = swPinRootCA.isChecked();
 
-        // Assuming this code is within an Activity and serverUrl, token, hostname, and tags are already defined
+        // Assuming this code is within an Activity and serverUrl, token, hostname, and certificate are already defined
 
         // Validate serverUrl
         try {
@@ -127,13 +128,13 @@ public class EnrollmentActivity extends AppCompatActivity {
             return; // Exit the method or handle accordingly
         }
 
-        // Since tags can also include commas, adjust the pattern
-        String tagsPattern = "^[A-Za-z0-9_,\\-\\.]*$";
+        // Match default encoded certificate pattern (---BEGIN CERTIFICATE--- to ---END CERTIFICATE---)
+        String certificatePattern = "-----BEGIN CERTIFICATE-----.+-----END CERTIFICATE-----";
 
-        // Validate tags
-        if (!tags.matches(tagsPattern)) {
-            Log.w(TAG, "Invalid characters in tags.");
-            Toast.makeText(this, "Tags contain invalid characters. Only letters, digits, '_', '-', '.', and ',' are allowed.", Toast.LENGTH_LONG).show();
+        // Validate certificate
+        if (!certificate.matches(certificatePattern)) {
+            Log.w(TAG, "Invalid characters in certificate.");
+            Toast.makeText(this, "Certificate contains invalid characters. Please provide a valid certificate.", Toast.LENGTH_LONG).show();
             return; // Exit the method or handle accordingly
         }
 
@@ -141,7 +142,7 @@ public class EnrollmentActivity extends AppCompatActivity {
 
         if (!serverUrl.isEmpty() && !token.isEmpty() && !hostname.isEmpty()) {
 
-            EnrollmentRequest request = new EnrollmentRequest(serverUrl, token, hostname, tags, checkCA, pinRootCA);
+            EnrollmentRequest request = new EnrollmentRequest(serverUrl, token, hostname, certificate, checkCA, pinRootCA);
             viewModel = new EnrollmentViewModel(getApplication(), request, tError);
 
             // Trigger the enrollment and observe the result
@@ -157,13 +158,13 @@ public class EnrollmentActivity extends AppCompatActivity {
             });
         } else {
             // Handle validation failure
-            Toast.makeText(this, "Please fill in all fields (except tags).", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Please fill in all fields (except certificate).", Toast.LENGTH_SHORT).show();
         }
     }
 
     private void autofillFromEnrollmentString(String base64EnrollmentString) {
         try {
-            String jsonString = new String(Base64.getDecoder().decode(base64EnrollmentString));
+            String jsonString = new String(android.util.Base64.decode(base64EnrollmentString, android.util.Base64.DEFAULT));
             JSONObject jsonObj = new JSONObject(jsonString);
 
             // Attempt to replace %DEVICENAME% placeholder with the device's model name
@@ -173,13 +174,12 @@ public class EnrollmentActivity extends AppCompatActivity {
             etServerUrl.setText(jsonObj.optString("serverUrl", ""));
             etToken.setText(jsonObj.optString("token", ""));
             etHostname.setText(hostname); // Set the potentially modified hostname
-            etTags.setText(jsonObj.optString("tags", ""));
+            etTags.setText(jsonObj.optString("certificate", ""));
             swCheckCA.setChecked(jsonObj.optBoolean("verifyServerCert", true));
             swPinRootCA.setChecked(jsonObj.optBoolean("pinRootCert", false));
             tError.setText("");
         } catch (Exception e) {
-            tError.setText("Failed to autofill: " + e.getMessage());
-            //Toast.makeText(this, "Failed to autofill: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            tError.setText(MessageFormat.format("Failed to autofill: {0}", e.getMessage()));
         }
     }
 

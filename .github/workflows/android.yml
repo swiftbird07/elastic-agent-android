@@ -24,3 +24,10 @@ jobs:
       run: chmod +x gradlew
     - name: Build with Gradle
       run: ./gradlew build
+
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Run unit tests
+      run: ./gradlew test

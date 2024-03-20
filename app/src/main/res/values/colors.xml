@@ -2,5 +2,5 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="elastic_agent_green">#FF03DAC5</color>
+    <color name="elastic_agent_green">#00b4aa</color>
 </resources>

@@ -1,0 +1,10 @@
+<!-- res/drawable/edgy_notch_shape.xml -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="120dp"
+    android:height="60dp"
+    android:viewportWidth="120"
+    android:viewportHeight="60">
+    <path
+        android:fillColor="@color/elastic_agent_green"
+        android:pathData="M0,0 L30,60 L90,60 L120,0 Z" />
+</vector>

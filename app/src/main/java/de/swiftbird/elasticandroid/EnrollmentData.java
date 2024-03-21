@@ -6,12 +6,49 @@ import androidx.room.PrimaryKey;
 
 @Entity
 public class EnrollmentData {
-    @PrimaryKey(autoGenerate = true)
+    @PrimaryKey
+    @ColumnInfo(name = "id")
     public int id;
 
     @ColumnInfo(name = "agent_id")
     public String agentId;
 
-    @ColumnInfo(name = "server_url")
-    public String serverUrl;
+    @ColumnInfo(name = "is_enrolled")
+    public boolean isEnrolled;
+
+    @ColumnInfo(name = "hostname")
+    public String hostname;
+
+    @ColumnInfo(name = "action")
+    public String action;
+
+    @ColumnInfo(name = "access_api_key")
+    public String accessApiKey;
+
+    @ColumnInfo(name = "access_api_key_id")
+    public String accessApiKeyId;
+
+    @ColumnInfo(name = "active")
+    public boolean active;
+
+    @ColumnInfo(name = "enrolled_at")
+    public String enrolledAt;
+
+    @ColumnInfo(name = "policy_id")
+    public String policyId;
+
+    @ColumnInfo(name = "status")
+    public String status;
+
+    @ColumnInfo(name = "type")
+    public String type;
+
+    @ColumnInfo(name = "last_checkin")
+    public String lastCheckin;
+
+    @ColumnInfo(name = "last_policy_update")
+    public String lastPolicyUpdate;
+
+    @ColumnInfo(name = "policy")
+    public String policy;
 }

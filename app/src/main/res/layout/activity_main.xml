@@ -1,30 +1,195 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="15dp"
+        android:background="@drawable/edgy_notch_shape" />
+
+
+
     <TextView
-        android:id="@+id/tvEnrollmentInfo"
+        android:id="@+id/tAgentStatusValue"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Enrollment Information: Not Enrolled"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="50dp"/>
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="55dp"
+        android:layout_marginBottom="10dp"
+        android:layout_toEndOf="@+id/tAgentStatus"
+        android:text="Unenrolled"
+        android:textColor="@android:color/holo_red_dark"
+        android:textSize="18sp"/>
+
+
+    <TextView
+        android:id="@+id/tAgentStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="55dp"
+        android:layout_marginBottom="16dp"
+        android:layout_marginStart="16dp"
+        android:text="Agent Status: "
+        android:textSize="18sp"/>
+
+    <LinearLayout
+        android:id="@+id/llEnrollmentDetails"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/tAgentStatus"
+        android:background="@drawable/bordered_background"
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:visibility="visible">
+
+        <!-- Template for Key:Value pair -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Hostname:" />
+
+
+            <TextView
+                android:id="@+id/tHostnameValue"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Agent Policy:" />
+
+
+            <TextView
+                android:id="@+id/tPolicyValue"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="" />
+        </LinearLayout>
+        <!-- Policy ID -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Policy ID:" />
+
+            <TextView
+                android:id="@+id/tPolicyIdValue"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="" />
+        </LinearLayout>
+
+        <!-- Enrolled At -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Enrolled At:" />
+
+            <TextView
+                android:id="@+id/tEnrolledAtValue"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="" />
+        </LinearLayout>
+
+        <!-- Last Checkin -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Last Checkin:" />
+
+            <TextView
+                android:id="@+id/tLastCheckinValue"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="" />
+        </LinearLayout>
+
+        <!-- Last Policy Update -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Last Policy Update:" />
+
+            <TextView
+                android:id="@+id/tLastPolicyUpdateValue"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="" />
+        </LinearLayout>
+    </LinearLayout>
+
+
 
     <Button
-        android:id="@+id/btnEnrollUnenroll"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Enroll Agent"
-        android:layout_below="@+id/tvEnrollmentInfo"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="20dp"/>
+    android:id="@+id/btnEnrollUnenroll"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="Enroll Agent"
+    android:layout_below="@+id/llEnrollmentDetails"
+    android:layout_centerHorizontal="true"
+    android:layout_marginTop="20dp"/>
 
-    <TextView
-        android:id="@+id/tvLastDataSent"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Last Data Sent: Placeholder"
-        android:layout_below="@+id/btnEnrollUnenroll"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="20dp"/>
-</RelativeLayout>
+    <ImageView
+        android:id="@+id/ivAgentStatusIcon"
+        android:layout_width="147dp"
+        android:layout_height="143dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+
+        android:layout_marginStart="100dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="100dp"
+        android:src="@drawable/icon" />
+
+    </RelativeLayout>

@@ -5,6 +5,8 @@ import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
+import androidx.lifecycle.LiveData;
+
 
 @Dao
 public interface EnrollmentDataDAO {
@@ -13,4 +15,8 @@ public interface EnrollmentDataDAO {
 
     @Query("SELECT * FROM EnrollmentData WHERE id = :id")
     LiveData<EnrollmentData> getEnrollmentInfo(int id);
+
+    @Query("DELETE FROM EnrollmentData")
+    void delete();
+
 }

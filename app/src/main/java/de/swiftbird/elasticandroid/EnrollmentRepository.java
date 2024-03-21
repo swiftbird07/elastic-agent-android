@@ -3,11 +3,11 @@ package de.swiftbird.elasticandroid;
 import android.content.Context;
 import android.util.Log;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
+
 import androidx.room.Room;
+
+import org.json.JSONObject;
 
 import okhttp3.Authenticator;
 import okhttp3.Interceptor;
@@ -36,107 +36,156 @@ public class EnrollmentRepository {
     private final Context context;
     private FleetApi fleetApi;
     private static final String TAG = "EnrollmentRepository";
-    private TextView tError;
+    private TextView tError, tStatus;
+    private String token;
 
-    public EnrollmentRepository(Context context, String serverUrl, String token, boolean checkCert, TextView tError) {
+
+    public EnrollmentRepository(Context context, String serverUrl, String token, boolean checkCert, TextView tStatus, TextView tError) {
         this.context = context;
         // Initialize Retrofit instance
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(serverUrl)
-                .client(getOkHttpClient(checkCert, token))
+                .client(getOkHttpClient(checkCert))
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
 
         fleetApi = retrofit.create(FleetApi.class);
+        this.token = token;
+
         this.tError = tError;
+        this.tStatus = tStatus;
     }
 
-    public LiveData<EnrollmentResponse> enrollAgent(EnrollmentRequest request) {
+    public void enrollAgent(AppEnrollmentRequest request, de.swiftbird.elasticandroid.Callback callback) {
         Log.i(TAG, "Starting enrollment process...");
+        tStatus.setText("Starting enrollment process...");
         Log.d(TAG, "User provided Server URL: " + request.getServerUrl());
         Log.d(TAG, "User provided Hostname: " + request.getHostname());
-        Log.d(TAG, "User provided certificate: " + request.getTags());
-        //Log.i(TAG, "User provided Token: " + request.getToken())
+        Log.d(TAG, "User provided certificate: " + request.getCertificate());
 
         // First call API info endpoint:
-        Log.i(TAG, "Requesting API details...");
-        final MutableLiveData<ApiResponse> liveDataApi = new MutableLiveData<ApiResponse>();
+        Log.i(TAG, "Requesting Fleet Server details...");
+        tStatus.setText("Requesting Fleet Server details...");
 
-        fleetApi.getApiInfo().enqueue(new Callback<ApiResponse>() {
+        fleetApi.getFleetStatus().enqueue(new Callback<FleetStatusResponse>() {
+
             @Override
-            public void onResponse(Call<ApiResponse> call, Response<ApiResponse> response) {
+            public void onResponse(Call<FleetStatusResponse> call, Response<FleetStatusResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    Log.i(TAG, "API version: " + response.body().getData().getApi_version());
-                    Log.i(TAG, "API revision: " + response.body().getData().getRevision());
-                    Log.i(TAG, "Fleet hostname: " + response.body().getData().getHostname());
-                } else {
-                    try {
-                        tError.setText("Could not communicate with Fleet API - Message: " + response.errorBody().string());
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
+                    Log.i(TAG, "Fleet Name: " + response.body().getName());
+                    Log.i(TAG, "Fleet Status: " + response.body().getStatus());
+
+                    if (response.body().getStatus().equals("HEALTHY")) {
+                        Log.i(TAG, "Fleet is HEALTHY. Sending enrollment request to fleet server...");
+                        tStatus.setText("Fleet server is healthy. Sending enrollment request to fleet server (this may take a while)...");
+
+
+                        FleetEnrollRequest enrollRequest = new FleetEnrollRequest();
+                        enrollRequest.setType("PERMANENT");
+
+
+                        fleetApi.enrollAgent("ApiKey " + token, enrollRequest).enqueue(new Callback<FleetEnrollResponse>() {
+                            @Override
+                            public void onResponse(Call<FleetEnrollResponse> call, Response<FleetEnrollResponse> response) {
+                                if (response.isSuccessful()) {
+                                    FleetEnrollResponse enrollResponse = response.body();
+
+                                    if(enrollResponse != null && enrollResponse.getItem() != null && enrollResponse.getItem().getId() != null){
+                                        Log.i(TAG, "Enrollment successful. Agent ID: " + enrollResponse.getItem().getId());
+                                        tStatus.setText("Enrollment successful. Agent ID: " + enrollResponse.getItem().getId());
+
+                                        saveEnrollmentInfo(request, enrollResponse);
+
+                                        // Callback to the activity
+                                        callback.onCallback(true);
+
+                                    } else {
+                                        tError.setText("Enrollment failed because of invalid response from Fleet Server.");
+                                        Log.e(TAG, "Enrollment failed because of invalid response from Fleet Server. Context: " + response.toString());
+                                        callback.onCallback(false);
+                                    }
+                                } else {
+
+                                    try {
+                                        try {
+                                            JSONObject obj = new JSONObject(response.errorBody().string());
+                                            String message = obj.getString("message");
+                                            if(message.equals("BadRequest") || message.equals("unauthorized")){
+                                                tError.setText("The fleet server rejected the enrollment token. Please check the token and try again.");
+                                            } else {
+                                                tError.setText("Enrollment failed with code: " + response.code() +  ". Error: " + message);
+                                            }
+
+                                        } catch (Exception e) {
+                                            tError.setText("Enrollment failed with code: " + response.code() + " (Error message could not be read)");
+                                        }
+                                        Log.w(TAG, "Enrollment failed with code: " + response.code() +  ". Context: " + response.toString() + " Response: " + response.errorBody().string());
+
+                                    } catch (IOException e) {
+                                        Log.e(TAG, "Enrollment failed with code: " + response.code() +  ". Context: " + response.toString() + " (Error body could not be read)");
+                                    }
+                                    callback.onCallback(false);
+                                }
+                            }
+
+                            @Override
+                            public void onFailure(Call<FleetEnrollResponse> call, Throwable t) {
+                                tError.setText("Enrollment failed with error: " + t.getMessage());
+                                Log.e(TAG, "Enrollment failed with error: " + t.getMessage());
+                                callback.onCallback(false);
+                            }
+                        });
+
+
+                    } else {
+                        tError.setText("Fleet server is not healthy - Status: " + response.body().getStatus());
+                        Log.w(TAG, "Fleet Server is not healthy. Stopping enrollment.");
+                        callback.onCallback(false);
                     }
-                    Log.w(TAG, "Initial API request failed. Stopping enrollment.");
-                    liveDataApi.postValue(null);
-                }
-            }
-
-
-            @Override
-            public void onFailure(Call<ApiResponse> call, Throwable t) {
-                // Handle failure
-                tError.setText("Could not communicate with Fleet API - Error: " + t.getMessage());
-                Log.e(TAG, "Unhandled exception in initial API request. Stopping enrollment. Response: " + call.toString() + " Error: " + t.toString());
-                liveDataApi.postValue(null); // Simplified for brevity
-            }
-        });
-
-        if(liveDataApi.getValue() == null) return new LiveData<EnrollmentResponse>(){};
-
-
-        // Use MutableLiveData to post the result from the network operation
-        Log.i(TAG, "Requesting enrollment...");
-        final MutableLiveData<EnrollmentResponse> liveData = new MutableLiveData<EnrollmentResponse>();
-
-        fleetApi.enrollAgent(request).enqueue(new Callback<EnrollmentResponse>() {
-            @Override
-            public void onResponse(Call<EnrollmentResponse> call, Response<EnrollmentResponse> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    Log.i(TAG, "Enrollment successful.");
-                    liveData.postValue(response.body());
-                    Log.i(TAG, "Saving Enrollment data to db...");
-                    saveEnrollmentInfo(request, response.body());
                 } else {
-                    // Handle errors
-                    tError.setText("Could not complete Fleet enrollment - Response: " + response.errorBody().toString());
-                    Log.w(TAG, "Enrollment request failed. Stopping enrollment.");
-                    liveData.postValue(null); // Simplified for brevity
+                    tError.setText("Could not communicate with fleet server - Check server URL and try again. Status Code: " + response.code());
+                    Log.e(TAG, "Unhandled externally caused exception in initial Fleet Server request. Stopping enrollment. Response: " + response.toString());
+                    callback.onCallback(false);
                 }
             }
 
             @Override
-            public void onFailure(Call<EnrollmentResponse> call, Throwable t) {
+            public void onFailure(Call<FleetStatusResponse> call, Throwable t) {
                 // Handle failure
-                tError.setText("Could not complete Fleet enrollment - Error: " + t.getMessage());
-                Log.e(TAG, "Unhandled exception in initial enrollment request. Stopping enrollment. Response: " + call.toString() + " Error: " + t.toString());
-                liveData.postValue(null); // Simplified for brevity
+                tError.setText("Could not communicate with Fleet Server - Error: " + t.getMessage());
+                Log.e(TAG, "Unhandled exception in initial Fleet Server request. Stopping enrollment. Response: " + call.toString() + " Error: " + t.toString());
+                callback.onCallback(false);
             }
         });
 
-        return liveData;
+
     }
 
-    public void saveEnrollmentInfo(EnrollmentRequest request, EnrollmentResponse response) {
+    public void saveEnrollmentInfo(AppEnrollmentRequest request, FleetEnrollResponse response) {
         new Thread(new Runnable() {
             @Override
             public void run() {
+
+                FleetEnrollResponse.Item item = response.getItem();
+
                 EnrollmentData enrollmentInfo = new EnrollmentData();
-                enrollmentInfo.agentId = response.getData().getAgentId();
-                enrollmentInfo.serverUrl = request.getServerUrl();
-                // Set other fields as needed
+
+                enrollmentInfo.id = 1; // We only have one enrollment info in the database
+                enrollmentInfo.action = response.getAction();
+                enrollmentInfo.accessApiKey = item.getAccessApiKey();
+                enrollmentInfo.accessApiKeyId = item.getAccessApiKeyId();
+                enrollmentInfo.active = item.getActive();
+                enrollmentInfo.enrolledAt = item.getEnrolledAt();
+                enrollmentInfo.policyId = item.getPolicyId();
+                enrollmentInfo.status = item.getStatus();
+                enrollmentInfo.isEnrolled = true;
+                enrollmentInfo.hostname = request.getHostname();
+                enrollmentInfo.agentId = item.getId();
+
 
                 AppDatabase db = Room.databaseBuilder(context.getApplicationContext(),
                         AppDatabase.class, "enrollment-data").build();
-                db.EnrollmentDataDAO().insertEnrollmentInfo(enrollmentInfo);
+                db.enrollmentDataDAO().insertEnrollmentInfo(enrollmentInfo);
                 Log.i(TAG, "Saving Enrollment data to db successful.");
             }
         }).start();
@@ -144,13 +193,13 @@ public class EnrollmentRepository {
 
 
 
-    private static OkHttpClient getOkHttpClient(boolean checkCA, String token) {
+    private static OkHttpClient getOkHttpClient(boolean checkCA) {
         Interceptor authInterceptor = new Interceptor() {
             @Override
             public okhttp3.Response intercept(Chain chain) throws IOException {
                 Request originalRequest = chain.request();
                 Request newRequest = originalRequest.newBuilder()
-                        .header("Authorization", "Bearer " + token)
+                        .header("User-Agent", "elastic agent " + BuildConfig.AGENT_VERSION)
                         .build();
                 return chain.proceed(newRequest);
             }

@@ -6,9 +6,11 @@ if (envFile.exists()) {
     envFile.inputStream().use { props.load(it) }
 }
 
+
 plugins {
-    alias(libs.plugins.androidApplication)
-    id("com.google.devtools.ksp") version "1.8.10-1.0.9" apply true
+    id("com.android.application")
+    kotlin("android")
+    kotlin("kapt")
 }
 
 android {
@@ -25,6 +27,7 @@ android {
 
         val enrollmentString = props.getProperty("ENROLLMENT_STRING") ?: ""
         buildConfigField("String", "ENROLLMENT_STRING", "\"$enrollmentString\"")
+        buildConfigField("String", "AGENT_VERSION", "\"8.10.2\"")
 
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -52,6 +55,7 @@ dependencies {
     implementation(libs.constraintlayout)
     implementation(libs.navigation.fragment)
     implementation(libs.navigation.ui)
+    //implementation(libs.room.common)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
@@ -67,10 +71,11 @@ dependencies {
     // ViewModel for managing UI-related data in a lifecycle-conscious way
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.3.1")
 
-    // Room Database for local data storage
-    implementation("androidx.room:room-runtime:2.2.6")
-    // Annotation processor for Room to generate the necessary code
-    ksp("androidx.room:room-compiler:2.5.0")
+    val roomVersion = "2.4.2" // Use the latest version available
+
+    implementation("androidx.room:room-runtime:$roomVersion")
+    kapt("androidx.room:room-compiler:$roomVersion")
+
 }
 
 

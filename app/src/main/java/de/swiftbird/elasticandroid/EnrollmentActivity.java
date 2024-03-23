@@ -150,7 +150,7 @@ public class EnrollmentActivity extends AppCompatActivity implements Callback {
 
             tStatus.setText("Starting enrollment process...");
 
-            AppEnrollmentRequest request = new AppEnrollmentRequest(serverUrl, token, hostname, certificate, checkCA, pinRootCA);
+            AppEnrollRequest request = new AppEnrollRequest(serverUrl, token, hostname, certificate, checkCA, pinRootCA);
             EnrollmentRepository repository = new EnrollmentRepository(getApplicationContext(), request.getServerUrl(), request.getToken(), request.getCheckCert(),  tStatus, tError);
             repository.enrollAgent(request, this); // will callback onCallback
 
@@ -194,7 +194,13 @@ public class EnrollmentActivity extends AppCompatActivity implements Callback {
             finish();
         } else {
             Log.w(TAG, "Enrollment failed. Check logs for details.");
-            btnEnrollNow.setEnabled(true);
+            // Delete enrollment data from database (as it is invalid)
+            AppDatabase db = AppDatabase.getDatabase(this.getApplicationContext(), "enrollment-data");
+            AppDatabase.databaseWriteExecutor.execute(() -> {
+                db.enrollmentDataDAO().delete();
+                btnEnrollNow.setEnabled(true);
+            });
+
         }
     }
 }

@@ -19,6 +19,12 @@ public class EnrollmentData {
     @ColumnInfo(name = "hostname")
     public String hostname;
 
+    @ColumnInfo(name = "fleet_url")
+    public String fleetUrl;
+
+    @ColumnInfo(name = "veryify_cert")
+    public boolean verifyCert;
+
     @ColumnInfo(name = "action")
     public String action;
 

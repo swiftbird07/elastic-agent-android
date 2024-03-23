@@ -1,6 +1,6 @@
 package de.swiftbird.elasticandroid;
 
-public class AppEnrollmentResponse {
+public class AppEnrollResponse {
     private Data data;
 
     // Getter and setter

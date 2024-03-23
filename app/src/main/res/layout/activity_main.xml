@@ -168,14 +168,21 @@
         </LinearLayout>
     </LinearLayout>
 
-
+    <Button
+        android:id="@+id/btnSyncNow"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="🔄 Sync Now"
+        android:layout_below="@+id/llEnrollmentDetails"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="20dp"/>
 
     <Button
     android:id="@+id/btnEnrollUnenroll"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:text="Enroll Agent"
-    android:layout_below="@+id/llEnrollmentDetails"
+    android:layout_below="@+id/btnSyncNow"
     android:layout_centerHorizontal="true"
     android:layout_marginTop="20dp"/>
 

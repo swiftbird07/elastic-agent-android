@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -23,8 +24,9 @@ import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements Callback {
 
     private TextView tAgentStatusValue;
     private TextView tHostnameValue;
@@ -33,7 +35,10 @@ public class MainActivity extends AppCompatActivity {
     private TextView tEnrolledAtValue;
     private TextView tLastCheckinValue;
     private TextView tLastPolicyUpdateValue;
+
+    private Button btnSyncNow;
     private Button btnEnrollUnenroll;
+
     private LinearLayout llEnrollmentDetails;
 
     private EnrollmentData enrollmentData;
@@ -53,6 +58,7 @@ public class MainActivity extends AppCompatActivity {
         tLastPolicyUpdateValue = findViewById(R.id.tLastPolicyUpdateValue);
         btnEnrollUnenroll = findViewById(R.id.btnEnrollUnenroll);
         llEnrollmentDetails = findViewById(R.id.llEnrollmentDetails);
+        btnSyncNow = findViewById(R.id.btnSyncNow);
 
         btnEnrollUnenroll.setOnClickListener(view -> {
             if (isEnrolled()) {
@@ -63,20 +69,44 @@ public class MainActivity extends AppCompatActivity {
         });
 
         // Load UI based on enrollment status from database
-        AppDatabase db = AppDatabase.getDatabase(this.getApplicationContext());
+        AppDatabase db = AppDatabase.getDatabase(this.getApplicationContext(), "enrollment-data");
         db.enrollmentDataDAO().getEnrollmentInfo(1).observe(this, enrollmentData -> {
             updateUIBasedOnEnrollment(enrollmentData);
+
+            btnSyncNow.setOnClickListener(view -> {
+                CheckinRepository checkinRepository = CheckinRepository.getInstance(this);
+                androidx.appcompat.app.AlertDialog dialog = new MaterialAlertDialogBuilder(this)
+                        .setTitle("Checking in...")
+                        .setMessage("Starting checkin...")
+                        .setCancelable(false)
+                        .setPositiveButton("OK", /* listener = */ null)
+                        .show();
+                checkinRepository.checkinAgent(enrollmentData, AgentMetadata.getMetadataFromDeviceAndDB(enrollmentData.agentId, enrollmentData.hostname), this, dialog, null, this);
+            });
         });
+
+        onResume();
 
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+
         // Load UI based on enrollment status from database
-        AppDatabase db = AppDatabase.getDatabase(this.getApplicationContext());
+        AppDatabase db = AppDatabase.getDatabase(this.getApplicationContext(), "enrollment-data");
         db.enrollmentDataDAO().getEnrollmentInfo(1).observe(this, enrollmentData -> {
-            updateUIBasedOnEnrollment(enrollmentData);
+            if(enrollmentData != null) {
+                updateUIBasedOnEnrollment(enrollmentData);
+            }
+        });
+
+        AppDatabase db2 = AppDatabase.getDatabase(this.getApplicationContext(), "policy-data");
+        db.policyDataDAO().getPoliyData().observe(this, policyData -> {
+            if(policyData != null) {
+                btnSyncNow.setVisibility(View.VISIBLE);
+                updateUIBasedOnPolicy(policyData);
+            }
         });
     }
 
@@ -92,6 +122,8 @@ public class MainActivity extends AppCompatActivity {
     private void updateUIBasedOnEnrollment(EnrollmentData enrollmentData) {
         this.enrollmentData = enrollmentData;
         if (isEnrolled()) {
+            // Check if agent is enrolled and show sync button
+            btnSyncNow.setEnabled(true);
 
             // Update the agent status and other TextViews with data from EnrollmentData object
             tAgentStatusValue.setText(enrollmentData.isEnrolled ? "Enrolled" : "Unenrolled");
@@ -102,9 +134,7 @@ public class MainActivity extends AppCompatActivity {
             tHostnameValue.setText( (enrollmentData.hostname != null ? enrollmentData.hostname : "N/A"));
             tPolicyValue.setText( (enrollmentData.action != null ? enrollmentData.action : "N/A"));
             tPolicyIdValue.setText( (enrollmentData.policyId != null ? enrollmentData.policyId : "N/A"));
-            tEnrolledAtValue.setText( (enrollmentData.enrolledAt != null ? enrollmentData.enrolledAt : "N/A"));
-            tLastCheckinValue.setText("Placeholder"); // TODO: Update this with actual last check-in data when available
-            tLastPolicyUpdateValue.setText("Placeholder"); // TODO: Update this with actual last policy update data when available
+            tEnrolledAtValue.setText( (enrollmentData.enrolledAt != null ? enrollmentData.enrolledAt : "Never"));
 
             // Update the button text for unenrollment
             btnEnrollUnenroll.setText("Unenroll Agent");
@@ -114,6 +144,8 @@ public class MainActivity extends AppCompatActivity {
             showEnrollmentDetails(true);
 
         } else {
+            // Check if agent is enrolled and show sync button
+            btnSyncNow.setEnabled(false);
             tAgentStatusValue.setText("Unenrolled");
             tAgentStatusValue.setTextColor(getResources().getColor(android.R.color.holo_red_light)); // Set text color to red if unenrolled
 
@@ -128,6 +160,12 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void updateUIBasedOnPolicy(PolicyData policyData) {
+        // Update the UI based on the policy data
+        tLastCheckinValue.setText(policyData.lastUpdated != null ? policyData.lastUpdated : "Never");
+        tLastPolicyUpdateValue.setText(policyData.createdAt != null ? policyData.createdAt : "Never");
+    }
+
     private void showEnrollmentDetails(boolean show) {
         // If using View visibility to show/hide enrollment details, implement logic here
         int visibility = show ? View.VISIBLE : View.GONE;
@@ -139,15 +177,6 @@ public class MainActivity extends AppCompatActivity {
         tLastPolicyUpdateValue.setVisibility(visibility);
     }
 
-    private void clearEnrollmentDetails() {
-        // Clear the TextViews or set to "N/A" when not enrolled
-        tHostnameValue.setText("Hostname: N/A");
-        tPolicyValue.setText("Agent Policy: N/A");
-        tPolicyIdValue.setText("Policy ID: N/A");
-        tEnrolledAtValue.setText("Enrolled At: N/A");
-        tLastCheckinValue.setText("Last Checkin: N/A");
-        tLastPolicyUpdateValue.setText("Last Policy Update: N/A");
-    }
 
     private void showUnenrollmentDialog() {
         new AlertDialog.Builder(this)
@@ -160,11 +189,32 @@ public class MainActivity extends AppCompatActivity {
     private void unenrollAgent() {
         // TODO: Implement sending last data log to ES
         // Delete the enrollment data from the database
-        AppDatabase db = AppDatabase.getDatabase(this.getApplicationContext());
+        AppDatabase db = AppDatabase.getDatabase(this.getApplicationContext(), "enrollment-data");
         AppDatabase.databaseWriteExecutor.execute(() -> {
             db.enrollmentDataDAO().delete();
         });
         // Refresh the UI
         updateUIBasedOnEnrollment(new EnrollmentData());
+    }
+
+    @Override
+    public void onCallback(boolean success) {
+        if (success) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(getApplicationContext(), "Checkin successful", Toast.LENGTH_SHORT).show();
+                    onResume();
+                }
+            });
+
+        } else {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(getApplicationContext(), "Checkin failed", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
     }
 }

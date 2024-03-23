@@ -1,12 +1,14 @@
 package de.swiftbird.elasticandroid;
 
-import java.util.List;
+import com.google.gson.annotations.SerializedName;
 
 public class FleetEnrollRequest {
     private String type;
-    private Metadata metadata;
+    @SerializedName("metadata")
+    private AgentMetadata metadata;
     private String enrollment_id;
     private String shared_id;
+
 
     public String getType() {
         return type;
@@ -16,11 +18,11 @@ public class FleetEnrollRequest {
         this.type = type;
     }
 
-    public Metadata getMetadata() {
+    public AgentMetadata getMetadata() {
         return metadata;
     }
 
-    public void setMetadata(Metadata metadata) {
+    public void setMetadata(AgentMetadata metadata) {
         this.metadata = metadata;
     }
 
@@ -41,35 +43,5 @@ public class FleetEnrollRequest {
     }
 
 
-    public static class Metadata {
-        private String user_provided; // Assuming JSON String
-        private String local; // Assuming JSON String
-        private List<String> tags;
 
-        public String getUser_provided() {
-            return user_provided;
-        }
-
-        public void setUser_provided(String user_provided) {
-            this.user_provided = user_provided;
-        }
-
-        public String getLocal() {
-            return local;
-        }
-
-        public void setLocal(String local) {
-            this.local = local;
-        }
-
-        public List<String> getTags() {
-            return tags;
-        }
-
-        public void setTags(List<String> tags) {
-            this.tags = tags;
-        }
-
-        // Constructor, getters, and setters
-    }
 }

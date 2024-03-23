@@ -5,6 +5,7 @@ import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.Header;
 import retrofit2.http.POST;
+import retrofit2.http.Path;
 
 public interface FleetApi {
 
@@ -12,7 +13,11 @@ public interface FleetApi {
     Call<FleetStatusResponse> getFleetStatus();
 
     @POST("/api/fleet/agents/enroll")
-    Call<FleetEnrollResponse> enrollAgent(@Header("Authorization") String apiKey, @Body FleetEnrollRequest enrollRequest);
+    Call<FleetEnrollResponse> enrollAgent(@Header("Authorization") String enrollmentTokenHeader, @Body FleetEnrollRequest enrollRequest);
 
-
+    @POST("/api/fleet/agents/{id}/checkin")
+    Call<CheckinResponse> postCheckin(
+            @Header("Authorization") String accessApiKeyHeader,
+            @Path("id") String id,
+            @Body CheckinRequest checkinRequest);
 }

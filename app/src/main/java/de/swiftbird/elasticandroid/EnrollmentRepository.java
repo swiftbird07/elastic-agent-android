@@ -1,18 +1,20 @@
 package de.swiftbird.elasticandroid;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.util.Log;
+import android.util.TypedValue;
 import android.widget.TextView;
 
 
-import androidx.room.Room;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
+
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.gson.Gson;
 
 import org.json.JSONObject;
 
-import okhttp3.Authenticator;
-import okhttp3.Interceptor;
-import okhttp3.Request;
-import okhttp3.Route;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -20,16 +22,7 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 import java.io.IOException;
-import java.security.cert.CertificateException;
-
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
-import javax.net.ssl.SSLSocketFactory;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
-
-import okhttp3.OkHttpClient;
+import java.util.UUID;
 
 public class EnrollmentRepository {
 
@@ -39,13 +32,16 @@ public class EnrollmentRepository {
     private TextView tError, tStatus;
     private String token;
 
+    private boolean verifyCert;
+
 
     public EnrollmentRepository(Context context, String serverUrl, String token, boolean checkCert, TextView tStatus, TextView tError) {
         this.context = context;
+        this.verifyCert = checkCert;
         // Initialize Retrofit instance
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(serverUrl)
-                .client(getOkHttpClient(checkCert))
+                .client(NetworkBuilder.getOkHttpClient(checkCert))
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
 
@@ -56,7 +52,7 @@ public class EnrollmentRepository {
         this.tStatus = tStatus;
     }
 
-    public void enrollAgent(AppEnrollmentRequest request, de.swiftbird.elasticandroid.Callback callback) {
+    public void enrollAgent(AppEnrollRequest request, de.swiftbird.elasticandroid.Callback callbackToEnrollmentActivity) {
         Log.i(TAG, "Starting enrollment process...");
         tStatus.setText("Starting enrollment process...");
         Log.d(TAG, "User provided Server URL: " + request.getServerUrl());
@@ -82,11 +78,13 @@ public class EnrollmentRepository {
 
                         FleetEnrollRequest enrollRequest = new FleetEnrollRequest();
                         enrollRequest.setType("PERMANENT");
-
+                        String randomAgentId = UUID.randomUUID().toString();
+                        AgentMetadata metadata = AgentMetadata.getMetadataFromDeviceAndDB(null, request.getHostname());
+                        enrollRequest.setMetadata(metadata);
 
                         fleetApi.enrollAgent("ApiKey " + token, enrollRequest).enqueue(new Callback<FleetEnrollResponse>() {
                             @Override
-                            public void onResponse(Call<FleetEnrollResponse> call, Response<FleetEnrollResponse> response) {
+                            public void onResponse(@NonNull Call<FleetEnrollResponse> call, @NonNull Response<FleetEnrollResponse> response) {
                                 if (response.isSuccessful()) {
                                     FleetEnrollResponse enrollResponse = response.body();
 
@@ -94,15 +92,33 @@ public class EnrollmentRepository {
                                         Log.i(TAG, "Enrollment successful. Agent ID: " + enrollResponse.getItem().getId());
                                         tStatus.setText("Enrollment successful. Agent ID: " + enrollResponse.getItem().getId());
 
-                                        saveEnrollmentInfo(request, enrollResponse);
+                                        Log.d(TAG, "Response from Fleet Server: " + new Gson().toJson(enrollResponse));
 
-                                        // Callback to the activity
-                                        callback.onCallback(true);
+                                        // Save the enrollment info to the database
+                                        EnrollmentData enrollmentData = parseAndSaveEnrollmentInfo(request, enrollResponse);
+
+                                        Log.i(TAG, "Enrollment data saved to database. Starting initial checkin...");
+                                        // We are not done yet. We need to do the initial checkin to get the policy
+                                        CheckinRepository checkinRepository = CheckinRepository.getInstance(context);
+
+                                        Context context2 = new androidx.appcompat.view.ContextThemeWrapper(context, R.style.Theme_ElasticAgentAndroid);
+
+                                        try {
+                                            TypedValue typedValue = new TypedValue();
+                                            context2.getTheme().resolveAttribute(R.color.elastic_agent_green, typedValue, true);
+                                            Log.d("ThemeCheck", "colorPrimary: " + typedValue.resourceId + ", expected: " + R.color.elastic_agent_green);
+                                        } catch (Exception e) {
+                                            Log.e("ThemeCheck", "Error checking theme", e);
+                                        }
+
+
+                                        checkinRepository.checkinAgent(enrollmentData, metadata, callbackToEnrollmentActivity, null, tStatus, context);
+
 
                                     } else {
                                         tError.setText("Enrollment failed because of invalid response from Fleet Server.");
                                         Log.e(TAG, "Enrollment failed because of invalid response from Fleet Server. Context: " + response.toString());
-                                        callback.onCallback(false);
+                                        callbackToEnrollmentActivity.onCallback(false);
                                     }
                                 } else {
 
@@ -124,7 +140,7 @@ public class EnrollmentRepository {
                                     } catch (IOException e) {
                                         Log.e(TAG, "Enrollment failed with code: " + response.code() +  ". Context: " + response.toString() + " (Error body could not be read)");
                                     }
-                                    callback.onCallback(false);
+                                    callbackToEnrollmentActivity.onCallback(false);
                                 }
                             }
 
@@ -132,7 +148,7 @@ public class EnrollmentRepository {
                             public void onFailure(Call<FleetEnrollResponse> call, Throwable t) {
                                 tError.setText("Enrollment failed with error: " + t.getMessage());
                                 Log.e(TAG, "Enrollment failed with error: " + t.getMessage());
-                                callback.onCallback(false);
+                                callbackToEnrollmentActivity.onCallback(false);
                             }
                         });
 
@@ -140,12 +156,12 @@ public class EnrollmentRepository {
                     } else {
                         tError.setText("Fleet server is not healthy - Status: " + response.body().getStatus());
                         Log.w(TAG, "Fleet Server is not healthy. Stopping enrollment.");
-                        callback.onCallback(false);
+                        callbackToEnrollmentActivity.onCallback(false);
                     }
                 } else {
                     tError.setText("Could not communicate with fleet server - Check server URL and try again. Status Code: " + response.code());
                     Log.e(TAG, "Unhandled externally caused exception in initial Fleet Server request. Stopping enrollment. Response: " + response.toString());
-                    callback.onCallback(false);
+                    callbackToEnrollmentActivity.onCallback(false);
                 }
             }
 
@@ -154,107 +170,47 @@ public class EnrollmentRepository {
                 // Handle failure
                 tError.setText("Could not communicate with Fleet Server - Error: " + t.getMessage());
                 Log.e(TAG, "Unhandled exception in initial Fleet Server request. Stopping enrollment. Response: " + call.toString() + " Error: " + t.toString());
-                callback.onCallback(false);
+                callbackToEnrollmentActivity.onCallback(false);
             }
         });
 
 
     }
 
-    public void saveEnrollmentInfo(AppEnrollmentRequest request, FleetEnrollResponse response) {
+    private EnrollmentData parseAndSaveEnrollmentInfo(AppEnrollRequest request, FleetEnrollResponse response) {
+
+        FleetEnrollResponse.Item item = response.getItem();
+
+        EnrollmentData enrollmentData = new EnrollmentData();
+
+        enrollmentData.id = 1; // We only have one enrollment info in the database
+        enrollmentData.action = response.getAction();
+        enrollmentData.accessApiKey = item.getAccessApiKey();
+        enrollmentData.accessApiKeyId = item.getAccessApiKeyId();
+        enrollmentData.active = item.getActive();
+        enrollmentData.enrolledAt = item.getEnrolledAt();
+        enrollmentData.policyId = item.getPolicyId();
+        enrollmentData.status = item.getStatus();
+        enrollmentData.isEnrolled = true;
+        enrollmentData.hostname = request.getHostname();
+        enrollmentData.agentId = item.getId();
+        enrollmentData.fleetUrl = request.getServerUrl();
+        enrollmentData.verifyCert = verifyCert;
+
         new Thread(new Runnable() {
             @Override
             public void run() {
-
-                FleetEnrollResponse.Item item = response.getItem();
-
-                EnrollmentData enrollmentInfo = new EnrollmentData();
-
-                enrollmentInfo.id = 1; // We only have one enrollment info in the database
-                enrollmentInfo.action = response.getAction();
-                enrollmentInfo.accessApiKey = item.getAccessApiKey();
-                enrollmentInfo.accessApiKeyId = item.getAccessApiKeyId();
-                enrollmentInfo.active = item.getActive();
-                enrollmentInfo.enrolledAt = item.getEnrolledAt();
-                enrollmentInfo.policyId = item.getPolicyId();
-                enrollmentInfo.status = item.getStatus();
-                enrollmentInfo.isEnrolled = true;
-                enrollmentInfo.hostname = request.getHostname();
-                enrollmentInfo.agentId = item.getId();
-
-
-                AppDatabase db = Room.databaseBuilder(context.getApplicationContext(),
-                        AppDatabase.class, "enrollment-data").build();
-                db.enrollmentDataDAO().insertEnrollmentInfo(enrollmentInfo);
+                AppDatabase db = AppDatabase.getDatabase(context, "enrollment-data");
+                db.enrollmentDataDAO().insertEnrollmentInfo(enrollmentData);
                 Log.i(TAG, "Saving Enrollment data to db successful.");
             }
         }).start();
+
+        return enrollmentData;
     }
 
 
 
-    private static OkHttpClient getOkHttpClient(boolean checkCA) {
-        Interceptor authInterceptor = new Interceptor() {
-            @Override
-            public okhttp3.Response intercept(Chain chain) throws IOException {
-                Request originalRequest = chain.request();
-                Request newRequest = originalRequest.newBuilder()
-                        .header("User-Agent", "elastic agent " + BuildConfig.AGENT_VERSION)
-                        .build();
-                return chain.proceed(newRequest);
-            }
-        };
 
-        if (checkCA){
-            return new OkHttpClient.Builder().addInterceptor(authInterceptor).build();
-        } else {
-
-            try {
-                // Create a trust manager that does not validate certificate chains
-                final TrustManager[] trustAllCerts = new TrustManager[]{
-                        new X509TrustManager() {
-                            @Override
-                            public void checkClientTrusted(java.security.cert.X509Certificate[] chain, String authType) throws CertificateException {
-                            }
-
-                            @Override
-                            public void checkServerTrusted(java.security.cert.X509Certificate[] chain, String authType) throws CertificateException {
-                            }
-
-                            @Override
-                            public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-                                return new java.security.cert.X509Certificate[]{};
-                            }
-                        }
-                };
-
-                // Install the all-trusting trust manager
-                final SSLContext sslContext = SSLContext.getInstance("SSL");
-                sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
-                // Create an ssl socket factory with our all-trusting manager
-                final SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
-
-                OkHttpClient.Builder builder = new OkHttpClient.Builder();
-                builder.sslSocketFactory(sslSocketFactory);
-                builder.hostnameVerifier(new HostnameVerifier() {
-                    @Override
-                    public boolean verify(String hostname, SSLSession session) {
-                        return true;
-                    }
-                });
-                builder.authenticator(new Authenticator() {
-                    @Override
-                    public Request authenticate(Route route, okhttp3.Response response) throws IOException {
-                        return null;
-                    }
-                });
-
-                OkHttpClient okHttpClient = builder.addInterceptor(authInterceptor).build();
-                return okHttpClient;
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        }
-    }
 
 }

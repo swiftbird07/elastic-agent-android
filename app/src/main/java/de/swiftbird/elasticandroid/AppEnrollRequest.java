@@ -1,6 +1,6 @@
 package de.swiftbird.elasticandroid;
 
-public class AppEnrollmentRequest {
+public class AppEnrollRequest {
     private String serverUrl;
     private String token;
     private String hostname;
@@ -8,7 +8,7 @@ public class AppEnrollmentRequest {
     private boolean checkCert;
     private boolean fingerprintRootCA;
 
-    protected AppEnrollmentRequest(String serverUrl, String token, String hostname, String certificate, boolean checkCert, boolean fingerprintRootCA){
+    protected AppEnrollRequest(String serverUrl, String token, String hostname, String certificate, boolean checkCert, boolean fingerprintRootCA){
         this.serverUrl = serverUrl;
         this.token = token;
         this.hostname = hostname;

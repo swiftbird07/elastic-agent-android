@@ -1,0 +1,418 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+
+    <View
+        android:layout_width="match_parent"
+        android:id="@+id/vNotch"
+        android:layout_height="15dp"
+        android:background="@drawable/edgy_notch_shape" />
+
+
+        <TextView
+            android:id="@+id/tAgentStatusValue"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="55dp"
+            android:layout_marginBottom="10dp"
+            android:layout_toEndOf="@+id/tAgentStatus"
+            android:text="Unenrolled"
+            android:textColor="@android:color/holo_red_dark"
+            android:textSize="18sp"/>
+
+
+        <TextView
+            android:id="@+id/tAgentStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="55dp"
+            android:layout_marginBottom="16dp"
+            android:layout_marginStart="16dp"
+            android:text="Agent Status: "
+            android:textSize="18sp"/>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:id="@+id/svMain"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/tAgentStatus"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp"
+            android:background="@drawable/bordered_background">
+            <LinearLayout
+                android:id="@+id/llEnrollmentDetails"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/tAgentStatus"
+                android:background="@drawable/bordered_background"
+                android:orientation="vertical"
+                android:padding="16dp"
+                android:visibility="visible">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Fleet Status:" />
+
+                    <TextView
+                        android:id="@+id/fleetStatus"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Hostname:" />
+
+
+                    <TextView
+                        android:id="@+id/tHostnameValue"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Fleet Policy:" />
+
+
+                    <TextView
+                        android:id="@+id/tPolicyValue"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="" />
+                </LinearLayout>
+                <!-- Policy ID -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Fleet Policy ID:" />
+
+                    <TextView
+                        android:id="@+id/tPolicyIdValue"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="" />
+                </LinearLayout>
+
+                <!-- Enrolled At -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Enrolled At:" />
+
+                    <TextView
+                        android:id="@+id/tEnrolledAtValue"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Collector Details -->
+            <LinearLayout
+                android:id="@+id/llCollectorDetails"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+
+                android:background="@drawable/bordered_background"
+                android:orientation="vertical"
+                android:padding="16dp"
+                android:visibility="visible">
+
+
+
+                <!-- Last Checkin -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Last Checkin:" />
+
+                    <TextView
+                        android:id="@+id/tLastCheckinValue"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="" />
+                </LinearLayout>
+
+                <!-- Last Policy Update -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Last Policy Update:" />
+
+                    <TextView
+                        android:id="@+id/tLastPolicyUpdateValue"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="" />
+                </LinearLayout>
+
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Enabled Collectors:" />
+
+                    <TextView
+                        android:id="@+id/enabledCollectors"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Revision:" />
+
+                    <TextView
+                        android:id="@+id/revisionValue"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Protections Enabled:" />
+
+                    <TextView
+                        android:id="@+id/protectionsEnabledValue"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Input Name:" />
+
+                    <TextView
+                        android:id="@+id/inputNameValue"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Data Stream:" />
+
+                    <TextView
+                        android:id="@+id/dataStreamValue"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Ignore Older:" />
+
+                    <TextView
+                        android:id="@+id/ignoreOlderValue"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Interval (Minutes):" />
+
+                    <TextView
+                        android:id="@+id/intervalValue"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Elasticsearch URL:" />
+
+                    <TextView
+                        android:id="@+id/esUrlValue"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Elasticsearch SSL Fingerprint:" />
+
+                    <TextView
+                        android:id="@+id/esSslFingerprintValue"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="" />
+                </LinearLayout>
+
+            </LinearLayout>
+        </LinearLayout>
+
+    </ScrollView>
+
+    <Button
+        android:id="@+id/btnBack"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Back"
+        app:backgroundTint="@color/elastic_agent_gray"
+        android:textColor="@android:color/white"
+        android:layout_above="@+id/ivAgentStatusIcon"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="0dp"/>
+
+
+    <ImageView
+        android:id="@+id/ivAgentStatusIcon"
+        android:layout_width="wrap_content"
+        android:layout_height="72dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+
+        android:layout_marginStart="100dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="100dp"
+        android:src="@drawable/icon" />
+</RelativeLayout>

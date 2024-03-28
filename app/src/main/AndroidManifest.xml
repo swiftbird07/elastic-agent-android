@@ -30,6 +30,10 @@
             android:name=".EnrollmentActivity"
             android:theme="@style/Theme.ElasticAgentAndroid">
         </activity>
+        <activity
+            android:name=".DetailsActivity"
+            android:theme="@style/Theme.ElasticAgentAndroid">
+        </activity>
     </application>
 
 </manifest>

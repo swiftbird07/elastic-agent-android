@@ -180,7 +180,6 @@ public class CheckinRepository {
                                 db.policyDataDAO().delete(); // Synchronously delete old policy data
                                 db.policyDataDAO().insertPolicyData(policyData); // Synchronously insert new policy data
                                 Log.i(TAG, "Policy data updated successfully.");
-                                //TODO: Send acknowledgement to fleet server
                                 callbackActivity.onCallback(true);
                         }
 
@@ -216,6 +215,18 @@ public class CheckinRepository {
                 if (t instanceof SocketTimeoutException) {
                     Log.i(TAG, "Checkin successful but no new actions were available (timeout).");
                     writeDialog("Checkin successful. No updates.", true);
+                    // Update lastUpdated to current time format 2024-03-19T21:25:27.937Z API 24
+                    @SuppressLint("SimpleDateFormat") SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+                    sdf.setTimeZone(TimeZone.getTimeZone("UTC")); // Ensure the time is in UTC
+
+                    AppDatabase.databaseWriteExecutor.execute(() -> {
+                                AppDatabase db = AppDatabase.getDatabase(context, "policy-data");
+                                // Update lastUpdated to current time format 2024-03-19T21:25:27.937Z API 24
+                                @SuppressLint("SimpleDateFormat") SimpleDateFormat sdf_2 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+                                sdf_2.setTimeZone(TimeZone.getTimeZone("UTC")); // Ensure the time is in UTC
+                                db.policyDataDAO().refreshPolicyData(sdf.format(Calendar.getInstance().getTime()), null);
+                            });
+
                     callbackActivity.onCallback(true);
                 } else {
                     // Handle failure

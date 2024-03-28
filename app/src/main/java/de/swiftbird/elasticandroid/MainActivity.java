@@ -2,54 +2,69 @@ package de.swiftbird.elasticandroid;
 
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.Bundle;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.text.SpannableString;
+import android.text.Spanned;
+import android.text.style.ForegroundColorSpan;
+import android.text.style.StyleSpan;
+import android.util.Log;
 import android.view.View;
 
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.core.content.ContextCompat;
 
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class MainActivity extends AppCompatActivity implements StatusCallback {
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
-    private TextView tAgentStatusValue;
-    private TextView tHostnameValue;
-    private TextView tPolicyValue;
-    private TextView tPolicyIdValue;
-    private TextView tEnrolledAtValue;
-    private TextView tLastCheckinValue;
-    private TextView tLastPolicyUpdateValue;
+public class MainActivity extends AppCompatActivity implements StatusCallback {
 
     private Button btnSyncNow;
     private Button btnEnrollUnenroll;
 
+    private Button btnDetails;
+
     private LinearLayout llEnrollmentDetails;
 
     private EnrollmentData enrollmentData;
+
+    private TextView tAgentStatusEnrolled;
+    private TextView tAgentStatusUnenrolled;
+
+    private RelativeLayout.LayoutParams layoutParams;
+
+    private String TAG = "MainActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Initialize TextView and Button properties
-        tAgentStatusValue = findViewById(R.id.tAgentStatusValue);
-        tHostnameValue = findViewById(R.id.tHostnameValue);
-        tPolicyValue = findViewById(R.id.tPolicyValue);
-        tPolicyIdValue = findViewById(R.id.tPolicyIdValue);
-        tEnrolledAtValue = findViewById(R.id.tEnrolledAtValue);
-        tLastCheckinValue = findViewById(R.id.tLastCheckinValue);
-        tLastPolicyUpdateValue = findViewById(R.id.tLastPolicyUpdateValue);
-        btnEnrollUnenroll = findViewById(R.id.btnEnrollUnenroll);
-        llEnrollmentDetails = findViewById(R.id.llEnrollmentDetails);
+
         btnSyncNow = findViewById(R.id.btnSyncNow);
+        tAgentStatusEnrolled = findViewById(R.id.tAgentStatusEnrolled);
+        tAgentStatusUnenrolled = findViewById(R.id.tAgentStatusUnenrolled);
+        btnEnrollUnenroll = findViewById(R.id.btnEnrollUnenroll);
+        btnDetails = findViewById(R.id.btnShowDetails);
+
+        btnDetails.setOnClickListener(view -> {
+            startActivity(new Intent(MainActivity.this, DetailsActivity.class));
+        });
 
         btnEnrollUnenroll.setOnClickListener(view -> {
             if (isEnrolled()) {
@@ -92,11 +107,9 @@ public class MainActivity extends AppCompatActivity implements StatusCallback {
             }
         });
 
-        AppDatabase db2 = AppDatabase.getDatabase(this.getApplicationContext(), "policy-data");
         db.policyDataDAO().getPoliyData().observe(this, policyData -> {
             if(policyData != null) {
                 btnSyncNow.setVisibility(View.VISIBLE);
-                updateUIBasedOnPolicy(policyData);
             }
         });
     }
@@ -115,56 +128,46 @@ public class MainActivity extends AppCompatActivity implements StatusCallback {
             // Check if agent is enrolled and show sync button
             btnSyncNow.setEnabled(true);
 
-            // Update the agent status and other TextViews with data from EnrollmentData object
-            tAgentStatusValue.setText(enrollmentData.isEnrolled ? "Enrolled" : "Unenrolled");
-            tAgentStatusValue.setTextColor(getResources().getColor(android.R.color.holo_green_dark)); // Set text color to green if enrolled
-            llEnrollmentDetails.setVisibility(View.VISIBLE);
+            String formattedDate = formatDate(enrollmentData.enrolledAt);
+            String baseText = "Agent is enrolled to " + enrollmentData.fleetUrl + " since " + formattedDate + ".";
 
-            tHostnameValue.setText( (enrollmentData.hostname != null ? enrollmentData.hostname : "N/A"));
-            tPolicyValue.setText( (enrollmentData.action != null ? enrollmentData.action : "N/A"));
-            tPolicyIdValue.setText( (enrollmentData.policyId != null ? enrollmentData.policyId : "N/A"));
-            tEnrolledAtValue.setText( (enrollmentData.enrolledAt != null ? enrollmentData.enrolledAt : "Never"));
+            SpannableString spannableString = new SpannableString(baseText);
+
+            // Make fleetUrl bold
+            int fleetUrlStart = baseText.indexOf(enrollmentData.fleetUrl);
+            int fleetUrlEnd = fleetUrlStart + enrollmentData.fleetUrl.length();
+            spannableString.setSpan(new StyleSpan(Typeface.BOLD), fleetUrlStart, fleetUrlEnd, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+            // Make the date bold
+            int dateStart = baseText.indexOf(formattedDate);
+            int dateEnd = dateStart + formattedDate.length();
+            spannableString.setSpan(new StyleSpan(Typeface.BOLD), dateStart, dateEnd, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+            tAgentStatusEnrolled.setText(spannableString);
+
+            //tAgentStatusEnrolled.setText("Agent is enrolled to " + enrollmentData.fleetUrl + " since " + enrollmentData.enrolledAt + ".");
+            tAgentStatusEnrolled.setVisibility(View.VISIBLE);
+            tAgentStatusUnenrolled.setVisibility(View.INVISIBLE);
 
             // Update the button text for unenrollment
             btnEnrollUnenroll.setText("Unenroll Agent");
             btnEnrollUnenroll.setBackgroundColor(getResources().getColor(android.R.color.holo_red_light));
             btnEnrollUnenroll.setTextColor(getResources().getColor(android.R.color.white));
 
-            showEnrollmentDetails(true);
-
         } else {
             // Check if agent is enrolled and show sync button
             btnSyncNow.setEnabled(false);
-            tAgentStatusValue.setText("Unenrolled");
-            tAgentStatusValue.setTextColor(getResources().getColor(android.R.color.holo_red_light)); // Set text color to red if unenrolled
+            tAgentStatusUnenrolled.setText("Agent is currently unenrolled.");
+            tAgentStatusUnenrolled.setVisibility(View.VISIBLE);
+            tAgentStatusEnrolled.setVisibility(View.INVISIBLE);
 
             // Update the button text for enrollment
             btnEnrollUnenroll.setText("Enroll Agent");
             // Set color back to elastic_agent_green
-            btnEnrollUnenroll.setBackgroundColor(ContextCompat.getColor(this, R.color.elastic_agent_green));
-
-
-            // Hide the enrollment details if not enrolled
-            showEnrollmentDetails(false);
         }
     }
 
-    private void updateUIBasedOnPolicy(PolicyData policyData) {
-        // Update the UI based on the policy data
-        tLastCheckinValue.setText(policyData.lastUpdated != null ? policyData.lastUpdated : "Never");
-        tLastPolicyUpdateValue.setText(policyData.createdAt != null ? policyData.createdAt : "Never");
-    }
 
-    private void showEnrollmentDetails(boolean show) {
-        // If using View visibility to show/hide enrollment details, implement logic here
-        int visibility = show ? View.VISIBLE : View.GONE;
-        tHostnameValue.setVisibility(visibility);
-        tPolicyValue.setVisibility(visibility);
-        tPolicyIdValue.setVisibility(visibility);
-        tEnrolledAtValue.setVisibility(visibility);
-        tLastCheckinValue.setVisibility(visibility);
-        tLastPolicyUpdateValue.setVisibility(visibility);
-    }
 
 
     private void showUnenrollmentDialog() {
@@ -205,5 +208,22 @@ public class MainActivity extends AppCompatActivity implements StatusCallback {
                 }
             });
         }
+    }
+
+    private String formatDate(String dateUnformatted){
+        try {
+            String originalPattern = "yyyy-MM-dd"; // Assume original format
+            String desiredPattern = "MMMM d, yyyy";
+            SimpleDateFormat originalFormat = new SimpleDateFormat(originalPattern, Locale.getDefault());
+            SimpleDateFormat desiredFormat = new SimpleDateFormat(desiredPattern, Locale.getDefault());
+
+            Date date = originalFormat.parse(dateUnformatted);
+
+            return desiredFormat.format(date);
+        } catch (ParseException e) {
+            Log.w(TAG, "Could not parse date " + dateUnformatted);
+            return dateUnformatted;
+        }
+
     }
 }

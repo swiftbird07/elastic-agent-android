@@ -34,6 +34,18 @@
             android:name=".DetailsActivity"
             android:theme="@style/Theme.ElasticAgentAndroid">
         </activity>
+        <activity
+            android:name=".HelpActivity"
+            android:theme="@style/Theme.ElasticAgentAndroid">
+        </activity>
+        <activity
+            android:name=".LicenseActivity"
+            android:theme="@style/Theme.ElasticAgentAndroid">
+        </activity>
+        <activity
+            android:name=".LegalActivity"
+            android:theme="@style/Theme.ElasticAgentAndroid">
+        </activity>
     </application>
 
 </manifest>

@@ -1,7 +1,9 @@
 package de.swiftbird.elasticandroid;
 
 import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
@@ -10,6 +12,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.preference.PreferenceManager;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.style.ForegroundColorSpan;
@@ -39,6 +42,10 @@ public class MainActivity extends AppCompatActivity implements StatusCallback {
 
     private Button btnDetails;
 
+    private Button btnHelp;
+    private Button btnLicense;
+    private Button btnLegal;
+
     private LinearLayout llEnrollmentDetails;
 
     private EnrollmentData enrollmentData;
@@ -66,6 +73,22 @@ public class MainActivity extends AppCompatActivity implements StatusCallback {
             startActivity(new Intent(MainActivity.this, DetailsActivity.class));
         });
 
+        btnHelp = findViewById(R.id.btnHelp);
+        btnLicense = findViewById(R.id.btnLicenses);
+        btnLegal = findViewById(R.id.btnLegal);
+
+        btnHelp.setOnClickListener(view -> {
+            startActivity(new Intent(MainActivity.this, HelpActivity.class));
+        });
+
+        btnLicense.setOnClickListener(view -> {
+            startActivity(new Intent(MainActivity.this, LicenseActivity.class));
+        });
+
+        btnLegal.setOnClickListener(view -> {
+            startActivity(new Intent(MainActivity.this, LegalActivity.class));
+        });
+
         btnEnrollUnenroll.setOnClickListener(view -> {
             if (isEnrolled()) {
                 showUnenrollmentDialog();
@@ -73,6 +96,8 @@ public class MainActivity extends AppCompatActivity implements StatusCallback {
                 startActivity(new Intent(MainActivity.this, EnrollmentActivity.class));
             }
         });
+
+
 
         // Load UI based on enrollment status from database
         AppDatabase db = AppDatabase.getDatabase(this.getApplicationContext(), "enrollment-data");
@@ -90,6 +115,25 @@ public class MainActivity extends AppCompatActivity implements StatusCallback {
                 checkinRepository.checkinAgent(enrollmentData, AgentMetadata.getMetadataFromDeviceAndDB(enrollmentData.agentId, enrollmentData.hostname), this, dialog, null, this);
             });
         });
+
+        // Reset the 'firstTime' flag every time for debug builds
+        if (BuildConfig.DEBUG) {
+            PreferenceManager.getDefaultSharedPreferences(this)
+                    .edit()
+                    .putBoolean("firstTime", false)
+                    .apply();
+        }
+
+
+        // Check if it's the first app start
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        if (!prefs.getBoolean("firstTime", false)) {
+            // Show the legal disclaimer
+            showLegalDisclaimer();
+
+            // After showing the disclaimer, set 'firstTime' to true
+            prefs.edit().putBoolean("firstTime", true).apply();
+        }
 
         onResume();
 
@@ -125,8 +169,14 @@ public class MainActivity extends AppCompatActivity implements StatusCallback {
     private void updateUIBasedOnEnrollment(EnrollmentData enrollmentData) {
         this.enrollmentData = enrollmentData;
         if (isEnrolled()) {
-            // Check if agent is enrolled and show sync button
+            // Enable the sync button
             btnSyncNow.setEnabled(true);
+            btnSyncNow.setBackgroundColor(getResources().getColor(R.color.elastic_agent_gray));
+            btnSyncNow.setTextColor(getResources().getColor(android.R.color.white));
+            // Enable the details button
+            btnDetails.setEnabled(true);
+            btnDetails.setBackgroundColor(getResources().getColor(R.color.elastic_agent_gray));
+            btnDetails.setTextColor(getResources().getColor(android.R.color.white));
 
             String formattedDate = formatDate(enrollmentData.enrolledAt);
             String baseText = "Agent is enrolled to " + enrollmentData.fleetUrl + " since " + formattedDate + ".";
@@ -153,10 +203,9 @@ public class MainActivity extends AppCompatActivity implements StatusCallback {
             btnEnrollUnenroll.setText("Unenroll Agent");
             btnEnrollUnenroll.setBackgroundColor(getResources().getColor(android.R.color.holo_red_light));
             btnEnrollUnenroll.setTextColor(getResources().getColor(android.R.color.white));
+            btnEnrollUnenroll.setCompoundDrawablesWithIntrinsicBounds(android.R.drawable.ic_media_rew, 0, 0, 0);
 
         } else {
-            // Check if agent is enrolled and show sync button
-            btnSyncNow.setEnabled(false);
             tAgentStatusUnenrolled.setText("Agent is currently unenrolled.");
             tAgentStatusUnenrolled.setVisibility(View.VISIBLE);
             tAgentStatusEnrolled.setVisibility(View.INVISIBLE);
@@ -164,6 +213,19 @@ public class MainActivity extends AppCompatActivity implements StatusCallback {
             // Update the button text for enrollment
             btnEnrollUnenroll.setText("Enroll Agent");
             // Set color back to elastic_agent_green
+            btnEnrollUnenroll.setBackgroundColor(getResources().getColor(R.color.elastic_agent_green));
+            btnEnrollUnenroll.setTextColor(getResources().getColor(android.R.color.white));
+            btnEnrollUnenroll.setCompoundDrawablesWithIntrinsicBounds(android.R.drawable.ic_media_ff, 0, 0, 0);
+
+            // Disable the sync button
+            btnSyncNow.setEnabled(false);
+            btnSyncNow.setBackgroundColor(getResources().getColor(android.R.color.darker_gray));
+            btnSyncNow.setTextColor(getResources().getColor(android.R.color.white));
+            // Disable the details button
+            btnDetails.setEnabled(false);
+            btnDetails.setBackgroundColor(getResources().getColor(android.R.color.darker_gray));
+            btnDetails.setTextColor(getResources().getColor(android.R.color.white));
+
         }
     }
 
@@ -225,5 +287,41 @@ public class MainActivity extends AppCompatActivity implements StatusCallback {
             return dateUnformatted;
         }
 
+    }
+
+    private void showLegalDisclaimer() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Legal Disclaimer");
+        String legalDisclaimerText =
+                "This software is provided 'as is', without warranty of any kind, express or " +
+                        "implied, including but not limited to the warranties of merchantability, " +
+                        "fitness for a particular purpose and noninfringement. In no event shall the " +
+                        "authors or copyright holders be liable for any claim, damages or other " +
+                        "liability, whether in an action of contract, tort or otherwise, arising from, " +
+                        "out of or in connection with the software or the use or other dealings in the " +
+                        "software.\n\n" +
+                        "It is strictly prohibited to use this software for illegal activities, including " +
+                        "but not limited to spying on individuals without their explicit consent. All users " +
+                        "and individuals who have the software installed on their device must be duly informed " +
+                        "about its functionalities and purposes.\n\n" +
+                        "The developer of this software disclaims all liability for misuse or illegal use " +
+                        "of the software. Users are responsible for ensuring their use of the software complies " +
+                        "with all applicable laws and regulations.";
+        builder.setMessage(legalDisclaimerText);
+
+        builder.setPositiveButton("ACCEPT", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                // User accepted the disclaimer, you might want to start a new activity here or just close the dialog.
+            }
+        });
+        builder.setNegativeButton("DECLINE", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                // Kill the app or show a message that the app will be closed
+                finish();
+            }
+        });
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
     }
 }

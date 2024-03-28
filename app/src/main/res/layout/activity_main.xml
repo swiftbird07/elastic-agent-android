@@ -38,7 +38,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="55dp"
         android:layout_marginBottom="16dp"
-        android:layout_marginStart="90dp"
+        android:layout_marginStart="88dp"
         android:text="Agent is currently unenrolled."
         android:textSize="18sp"/>
 

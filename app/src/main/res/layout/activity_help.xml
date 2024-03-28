@@ -1,0 +1,120 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+
+    <View
+        android:layout_width="match_parent"
+        android:id="@+id/vNotch"
+        android:layout_height="15dp"
+        android:background="@drawable/edgy_notch_shape" />
+
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:layout_below="@id/vNotch"
+        android:layout_above="@id/btnBack">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp">
+
+            <TextView
+                android:id="@+id/tvEndUserHeading"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="End User Information / I don't know what this is"
+                android:textStyle="bold"
+                android:textSize="18sp"
+                android:layout_marginBottom="8dp"/>
+
+            <TextView
+                android:id="@+id/tvEndUserInfo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="This app is a tool used by companies to manage devices. If you find this app on your device and are unsure what it is for, it's likely used for device management in your organization. If you are not part of an organization, please be aware that this app has capabilities that could affect your privacy."
+                android:layout_below="@id/tvEndUserHeading"
+                android:textSize="16sp"
+                android:layout_marginBottom="16dp"/>
+
+            <TextView
+                android:id="@+id/tvAdminHeading"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Administrator Information"
+                android:textStyle="bold"
+                android:textSize="18sp"
+                android:layout_below="@id/tvEndUserInfo"
+                android:layout_marginBottom="8dp"/>
+
+            <TextView
+                android:id="@+id/tvAdminInfo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="This unofficial Elastic Agent app can be enrolled in Fleet and configured to send various types of log data for monitoring purposes. Admins should ensure end users are informed about the app's capabilities and the data it manages."
+                android:layout_below="@id/tvAdminHeading"
+                android:textSize="16sp"
+                android:layout_marginBottom="16dp"/>
+
+            <TextView
+                android:id="@+id/tvVersionHeading"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Version and Legal"
+                android:textStyle="bold"
+                android:textSize="18sp"
+                android:layout_below="@id/tvAdminInfo"
+                android:layout_marginBottom="8dp"/>
+
+            <TextView
+                android:id="@+id/tvVersionInfo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="App Version: ??\nElastic Agent Compatibility Version: ??"
+                android:layout_below="@id/tvVersionHeading"
+                android:textSize="16sp"/>
+
+            <TextView
+                android:id="@+id/tvVersionInfo2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="\nPlease review the 'Licenses' and 'Legal' sections in the main menu for more information on the usage terms and conditions."
+                android:layout_below="@id/tvVersionInfo"
+                android:textSize="16sp"/>
+
+        </RelativeLayout>
+    </ScrollView>
+
+    <Button
+        android:id="@+id/btnBack"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Back"
+        app:backgroundTint="@color/elastic_agent_gray"
+        android:textColor="@android:color/white"
+        android:layout_above="@+id/ivAgentStatusIcon"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="20dp"/>
+
+    <ImageView
+        android:id="@+id/ivAgentStatusIcon"
+        android:layout_width="wrap_content"
+        android:layout_height="123dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+
+        android:layout_marginStart="100dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="100dp"
+        android:src="@drawable/icon" />
+</RelativeLayout>

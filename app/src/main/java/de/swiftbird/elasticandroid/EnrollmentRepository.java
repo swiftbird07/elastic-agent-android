@@ -138,16 +138,6 @@ public class EnrollmentRepository {
                                         CheckinRepository checkinRepository = CheckinRepository.getInstance(context);
 
                                         Context context2 = new androidx.appcompat.view.ContextThemeWrapper(context, R.style.Theme_ElasticAgentAndroid);
-
-                                        try {
-                                            TypedValue typedValue = new TypedValue();
-                                            context2.getTheme().resolveAttribute(R.color.elastic_agent_green, typedValue, true);
-                                            Log.d("ThemeCheck", "colorPrimary: " + typedValue.resourceId + ", expected: " + R.color.elastic_agent_green);
-                                        } catch (Exception e) {
-                                            Log.e("ThemeCheck", "Error checking theme", e);
-                                        }
-
-
                                         checkinRepository.checkinAgent(enrollmentData, metadata, callbackToEnrollmentActivity, null, tStatus, context);
 
 
@@ -205,7 +195,7 @@ public class EnrollmentRepository {
             public void onFailure(Call<FleetStatusResponse> call, Throwable t) {
                 // Handle failure
                 tError.setText("Could not communicate with Fleet Server - Error: " + t.getMessage());
-                Log.e(TAG, "Unhandled exception in initial Fleet Server request. Stopping enrollment. Response: " + call.toString() + " Error: " + t.toString());
+                Log.e(TAG, "Unhandled exception in initial Fleet Server request. Stopping enrollment - Error: " + t.toString());
                 callbackToEnrollmentActivity.onCallback(false);
             }
         });

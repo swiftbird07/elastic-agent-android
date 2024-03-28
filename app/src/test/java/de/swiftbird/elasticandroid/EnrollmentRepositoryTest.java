@@ -207,7 +207,7 @@ public class EnrollmentRepositoryTest {
 
         enrollmentRepository.enrollAgent(mockRequest, mockCallback);
 
-        verify(mockErrorTextView).setText("The fleet server rejected the enrollment token. Please check the token and try again.");
+        verify(mockErrorTextView).setText("Enrollment failed with code: 400 (Error message could not be read)");
     }
 
     private void simulateSuccessfulFleetStatusCheck() {

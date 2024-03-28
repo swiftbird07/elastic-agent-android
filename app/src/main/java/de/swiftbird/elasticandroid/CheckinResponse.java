@@ -51,6 +51,12 @@ public class CheckinResponse {
             return data;
         }
 
+        protected String getId() {return id; }
+
+        public String getType() {
+            return type;
+        }
+
         public class PolicyData {
             @SerializedName("policy")
             private Policy policy;

@@ -55,4 +55,6 @@ public class PolicyData {
     @ColumnInfo(name = "last_updated")
     public String lastUpdated;
 
+    @ColumnInfo(name = "checkin_action_id")
+    public String actionId;
 }

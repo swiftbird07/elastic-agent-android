@@ -22,7 +22,7 @@ import java.text.MessageFormat;
 
 import de.swiftbird.elasticandroid.R.id;
 
-public class EnrollmentActivity extends AppCompatActivity implements Callback {
+public class EnrollmentActivity extends AppCompatActivity implements StatusCallback {
     private static final String TAG = "EnrollmentActivity";
     private EditText etServerUrl, etToken, etHostname, etTags;
     private androidx.appcompat.widget.SwitchCompat swCheckCA, swPinRootCA;
@@ -198,8 +198,8 @@ public class EnrollmentActivity extends AppCompatActivity implements Callback {
             AppDatabase db = AppDatabase.getDatabase(this.getApplicationContext(), "enrollment-data");
             AppDatabase.databaseWriteExecutor.execute(() -> {
                 db.enrollmentDataDAO().delete();
-                btnEnrollNow.setEnabled(true);
             });
+            btnEnrollNow.setEnabled(true);
 
         }
     }

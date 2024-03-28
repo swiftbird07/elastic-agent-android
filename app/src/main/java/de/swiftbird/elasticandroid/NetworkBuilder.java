@@ -2,6 +2,7 @@ package de.swiftbird.elasticandroid;
 
 import java.io.IOException;
 import java.security.cert.CertificateException;
+import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
@@ -73,7 +74,8 @@ public  class NetworkBuilder {
                     }
                 });
 
-                OkHttpClient okHttpClient = builder.addInterceptor(authInterceptor).build();
+                OkHttpClient okHttpClient = builder.addInterceptor(authInterceptor).readTimeout(5, TimeUnit.SECONDS)
+                        .connectTimeout(15, TimeUnit.SECONDS).build();
                 return okHttpClient;
             } catch (Exception e) {
                 throw new RuntimeException(e);

@@ -51,8 +51,8 @@ public class AgentMetadata {
     }
 
     public static class Local {
-        @SerializedName("agent")
-        public AgentECSMeta agent;
+        @SerializedName("elastic")
+        public ElasticECSMeta elastic;
 
         @SerializedName("host")
         public HostECSMeta host;
@@ -60,10 +60,19 @@ public class AgentMetadata {
         @SerializedName("system")
         public SystemECSMeta system;
 
-        public Local(AgentECSMeta agent, HostECSMeta host, SystemECSMeta system) {
-            this.agent = agent;
+        public Local(ElasticECSMeta elastic, HostECSMeta host, SystemECSMeta system) {
+            this.elastic = elastic;
             this.host = host;
             this.system = system;
+        }
+    }
+
+    public static class ElasticECSMeta {
+        @SerializedName("agent")
+        public AgentECSMeta agent;
+
+        public ElasticECSMeta(AgentECSMeta agent) {
+            this.agent = agent;
         }
     }
 
@@ -143,6 +152,8 @@ public class AgentMetadata {
         agentECSMeta.logLevel = "info";
         agentECSMeta.complete = false;
 
+        ElasticECSMeta elasticECSMeta = new ElasticECSMeta(agentECSMeta);
+
         // Host metadata using Android's Build class
         HostECSMeta hostECSMeta = new HostECSMeta();
         hostECSMeta.arch = Build.SUPPORTED_ABIS[0]; // Primary ABI
@@ -157,13 +168,13 @@ public class AgentMetadata {
         SystemECSMeta systemECSMeta = new SystemECSMeta();
         systemECSMeta.family = "Android";
         systemECSMeta.kernel = System.getProperty("os.version", "N/A"); // Kernel version, if accessible
-        systemECSMeta.platform = Build.BRAND; // Brand as platform
+        systemECSMeta.platform = "Android";
         systemECSMeta.version = Build.VERSION.RELEASE; // OS version
         systemECSMeta.name = "Android"; // System name
         systemECSMeta.fullName = Build.MODEL + " " + Build.VERSION.RELEASE; // Concatenated model and version
 
         // Construct and return the LocalMeta object with filled-in metadata
-        AgentMetadata metadata = new AgentMetadata(new Local(agentECSMeta, hostECSMeta, systemECSMeta));
+        AgentMetadata metadata = new AgentMetadata(new Local(elasticECSMeta, hostECSMeta, systemECSMeta));
         Log.d("AgentMetadata", "Gathered Agent metadata: " + new Gson().toJson(metadata)); // Log the metadata object
 
         return metadata;

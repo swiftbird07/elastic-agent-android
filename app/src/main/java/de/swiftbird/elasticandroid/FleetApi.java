@@ -20,4 +20,10 @@ public interface FleetApi {
             @Header("Authorization") String accessApiKeyHeader,
             @Path("id") String id,
             @Body CheckinRequest checkinRequest);
+
+    @POST("/api/fleet/agents/{id}/acks")
+    Call<AckResponse> postAck(
+            @Header("Authorization") String accessApiKeyHeader,
+            @Path("id") String id,
+            @Body AckRequest ackRequest);
 }

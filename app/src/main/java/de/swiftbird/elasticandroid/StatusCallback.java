@@ -1,5 +1,5 @@
 package de.swiftbird.elasticandroid;
 
-public interface Callback {
+public interface StatusCallback {
     void onCallback(boolean success);
 }

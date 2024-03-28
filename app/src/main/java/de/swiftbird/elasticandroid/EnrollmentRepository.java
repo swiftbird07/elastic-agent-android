@@ -1,6 +1,5 @@
 package de.swiftbird.elasticandroid;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.util.Log;
 import android.util.TypedValue;
@@ -8,9 +7,7 @@ import android.widget.TextView;
 
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
 
-import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.gson.Gson;
 
 import org.json.JSONObject;
@@ -24,21 +21,47 @@ import retrofit2.converter.gson.GsonConverterFactory;
 import java.io.IOException;
 import java.util.UUID;
 
+/**
+ * This class is responsible for managing enrollment processes, specifically handling the
+ * interactions with the Fleet API to enroll devices. It initializes necessary network components
+ * and manages UI feedback through TextViews for status and error messages.
+ */
 public class EnrollmentRepository {
 
+    // Context from the Android application, used for various operations that require a context.
     private final Context context;
+
+    // Interface for the Fleet API, used to make network requests to the Fleet service.
     private FleetApi fleetApi;
+
+    // Tag used for logging, helps with categorizing logs from this repository.
     private static final String TAG = "EnrollmentRepository";
+
+    // TextViews for displaying error messages and status updates in the UI.
     private TextView tError, tStatus;
+
+    // Token used for authentication with the Fleet API.
     private String token;
 
+    // Flag indicating whether SSL certificate verification is enabled for network requests.
     private boolean verifyCert;
 
-
+    /**
+     * Constructor for EnrollmentRepository. Initializes the Retrofit client for network
+     * operations, sets up the Fleet API interface, and prepares UI components for feedback.
+     *
+     * @param context The Android context, used for tasks that require a context.
+     * @param serverUrl The base URL for the Fleet API server.
+     * @param token The authentication token for interacting with the Fleet API.
+     * @param checkCert A boolean indicating whether SSL certificate verification should be performed.
+     * @param tStatus A TextView for displaying status messages to the user.
+     * @param tError A TextView for displaying error messages to the user.
+     */
     public EnrollmentRepository(Context context, String serverUrl, String token, boolean checkCert, TextView tStatus, TextView tError) {
         this.context = context;
         this.verifyCert = checkCert;
-        // Initialize Retrofit instance
+
+        // Initialize Retrofit instance for networking
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(serverUrl)
                 .client(NetworkBuilder.getOkHttpClient(checkCert))
@@ -52,7 +75,7 @@ public class EnrollmentRepository {
         this.tStatus = tStatus;
     }
 
-    public void enrollAgent(AppEnrollRequest request, de.swiftbird.elasticandroid.Callback callbackToEnrollmentActivity) {
+    public void enrollAgent(AppEnrollRequest request, StatusCallback callbackToEnrollmentActivity) {
         Log.i(TAG, "Starting enrollment process...");
         tStatus.setText("Starting enrollment process...");
         Log.d(TAG, "User provided Server URL: " + request.getServerUrl());

@@ -75,6 +75,19 @@ public class EnrollmentRepository {
         this.tStatus = tStatus;
     }
 
+    /**
+     * Initiates the enrollment process of an agent with the fleet server. This method starts by logging
+     * and displaying the beginning of the enrollment process, followed by making a call to the fleet
+     * API to get the fleet server's status. If the fleet server is healthy, it proceeds to send an
+     * enrollment request to the server. Depending on the response, it either logs and displays a
+     * success message with the new agent ID or handles errors appropriately by logging them and
+     * updating the UI with the error message.
+     *
+     * @param request The {@link AppEnrollRequest} containing details necessary for enrollment, such as the
+     *                server URL, hostname, and certificate.
+     * @param callbackToEnrollmentActivity A {@link StatusCallback} that allows this method to communicate
+     *                                     the outcome of the enrollment process back to the calling activity.
+     */
     public void enrollAgent(AppEnrollRequest request, StatusCallback callbackToEnrollmentActivity) {
         Log.i(TAG, "Starting enrollment process...");
         tStatus.setText("Starting enrollment process...");

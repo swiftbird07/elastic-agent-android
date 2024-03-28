@@ -78,6 +78,12 @@ dependencies {
 
     implementation("com.google.android.material:material")
 
+    // Unit testing dependencies
+    testImplementation("junit:junit:4.13.2")
+    testImplementation("org.mockito:mockito-core:3.+")
+
+    // For Android-specific mocking
+    testImplementation("org.robolectric:robolectric:4.+")
 
 }
 

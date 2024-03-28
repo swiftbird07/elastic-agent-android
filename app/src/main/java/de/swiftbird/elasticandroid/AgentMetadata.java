@@ -18,8 +18,8 @@ import java.util.List;
 
 public class AgentMetadata {
 
-        private String user_provided; // Assuming JSON String
-        private Local local; // Assuming JSON String
+        private String user_provided;
+        private Local local;
         private List<String> tags;
 
         public String getUser_provided() {

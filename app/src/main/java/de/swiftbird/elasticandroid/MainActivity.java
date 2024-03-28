@@ -102,7 +102,6 @@ public class MainActivity extends AppCompatActivity implements StatusCallback {
     }
 
     private boolean isEnrolled() {
-        // Check enrollment status (for now, assume false)
         try {
             return enrollmentData.isEnrolled;
         } catch (Exception e) {
@@ -121,7 +120,6 @@ public class MainActivity extends AppCompatActivity implements StatusCallback {
             tAgentStatusValue.setTextColor(getResources().getColor(android.R.color.holo_green_dark)); // Set text color to green if enrolled
             llEnrollmentDetails.setVisibility(View.VISIBLE);
 
-            // Assuming you have setters or public fields in EnrollmentData for these details
             tHostnameValue.setText( (enrollmentData.hostname != null ? enrollmentData.hostname : "N/A"));
             tPolicyValue.setText( (enrollmentData.action != null ? enrollmentData.action : "N/A"));
             tPolicyIdValue.setText( (enrollmentData.policyId != null ? enrollmentData.policyId : "N/A"));

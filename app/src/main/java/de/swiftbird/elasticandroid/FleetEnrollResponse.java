@@ -6,6 +6,12 @@ public class FleetEnrollResponse {
     private String action;
     private Item item;
 
+    // Constructor (mostly for testing)
+    public FleetEnrollResponse(String action, Item item) {
+        this.action = action;
+        this.item = item;
+    }
+
     public static class Item {
         @SerializedName("access_api_key")
         private String accessApiKey;
@@ -51,6 +57,19 @@ public class FleetEnrollResponse {
 
         @SerializedName("type")
         private String type;
+
+        // Constructor (mostly for testing)
+        public Item(String accessApiKey, String accessApiKeyId, Boolean active, String enrolledAt, String id, String policyId, String status, List<String> tags, String type) {
+            this.accessApiKey = accessApiKey;
+            this.accessApiKeyId = accessApiKeyId;
+            this.active = active;
+            this.enrolledAt = enrolledAt;
+            this.id = id;
+            this.policyId = policyId;
+            this.status = status;
+            this.tags = tags;
+            this.type = type;
+        }
 
         // Getters and Setters
 

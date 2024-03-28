@@ -302,7 +302,7 @@ public class CheckinRepository {
             return null;
         }
 
-        CheckinResponse.Action action = response.getActions().get(0); // Assuming the first action is of interest
+        CheckinResponse.Action action = response.getActions().get(0);
 
         if (action == null || action.getData() == null || action.getData().getPolicy() == null) {
             Log.e(TAG_PARSE, "Action, Action Data, or Policy is null.");

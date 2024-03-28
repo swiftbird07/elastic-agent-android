@@ -4,6 +4,10 @@ public class FleetStatusResponse {
     private String name;
     private String status;
 
+    public FleetStatusResponse(String healthy) {
+        this.status = healthy;
+    }
+
     // Getters and setters
     public String getName() {
         return name;

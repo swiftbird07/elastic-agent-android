@@ -16,6 +16,9 @@ public interface EnrollmentDataDAO {
     @Query("SELECT * FROM EnrollmentData WHERE id = :id")
     LiveData<EnrollmentData> getEnrollmentInfo(int id);
 
+    @Query("SELECT * FROM EnrollmentData WHERE id = :id")
+    EnrollmentData getEnrollmentInfoSync(int id);
+
     @Query("DELETE FROM EnrollmentData")
     void delete();
 

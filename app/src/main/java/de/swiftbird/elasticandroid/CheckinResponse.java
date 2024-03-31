@@ -319,6 +319,13 @@ public class CheckinResponse {
                 @SerializedName("interval")
                 private String interval;
 
+                // Custom
+                @SerializedName("put_interval")
+                private String put_interval;
+
+                @SerializedName("checkin_interval")
+                private String checkin_interval;
+
                 @SerializedName("paths")
                 private List<String> paths;
 
@@ -347,6 +354,14 @@ public class CheckinResponse {
 
                 protected boolean getAllowUserUnenroll() {
                     return allowUserUnenroll;
+                }
+
+                protected String getPutInterval() {
+                    return put_interval;
+                }
+
+                protected String getCheckinInterval() {
+                    return checkin_interval;
                 }
             }
 

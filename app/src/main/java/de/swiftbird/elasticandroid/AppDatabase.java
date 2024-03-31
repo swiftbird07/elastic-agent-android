@@ -9,7 +9,7 @@ import androidx.room.RoomDatabase;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-@Database(entities = {EnrollmentData.class, PolicyData.class}, version = 6)
+@Database(entities = {EnrollmentData.class, PolicyData.class}, version = 8)
 public abstract class AppDatabase extends RoomDatabase {
 
     public abstract EnrollmentDataDAO enrollmentDataDAO();

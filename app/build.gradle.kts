@@ -77,13 +77,14 @@ dependencies {
     kapt("androidx.room:room-compiler:$roomVersion")
 
     implementation("com.google.android.material:material")
-
+    implementation("androidx.work:work-runtime:2.7.1")
     // Unit testing dependencies
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.mockito:mockito-core:3.+")
 
     // For Android-specific mocking
     testImplementation("org.robolectric:robolectric:4.+")
+    androidTestImplementation("androidx.work:work-testing:2.7.1")
 
 }
 

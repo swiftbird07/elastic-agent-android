@@ -1,28 +1,16 @@
 package de.swiftbird.elasticandroid;
 
-import android.content.ClipData;
-import android.content.ClipboardManager;
-import android.content.Context;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
-
-import org.json.JSONObject;
-
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.text.MessageFormat;
+import androidx.work.WorkInfo;
+import androidx.work.WorkManager;
 
 import de.swiftbird.elasticandroid.R.id;
 
@@ -46,12 +34,16 @@ public class DetailsActivity extends AppCompatActivity  {
     private TextView inputNameValue;
     private TextView dataStreamValue;
     private TextView ignoreOlderValue;
-    private TextView intervalValue;
+    private TextView checkinIntervalValue;
     private TextView esUrlValue;
     private TextView esSslFingerprintValue;
+
+    private TextView workersValue;
     private LinearLayout llEnrollmentDetails;
     private LinearLayout llPolicyDetails;
     private Button btnBack;
+
+    private String TAG = "DetailsActivity";
 
     private EnrollmentData enrollmentData;
 
@@ -86,9 +78,10 @@ public class DetailsActivity extends AppCompatActivity  {
         inputNameValue = findViewById(R.id.inputNameValue);
         dataStreamValue = findViewById(R.id.dataStreamValue);
         ignoreOlderValue = findViewById(R.id.ignoreOlderValue);
-        intervalValue = findViewById(R.id.intervalValue);
+        checkinIntervalValue = findViewById(R.id.intervalValue);
         esUrlValue = findViewById(R.id.esUrlValue);
         esSslFingerprintValue = findViewById(R.id.esSslFingerprintValue);
+        workersValue = findViewById(R.id.workersValue);
 
         tLastPolicyUpdateValue = findViewById(R.id.tLastPolicyUpdateValue);
         llEnrollmentDetails = findViewById(R.id.llEnrollmentDetails);
@@ -159,7 +152,7 @@ public class DetailsActivity extends AppCompatActivity  {
         inputNameValue.setText(policyData.inputName != null ? policyData.inputName : "Not Set");
         dataStreamValue.setText(policyData.dataStreamDataset != null ? policyData.dataStreamDataset : "Not Set");
         ignoreOlderValue.setText(policyData.ignoreOlder != null ? policyData.ignoreOlder : "Not Set");
-        intervalValue.setText(policyData.interval != null ? policyData.interval : "Not Set");
+        checkinIntervalValue.setText(policyData.checkinInterval != -1 ? String.valueOf(policyData.checkinInterval) : "Not Set");
         esUrlValue.setText(policyData.hosts != null ? policyData.hosts : "Not Set");
         esSslFingerprintValue.setText(policyData.sslCaTrustedFingerprint != null ? policyData.sslCaTrustedFingerprint : "Not Set");
     }
@@ -184,6 +177,8 @@ public class DetailsActivity extends AppCompatActivity  {
     }
 
     private void update(){
+        Log.d(TAG, "Updating UI...");
+
         // Load UI based on enrollment status from database
         AppDatabase db = AppDatabase.getDatabase(this.getApplicationContext(), "enrollment-data");
         db.enrollmentDataDAO().getEnrollmentInfo(1).observe(this, enrollmentData -> {
@@ -197,6 +192,30 @@ public class DetailsActivity extends AppCompatActivity  {
                 updateUIBasedOnPolicy(policyData);
             }
         });
+
+        // Observe work with the specified tag
+        WorkManager.getInstance(getApplicationContext())
+                .getWorkInfosByTagLiveData(WorkScheduler.FLEET_CHECKIN_WORK_NAME)
+                .observe(this, workInfos -> {
+                    for (WorkInfo workInfo : workInfos) {
+                        // Log or display information about the work status
+                        Log.d(TAG, "Work with tag " + WorkScheduler.FLEET_CHECKIN_WORK_NAME + " is in state " + workInfo.getState());
+                        workersValue.append(WorkScheduler.FLEET_CHECKIN_WORK_NAME + " is in state " + workInfo.getState() + "\n");
+                    }
+                });
+        /*
+        WorkManager.getInstance(getApplicationContext())
+                .getWorkInfosByTagLiveData(WorkScheduler.ELASTICSEARCH_WORK_NAME)
+                .observe(this, workInfos -> {
+                    for (WorkInfo workInfo : workInfos) {
+                        // Log or display information about the work status
+
+                        Log.d(TAG, "Work with tag " + WorkScheduler.ELASTICSEARCH_WORK_NAME + " is in state " + workInfo.getState());
+                        workersValue.append(WorkScheduler.ELASTICSEARCH_WORK_NAME + " is in state " + workInfo.getState() + "\n");
+                    }
+                });
+
+         */
     }
 
 }

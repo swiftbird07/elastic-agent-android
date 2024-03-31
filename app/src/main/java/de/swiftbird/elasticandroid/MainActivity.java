@@ -247,6 +247,11 @@ public class MainActivity extends AppCompatActivity implements StatusCallback {
         AppDatabase.databaseWriteExecutor.execute(() -> {
             db.enrollmentDataDAO().delete();
         });
+
+        AppDatabase.databaseWriteExecutor.execute(() -> {
+            db.policyDataDAO().delete();
+        });
+
         // Refresh the UI
         updateUIBasedOnEnrollment(new EnrollmentData());
     }

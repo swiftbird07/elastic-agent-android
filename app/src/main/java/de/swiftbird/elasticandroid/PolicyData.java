@@ -36,6 +36,12 @@ public class PolicyData {
     @ColumnInfo(name = "interval")
     public String interval;
 
+    @ColumnInfo(name = "checkin_interval")
+    public int checkinInterval;
+
+    @ColumnInfo(name = "put_interval")
+    public int putInterval;
+
     // Paths will be stored as a single String, concatenated with a "," delimiter
     @ColumnInfo(name = "paths")
     public String paths;

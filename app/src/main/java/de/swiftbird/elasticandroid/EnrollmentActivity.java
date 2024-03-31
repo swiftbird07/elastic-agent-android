@@ -21,6 +21,7 @@ import java.net.URL;
 import java.text.MessageFormat;
 
 import de.swiftbird.elasticandroid.R.id;
+import kotlin.NotImplementedError;
 
 public class EnrollmentActivity extends AppCompatActivity implements StatusCallback {
     private static final String TAG = "EnrollmentActivity";
@@ -84,8 +85,9 @@ public class EnrollmentActivity extends AppCompatActivity implements StatusCallb
 
     private void loadFromQRCode() {
         // Trigger QR code scanning and handle result
-        String base64EnrollmentString = "exampleBase64String"; //TODO:  Replace with actual QR handling
-        autofillFromEnrollmentString(base64EnrollmentString);
+        throw new NotImplementedError("QR code scanning is not implemented yet.");
+        //String base64EnrollmentString = "exampleBase64String"; //TODO:  Replace with actual QR handling
+        //autofillFromEnrollmentString(base64EnrollmentString);
     }
 
     private void loadFromBuildConfig() {
@@ -94,6 +96,7 @@ public class EnrollmentActivity extends AppCompatActivity implements StatusCallb
     }
 
     private void attemptEnrollment() {
+        tError.setText("");
         String serverUrl = etServerUrl.getText().toString().trim();
         String token = etToken.getText().toString().trim();
         String hostname = etHostname.getText().toString().trim();

@@ -46,6 +46,7 @@
             android:name=".LegalActivity"
             android:theme="@style/Theme.ElasticAgentAndroid">
         </activity>
+        <service android:name=".BackgroundWorker" />
     </application>
 
 </manifest>

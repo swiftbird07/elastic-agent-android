@@ -1,7 +1,12 @@
 package de.swiftbird.elasticandroid;
 
+import static androidx.core.content.ContextCompat.getSystemService;
+
 import android.annotation.SuppressLint;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.util.Log;
 import android.widget.TextView;
 
@@ -27,6 +32,7 @@ import java.util.Calendar;
 import java.util.Map;
 import java.util.Objects;
 import java.util.TimeZone;
+import java.util.concurrent.TimeUnit;
 
 public class CheckinRepository {
 
@@ -173,13 +179,17 @@ public class CheckinRepository {
                                 sdf.setTimeZone(TimeZone.getTimeZone("UTC")); // Ensure the time is in UTC
                                 policyData.lastUpdated = sdf.format(Calendar.getInstance().getTime());
                                 db.policyDataDAO().refreshPolicyData(policyData.lastUpdated, policyData.actionId);
-
                                 callbackActivity.onCallback(true);
+
                         } else {
                                 Log.i(TAG, "Policy data is outdated. Updating...");
                                 db.policyDataDAO().delete(); // Synchronously delete old policy data
                                 db.policyDataDAO().insertPolicyData(policyData); // Synchronously insert new policy data
                                 Log.i(TAG, "Policy data updated successfully.");
+
+                                // Register background service
+                                int interval = policyData.checkinInterval;
+                                WorkScheduler.scheduleFleetCheckinWorker(context, interval, TimeUnit.SECONDS);
                                 callbackActivity.onCallback(true);
                         }
 
@@ -345,7 +355,14 @@ public class CheckinRepository {
         policyData.allowUserUnenroll = stream.getAllowUserUnenroll();
         policyData.dataStreamDataset = stream.getDataStream().getDataset();
         policyData.ignoreOlder = stream.getIgnoreOlder();
-        policyData.interval = stream.getInterval();
+
+        // Parse Xm or Xs etc. to seconds
+        int checkinIntervalSeconds = timeIntervalToSeconds(stream.getCheckinInterval());
+        int putIntervalSeconds = timeIntervalToSeconds(stream.getPutInterval());
+
+
+        policyData.checkinInterval = checkinIntervalSeconds;
+        policyData.putInterval = putIntervalSeconds;
 
         if(stream.getPaths() == null || stream.getPaths().isEmpty()){
             Log.e(TAG_PARSE, "Path data is missing.");
@@ -392,7 +409,23 @@ public class CheckinRepository {
         return policyData;
     }
 
+    private int timeIntervalToSeconds(String interval){
+        // Xm:
+        if(interval.contains("m")){
+            return Integer.parseInt(interval.replaceAll("[^0-9]", "")) * 60;
+        }
+        // Xs:
+        if(interval.contains("s")){
+            return Integer.parseInt(interval.replaceAll("[^0-9]", ""));
+        }
+        // Xh:
+        if(interval.contains("h")){
+            return Integer.parseInt(interval.replaceAll("[^0-9]", "")) * 3600;
+        }
 
+        Log.w(TAG, "Unknown time interval format: " + interval + ". Defaulting to 60 seconds.");
+        return 60;
+    }
 
 }
 

@@ -44,6 +44,7 @@
         android:id="@+id/svMain"
         android:layout_height="wrap_content"
         android:layout_below="@+id/tAgentStatus"
+        android:layout_above="@+id/btnBack"
         android:fillViewport="true">
 
         <LinearLayout
@@ -60,6 +61,7 @@
                 android:background="@drawable/bordered_background"
                 android:orientation="vertical"
                 android:padding="16dp"
+                android:layout_marginBottom="10dp"
                 android:visibility="visible">
 
                 <LinearLayout
@@ -338,7 +340,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Interval (Minutes):" />
+                        android:text="Checkin Interval (Seconds):" />
 
                     <TextView
                         android:id="@+id/intervalValue"
@@ -387,6 +389,41 @@
                 </LinearLayout>
 
             </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/llWorkerDetails"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/llCollectorDetails"
+                android:background="@drawable/bordered_background"
+                android:orientation="vertical"
+                android:padding="16dp"
+                android:layout_marginBottom="10dp"
+                android:visibility="visible">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Workers:" />
+
+                    <TextView
+                        android:id="@+id/workersValue"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="" />
+                </LinearLayout>
+
+
+
+            </LinearLayout>
+
         </LinearLayout>
 
     </ScrollView>

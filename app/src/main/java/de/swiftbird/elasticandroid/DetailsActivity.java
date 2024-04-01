@@ -2,7 +2,6 @@ package de.swiftbird.elasticandroid;
 
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
@@ -45,7 +44,7 @@ public class DetailsActivity extends AppCompatActivity  {
 
     private String TAG = "DetailsActivity";
 
-    private EnrollmentData enrollmentData;
+    private FleetEnrollData enrollmentData;
 
     private Handler handler = new Handler();
     private Runnable runnableCode = new Runnable() {
@@ -115,10 +114,10 @@ public class DetailsActivity extends AppCompatActivity  {
         handler.removeCallbacks(runnableCode);
     }
 
-    private void updateUIBasedOnEnrollment(EnrollmentData enrollmentData) {
+    private void updateUIBasedOnEnrollment(FleetEnrollData enrollmentData) {
         this.enrollmentData = enrollmentData;
         if (isEnrolled()) {
-            // Update the agent status and other TextViews with data from EnrollmentData object
+            // Update the agent status and other TextViews with data from FleetEnrollData object
             tAgentStatusValue.setText(enrollmentData.isEnrolled ? "Healthy" : "N/A");
             tAgentStatusValue.setTextColor(getResources().getColor(android.R.color.holo_green_dark)); // Set text color to green if enrolled
             llEnrollmentDetails.setVisibility(View.VISIBLE);
@@ -177,7 +176,7 @@ public class DetailsActivity extends AppCompatActivity  {
     }
 
     private void update(){
-        Log.d(TAG, "Updating UI...");
+        AppLog.d(TAG, "Updating UI...");
 
         // Load UI based on enrollment status from database
         AppDatabase db = AppDatabase.getDatabase(this.getApplicationContext(), "enrollment-data");
@@ -199,7 +198,7 @@ public class DetailsActivity extends AppCompatActivity  {
                 .observe(this, workInfos -> {
                     for (WorkInfo workInfo : workInfos) {
                         // Log or display information about the work status
-                        Log.d(TAG, "Work with tag " + WorkScheduler.FLEET_CHECKIN_WORK_NAME + " is in state " + workInfo.getState());
+                        AppLog.d(TAG, "Work with tag " + WorkScheduler.FLEET_CHECKIN_WORK_NAME + " is in state " + workInfo.getState());
                         workersValue.append(WorkScheduler.FLEET_CHECKIN_WORK_NAME + " is in state " + workInfo.getState() + "\n");
                     }
                 });
@@ -210,7 +209,7 @@ public class DetailsActivity extends AppCompatActivity  {
                     for (WorkInfo workInfo : workInfos) {
                         // Log or display information about the work status
 
-                        Log.d(TAG, "Work with tag " + WorkScheduler.ELASTICSEARCH_WORK_NAME + " is in state " + workInfo.getState());
+                        AppLog.d(TAG, "Work with tag " + WorkScheduler.ELASTICSEARCH_WORK_NAME + " is in state " + workInfo.getState());
                         workersValue.append(WorkScheduler.ELASTICSEARCH_WORK_NAME + " is in state " + workInfo.getState() + "\n");
                     }
                 });

@@ -1,8 +1,6 @@
 package de.swiftbird.elasticandroid;
 
 import android.content.Context;
-import android.util.Log;
-import android.util.TypedValue;
 import android.widget.TextView;
 
 
@@ -26,7 +24,7 @@ import java.util.UUID;
  * interactions with the Fleet API to enroll devices. It initializes necessary network components
  * and manages UI feedback through TextViews for status and error messages.
  */
-public class EnrollmentRepository {
+public class FleetEnrollRepository {
 
     // Context from the Android application, used for various operations that require a context.
     private final Context context;
@@ -35,7 +33,7 @@ public class EnrollmentRepository {
     private FleetApi fleetApi;
 
     // Tag used for logging, helps with categorizing logs from this repository.
-    private static final String TAG = "EnrollmentRepository";
+    private static final String TAG = "FleetEnrollRepository";
 
     // TextViews for displaying error messages and status updates in the UI.
     private TextView tError, tStatus;
@@ -47,7 +45,7 @@ public class EnrollmentRepository {
     private boolean verifyCert;
 
     /**
-     * Constructor for EnrollmentRepository. Initializes the Retrofit client for network
+     * Constructor for FleetEnrollRepository. Initializes the Retrofit client for network
      * operations, sets up the Fleet API interface, and prepares UI components for feedback.
      *
      * @param context The Android context, used for tasks that require a context.
@@ -57,7 +55,7 @@ public class EnrollmentRepository {
      * @param tStatus A TextView for displaying status messages to the user.
      * @param tError A TextView for displaying error messages to the user.
      */
-    public EnrollmentRepository(Context context, String serverUrl, String token, boolean checkCert, TextView tStatus, TextView tError) {
+    public FleetEnrollRepository(Context context, String serverUrl, String token, boolean checkCert, TextView tStatus, TextView tError) {
         this.context = context;
         this.verifyCert = checkCert;
 
@@ -89,14 +87,14 @@ public class EnrollmentRepository {
      *                                     the outcome of the enrollment process back to the calling activity.
      */
     public void enrollAgent(AppEnrollRequest request, StatusCallback callbackToEnrollmentActivity) {
-        Log.i(TAG, "Starting enrollment process...");
+        AppLog.i(TAG, "Starting enrollment process...");
         tStatus.setText("Starting enrollment process...");
-        Log.d(TAG, "User provided Server URL: " + request.getServerUrl());
-        Log.d(TAG, "User provided Hostname: " + request.getHostname());
-        Log.d(TAG, "User provided certificate: " + request.getCertificate());
+        AppLog.d(TAG, "User provided Server URL: " + request.getServerUrl());
+        AppLog.d(TAG, "User provided Hostname: " + request.getHostname());
+        AppLog.d(TAG, "User provided certificate: " + request.getCertificate());
 
         // First call API info endpoint:
-        Log.i(TAG, "Requesting Fleet Server details...");
+        AppLog.i(TAG, "Requesting Fleet Server details...");
         tStatus.setText("Requesting Fleet Server details...");
 
         fleetApi.getFleetStatus().enqueue(new Callback<FleetStatusResponse>() {
@@ -104,11 +102,11 @@ public class EnrollmentRepository {
             @Override
             public void onResponse(Call<FleetStatusResponse> call, Response<FleetStatusResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    Log.i(TAG, "Fleet Name: " + response.body().getName());
-                    Log.i(TAG, "Fleet Status: " + response.body().getStatus());
+                    AppLog.i(TAG, "Fleet Name: " + response.body().getName());
+                    AppLog.i(TAG, "Fleet Status: " + response.body().getStatus());
 
                     if (response.body().getStatus().equals("HEALTHY")) {
-                        Log.i(TAG, "Fleet is HEALTHY. Sending enrollment request to fleet server...");
+                        AppLog.i(TAG, "Fleet is HEALTHY. Sending enrollment request to fleet server...");
                         tStatus.setText("Fleet server is healthy. Sending enrollment request to fleet server (this may take a while)...");
 
 
@@ -125,17 +123,17 @@ public class EnrollmentRepository {
                                     FleetEnrollResponse enrollResponse = response.body();
 
                                     if(enrollResponse != null && enrollResponse.getItem() != null && enrollResponse.getItem().getId() != null){
-                                        Log.i(TAG, "Enrollment successful. Agent ID: " + enrollResponse.getItem().getId());
+                                        AppLog.i(TAG, "Enrollment successful. Agent ID: " + enrollResponse.getItem().getId());
                                         tStatus.setText("Enrollment successful. Agent ID: " + enrollResponse.getItem().getId());
 
-                                        Log.d(TAG, "Response from Fleet Server: " + new Gson().toJson(enrollResponse));
+                                        AppLog.d(TAG, "Response from Fleet Server: " + new Gson().toJson(enrollResponse));
 
                                         // Save the enrollment info to the database
-                                        EnrollmentData enrollmentData = parseAndSaveEnrollmentInfo(request, enrollResponse);
+                                        FleetEnrollData enrollmentData = parseAndSaveEnrollmentInfo(request, enrollResponse);
 
-                                        Log.i(TAG, "Enrollment data saved to database. Starting initial checkin...");
+                                        AppLog.i(TAG, "Enrollment data saved to database. Starting initial checkin...");
                                         // We are not done yet. We need to do the initial checkin to get the policy
-                                        CheckinRepository checkinRepository = CheckinRepository.getInstance(context);
+                                        FleetCheckinRepository checkinRepository = FleetCheckinRepository.getInstance(context);
 
                                         Context context2 = new androidx.appcompat.view.ContextThemeWrapper(context, R.style.Theme_ElasticAgentAndroid);
                                         checkinRepository.checkinAgent(enrollmentData, metadata, callbackToEnrollmentActivity, null, tStatus, context);
@@ -143,7 +141,7 @@ public class EnrollmentRepository {
 
                                     } else {
                                         tError.setText("Enrollment failed because of invalid response from Fleet Server.");
-                                        Log.e(TAG, "Enrollment failed because of invalid response from Fleet Server. Context: " + response.toString());
+                                        AppLog.e(TAG, "Enrollment failed because of invalid response from Fleet Server. Context: " + response.toString());
                                         callbackToEnrollmentActivity.onCallback(false);
                                     }
                                 } else {
@@ -161,10 +159,10 @@ public class EnrollmentRepository {
                                         } catch (Exception e) {
                                             tError.setText("Enrollment failed with code: " + response.code() + " (Error message could not be read)");
                                         }
-                                        Log.w(TAG, "Enrollment failed with code: " + response.code() +  ". Context: " + response.toString() + " Response: " + response.errorBody().string());
+                                        AppLog.w(TAG, "Enrollment failed with code: " + response.code() +  ". Context: " + response.toString() + " Response: " + response.errorBody().string());
 
                                     } catch (IOException e) {
-                                        Log.e(TAG, "Enrollment failed with code: " + response.code() +  ". Context: " + response.toString() + " (Error body could not be read)");
+                                        AppLog.e(TAG, "Enrollment failed with code: " + response.code() +  ". Context: " + response.toString() + " (Error body could not be read)");
                                     }
                                     callbackToEnrollmentActivity.onCallback(false);
                                 }
@@ -173,7 +171,7 @@ public class EnrollmentRepository {
                             @Override
                             public void onFailure(Call<FleetEnrollResponse> call, Throwable t) {
                                 tError.setText("Enrollment failed with error: " + t.getMessage());
-                                Log.e(TAG, "Enrollment failed with error: " + t.getMessage());
+                                AppLog.e(TAG, "Enrollment failed with error: " + t.getMessage());
                                 callbackToEnrollmentActivity.onCallback(false);
                             }
                         });
@@ -181,12 +179,12 @@ public class EnrollmentRepository {
 
                     } else {
                         tError.setText("Fleet server is not healthy - Status: " + response.body().getStatus());
-                        Log.w(TAG, "Fleet Server is not healthy. Stopping enrollment.");
+                        AppLog.w(TAG, "Fleet Server is not healthy. Stopping enrollment.");
                         callbackToEnrollmentActivity.onCallback(false);
                     }
                 } else {
                     tError.setText("Could not communicate with fleet server - Check server URL and try again. Status Code: " + response.code());
-                    Log.e(TAG, "Unhandled externally caused exception in initial Fleet Server request. Stopping enrollment. Response: " + response.toString());
+                    AppLog.e(TAG, "Unhandled externally caused exception in initial Fleet Server request. Stopping enrollment. Response: " + response.toString());
                     callbackToEnrollmentActivity.onCallback(false);
                 }
             }
@@ -195,7 +193,7 @@ public class EnrollmentRepository {
             public void onFailure(Call<FleetStatusResponse> call, Throwable t) {
                 // Handle failure
                 tError.setText("Could not communicate with Fleet Server - Error: " + t.getMessage());
-                Log.e(TAG, "Unhandled exception in initial Fleet Server request. Stopping enrollment - Error: " + t.toString());
+                AppLog.e(TAG, "Unhandled exception in initial Fleet Server request. Stopping enrollment - Error: " + t.toString());
                 callbackToEnrollmentActivity.onCallback(false);
             }
         });
@@ -203,11 +201,11 @@ public class EnrollmentRepository {
 
     }
 
-    private EnrollmentData parseAndSaveEnrollmentInfo(AppEnrollRequest request, FleetEnrollResponse response) {
+    private FleetEnrollData parseAndSaveEnrollmentInfo(AppEnrollRequest request, FleetEnrollResponse response) {
 
         FleetEnrollResponse.Item item = response.getItem();
 
-        EnrollmentData enrollmentData = new EnrollmentData();
+        FleetEnrollData enrollmentData = new FleetEnrollData();
 
         enrollmentData.id = 1; // We only have one enrollment info in the database
         enrollmentData.action = response.getAction();
@@ -228,7 +226,7 @@ public class EnrollmentRepository {
             public void run() {
                 AppDatabase db = AppDatabase.getDatabase(context, "enrollment-data");
                 db.enrollmentDataDAO().insertEnrollmentInfo(enrollmentData);
-                Log.i(TAG, "Saving Enrollment data to db successful.");
+                AppLog.i(TAG, "Saving Enrollment data to db successful.");
             }
         }).start();
 

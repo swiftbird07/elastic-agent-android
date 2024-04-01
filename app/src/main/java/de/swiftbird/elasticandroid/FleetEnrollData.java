@@ -5,7 +5,7 @@ import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
 @Entity
-public class EnrollmentData {
+public class FleetEnrollData {
     @PrimaryKey
     @ColumnInfo(name = "id")
     public int id;

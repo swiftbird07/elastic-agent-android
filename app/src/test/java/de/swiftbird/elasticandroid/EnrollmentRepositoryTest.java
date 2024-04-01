@@ -50,7 +50,7 @@ public class EnrollmentRepositoryTest {
     @Mock
     private Call<FleetEnrollResponse> mockEnrollCall;
 
-    private EnrollmentRepository enrollmentRepository;
+    private FleetEnrollRepository enrollmentRepository;
 
     // Initialize mocks before each test
     @Before
@@ -62,7 +62,7 @@ public class EnrollmentRepositoryTest {
         String token = "token123";
         boolean checkCert = true;
 
-        this.enrollmentRepository = new EnrollmentRepository(
+        this.enrollmentRepository = new FleetEnrollRepository(
                 mockContext,
                 serverUrl,
                 token,
@@ -71,8 +71,8 @@ public class EnrollmentRepositoryTest {
                 mockErrorTextView
         );
 
-        // Inject mockFleetApi using reflection or adjust EnrollmentRepository to allow setting this dependency more directly
-        Field fleetApiField = EnrollmentRepository.class.getDeclaredField("fleetApi");
+        // Inject mockFleetApi using reflection or adjust FleetEnrollRepository to allow setting this dependency more directly
+        Field fleetApiField = FleetEnrollRepository.class.getDeclaredField("fleetApi");
         fleetApiField.setAccessible(true);
         fleetApiField.set(enrollmentRepository, mockFleetApi);
     }
@@ -86,15 +86,15 @@ public class EnrollmentRepositoryTest {
 
         // Then
         // Use reflection to access private fields for verification
-        Field fleetApiField = EnrollmentRepository.class.getDeclaredField("fleetApi");
+        Field fleetApiField = FleetEnrollRepository.class.getDeclaredField("fleetApi");
         fleetApiField.setAccessible(true);
         Object fleetApiValue = fleetApiField.get(enrollmentRepository);
 
-        Field tokenField = EnrollmentRepository.class.getDeclaredField("token");
+        Field tokenField = FleetEnrollRepository.class.getDeclaredField("token");
         tokenField.setAccessible(true);
         String tokenValue = (String) tokenField.get(enrollmentRepository);
 
-        Field verifyCertField = EnrollmentRepository.class.getDeclaredField("verifyCert");
+        Field verifyCertField = FleetEnrollRepository.class.getDeclaredField("verifyCert");
         verifyCertField.setAccessible(true);
         boolean verifyCertValue = (boolean) verifyCertField.get(enrollmentRepository);
 

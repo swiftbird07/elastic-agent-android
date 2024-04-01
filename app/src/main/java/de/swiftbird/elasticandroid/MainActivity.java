@@ -4,7 +4,6 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
 
@@ -15,14 +14,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.preference.PreferenceManager;
 import android.text.SpannableString;
 import android.text.Spanned;
-import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
-import android.util.Log;
 import android.view.View;
-
-import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.constraintlayout.widget.ConstraintSet;
-import androidx.core.content.ContextCompat;
 
 import android.widget.Button;
 import android.widget.LinearLayout;
@@ -48,7 +41,7 @@ public class MainActivity extends AppCompatActivity implements StatusCallback {
 
     private LinearLayout llEnrollmentDetails;
 
-    private EnrollmentData enrollmentData;
+    private FleetEnrollData enrollmentData;
 
     private TextView tAgentStatusEnrolled;
     private TextView tAgentStatusUnenrolled;
@@ -93,7 +86,7 @@ public class MainActivity extends AppCompatActivity implements StatusCallback {
             if (isEnrolled()) {
                 showUnenrollmentDialog();
             } else {
-                startActivity(new Intent(MainActivity.this, EnrollmentActivity.class));
+                startActivity(new Intent(MainActivity.this, FleetEnrollActivity.class));
             }
         });
 
@@ -105,7 +98,7 @@ public class MainActivity extends AppCompatActivity implements StatusCallback {
             updateUIBasedOnEnrollment(enrollmentData);
 
             btnSyncNow.setOnClickListener(view -> {
-                CheckinRepository checkinRepository = CheckinRepository.getInstance(this);
+                FleetCheckinRepository checkinRepository = FleetCheckinRepository.getInstance(this);
                 androidx.appcompat.app.AlertDialog dialog = new MaterialAlertDialogBuilder(this)
                         .setTitle("Checking in...")
                         .setMessage("Starting checkin...")
@@ -166,7 +159,7 @@ public class MainActivity extends AppCompatActivity implements StatusCallback {
         }
     }
 
-    private void updateUIBasedOnEnrollment(EnrollmentData enrollmentData) {
+    private void updateUIBasedOnEnrollment(FleetEnrollData enrollmentData) {
         this.enrollmentData = enrollmentData;
         if (isEnrolled()) {
             // Enable the sync button
@@ -253,7 +246,7 @@ public class MainActivity extends AppCompatActivity implements StatusCallback {
         });
 
         // Refresh the UI
-        updateUIBasedOnEnrollment(new EnrollmentData());
+        updateUIBasedOnEnrollment(new FleetEnrollData());
     }
 
     @Override
@@ -288,7 +281,7 @@ public class MainActivity extends AppCompatActivity implements StatusCallback {
 
             return desiredFormat.format(date);
         } catch (ParseException e) {
-            Log.w(TAG, "Could not parse date " + dateUnformatted);
+            AppLog.w(TAG, "Could not parse date " + dateUnformatted);
             return dateUnformatted;
         }
 

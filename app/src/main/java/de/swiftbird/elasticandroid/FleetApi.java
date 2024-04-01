@@ -16,10 +16,10 @@ public interface FleetApi {
     Call<FleetEnrollResponse> enrollAgent(@Header("Authorization") String enrollmentTokenHeader, @Body FleetEnrollRequest enrollRequest);
 
     @POST("/api/fleet/agents/{id}/checkin")
-    Call<CheckinResponse> postCheckin(
+    Call<FleetCheckinResponse> postCheckin(
             @Header("Authorization") String accessApiKeyHeader,
             @Path("id") String id,
-            @Body CheckinRequest checkinRequest);
+            @Body FleetCheckinRequest checkinRequest);
 
     @POST("/api/fleet/agents/{id}/acks")
     Call<AckResponse> postAck(

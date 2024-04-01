@@ -4,7 +4,7 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.List;
 
-public class CheckinRequest {
+public class FleetCheckinRequest {
     @SerializedName("status")
     private String status;
 
@@ -24,7 +24,7 @@ public class CheckinRequest {
     private String upgradeDetails;
 
     // Constructors, getters, and setters
-    public CheckinRequest(String status, String ackToken, AgentMetadata metadata, String message, List<String> components, String upgradeDetails) {
+    public FleetCheckinRequest(String status, String ackToken, AgentMetadata metadata, String message, List<String> components, String upgradeDetails) {
         this.status = status;
         this.ackToken = ackToken;
         this.metadata = metadata;

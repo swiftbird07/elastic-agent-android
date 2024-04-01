@@ -42,6 +42,9 @@ public class PolicyData {
     @ColumnInfo(name = "put_interval")
     public int putInterval;
 
+    @ColumnInfo(name = "max_documents_per_request")
+    public int maxDocumentsPerRequest;
+
     // Paths will be stored as a single String, concatenated with a "," delimiter
     @ColumnInfo(name = "paths")
     public String paths;

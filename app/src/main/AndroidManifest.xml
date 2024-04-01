@@ -27,7 +27,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".EnrollmentActivity"
+            android:name=".FleetEnrollActivity"
             android:theme="@style/Theme.ElasticAgentAndroid">
         </activity>
         <activity

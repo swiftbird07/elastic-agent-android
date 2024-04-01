@@ -5,7 +5,6 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -23,8 +22,8 @@ import java.text.MessageFormat;
 import de.swiftbird.elasticandroid.R.id;
 import kotlin.NotImplementedError;
 
-public class EnrollmentActivity extends AppCompatActivity implements StatusCallback {
-    private static final String TAG = "EnrollmentActivity";
+public class FleetEnrollActivity extends AppCompatActivity implements StatusCallback {
+    private static final String TAG = "FleetEnrollActivity";
     private EditText etServerUrl, etToken, etHostname, etTags;
     private androidx.appcompat.widget.SwitchCompat swCheckCA, swPinRootCA;
     private TextView tError, tStatus;
@@ -111,7 +110,7 @@ public class EnrollmentActivity extends AppCompatActivity implements StatusCallb
         try {
             new URL(serverUrl).toURI();
         } catch (URISyntaxException | MalformedURLException e) {
-            Log.w(TAG, "Invalid server URL: " + serverUrl);
+            AppLog.w(TAG, "Invalid server URL: " + serverUrl);
             Toast.makeText(this, "Invalid server URL. Please correct it.", Toast.LENGTH_LONG).show();
             btnEnrollNow.setEnabled(true);
             return;
@@ -122,7 +121,7 @@ public class EnrollmentActivity extends AppCompatActivity implements StatusCallb
 
         // Validate token
         if (!token.matches(base64Pattern)) {
-            Log.w(TAG, "Invalid characters in token.");
+            AppLog.w(TAG, "Invalid characters in token.");
             Toast.makeText(this, "Token contains invalid characters. Only letters, digits, '_', '-', '=' and '.' are allowed.", Toast.LENGTH_LONG).show();
             btnEnrollNow.setEnabled(true);
             return;
@@ -130,7 +129,7 @@ public class EnrollmentActivity extends AppCompatActivity implements StatusCallb
 
         // Validate hostname
         if (!hostname.matches(base64Pattern)) {
-            Log.w(TAG, "Invalid characters in hostname.");
+            AppLog.w(TAG, "Invalid characters in hostname.");
             Toast.makeText(this, "Hostname contains invalid characters. Only letters, digits, '_', '-', and '.' are allowed.", Toast.LENGTH_LONG).show();
             btnEnrollNow.setEnabled(true);
             return;
@@ -141,7 +140,7 @@ public class EnrollmentActivity extends AppCompatActivity implements StatusCallb
 
         // Validate certificate
         if (!certificate.matches(certificatePattern) && !certificate.isEmpty()) {
-            Log.w(TAG, "Invalid characters in certificate.");
+            AppLog.w(TAG, "Invalid characters in certificate.");
             Toast.makeText(this, "Certificate contains invalid characters. Please provide a valid certificate.", Toast.LENGTH_LONG).show();
             btnEnrollNow.setEnabled(true);
             return;
@@ -154,7 +153,7 @@ public class EnrollmentActivity extends AppCompatActivity implements StatusCallb
             tStatus.setText("Starting enrollment process...");
 
             AppEnrollRequest request = new AppEnrollRequest(serverUrl, token, hostname, certificate, checkCA, pinRootCA);
-            EnrollmentRepository repository = new EnrollmentRepository(getApplicationContext(), request.getServerUrl(), request.getToken(), request.getCheckCert(),  tStatus, tError);
+            FleetEnrollRepository repository = new FleetEnrollRepository(getApplicationContext(), request.getServerUrl(), request.getToken(), request.getCheckCert(),  tStatus, tError);
             repository.enrollAgent(request, this); // will callback onCallback
 
         } else {
@@ -187,16 +186,16 @@ public class EnrollmentActivity extends AppCompatActivity implements StatusCallb
     @Override
     public void onCallback(boolean success) {
         if (success) {
-            Log.i(TAG, "Enrollment successful. Going back to main activity.");
+            AppLog.i(TAG, "Enrollment successful. Going back to main activity.");
             // Wait for the user to see the success message
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
-                Log.w(TAG, "Thread sleep interrupted: " + e.getMessage());
+                AppLog.w(TAG, "Thread sleep interrupted: " + e.getMessage());
             }
             finish();
         } else {
-            Log.w(TAG, "Enrollment failed. Check logs for details.");
+            AppLog.w(TAG, "Enrollment failed. Check logs for details.");
             // Delete enrollment data from database (as it is invalid)
             AppDatabase db = AppDatabase.getDatabase(this.getApplicationContext(), "enrollment-data");
             AppDatabase.databaseWriteExecutor.execute(() -> {

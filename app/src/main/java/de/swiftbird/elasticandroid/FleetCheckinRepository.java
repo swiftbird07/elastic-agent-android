@@ -1,13 +1,7 @@
 package de.swiftbird.elasticandroid;
 
-import static androidx.core.content.ContextCompat.getSystemService;
-
 import android.annotation.SuppressLint;
-import android.app.AlarmManager;
-import android.app.PendingIntent;
 import android.content.Context;
-import android.content.Intent;
-import android.util.Log;
 import android.widget.TextView;
 
 
@@ -34,38 +28,38 @@ import java.util.Objects;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
-public class CheckinRepository {
+public class FleetCheckinRepository {
 
     //private final Context context;
     private FleetApi fleetApi;
-    private EnrollmentData enrollmentData;
-    private static final String TAG = "CheckinRepository";
+    private FleetEnrollData enrollmentData;
+    private static final String TAG = "FleetCheckinRepository";
 
     // Singleton instance
-    private static CheckinRepository instance;
+    private static FleetCheckinRepository instance;
     
     private AlertDialog dialog;
 
     private TextView tStatus;
 
 
-    public CheckinRepository(Context context) {
+    public FleetCheckinRepository(Context context) {
         //this.context = context;
     }
 
-    public static CheckinRepository getInstance(Context context) {
+    public static FleetCheckinRepository getInstance(Context context) {
         if (instance == null) {
-            instance = new CheckinRepository(context);
+            instance = new FleetCheckinRepository(context);
         }
         return instance;
     }
 
-    public void checkinAgent(EnrollmentData data, AgentMetadata metadata, StatusCallback callbackActivity, @Nullable AlertDialog dialog, @Nullable TextView tStatus, Context context) {
+    public void checkinAgent(FleetEnrollData data, AgentMetadata metadata, StatusCallback callbackActivity, @Nullable AlertDialog dialog, @Nullable TextView tStatus, Context context) {
         this.dialog = dialog;
         this.tStatus = tStatus;
         this.enrollmentData = data;
 
-        Log.i(TAG, "Starting checkin");
+        AppLog.i(TAG, "Starting checkin");
         writeDialog("Starting checkin...", true);
 
 
@@ -81,18 +75,18 @@ public class CheckinRepository {
         String ackToken = null; // TODO: Get ack token from previous checkin response if available
 
         // Create checkin request
-        CheckinRequest checkinRequest = new CheckinRequest("online", ackToken, metadata, "Elastic Agent (Android) checkin.", null, null);
-        fleetApi.postCheckin("ApiKey " + data.accessApiKey, data.agentId, checkinRequest).enqueue(new Callback<CheckinResponse>() {
+        FleetCheckinRequest checkinRequest = new FleetCheckinRequest("online", ackToken, metadata, "Elastic Agent (Android) checkin.", null, null);
+        fleetApi.postCheckin("ApiKey " + data.accessApiKey, data.agentId, checkinRequest).enqueue(new Callback<FleetCheckinResponse>() {
             @Override
-            public void onResponse(@NonNull Call<CheckinResponse> call, @NonNull Response<CheckinResponse> response) {
-                Log.d(TAG, "Got Response from Fleet Server: " + new Gson().toJson(response.body()));
+            public void onResponse(@NonNull Call<FleetCheckinResponse> call, @NonNull Response<FleetCheckinResponse> response) {
+                AppLog.d(TAG, "Got Response from Fleet Server: " + new Gson().toJson(response.body()));
 
                 if (response.isSuccessful()) {
                     
-                    CheckinResponse checkinResponse = response.body();
+                    FleetCheckinResponse checkinResponse = response.body();
                     
                     if(checkinResponse == null){
-                        Log.e(TAG, "Checkin failed. Received no response from fleet server.");
+                        AppLog.e(TAG, "Checkin failed. Received no response from fleet server.");
                         writeDialog("Checkin failed. Received no response from fleet server.", false);
                         callbackActivity.onCallback(false);
                         return;
@@ -101,32 +95,32 @@ public class CheckinRepository {
                     String actionName = checkinResponse.getActions().get(0).getType();
 
                     if(Objects.equals(actionName, "REQUEST_DIAGNOSTICS")) {
-                        Log.i(TAG, "Received diagnostic request from fleet server.");
+                        AppLog.i(TAG, "Received diagnostic request from fleet server.");
                         writeDialog("Received diagnostic request from fleet server.", true);
                         // TODO: Implement diagnostic request handling
                         callbackActivity.onCallback(true);
                         return; // Exit early because we don't have a policy to process
 
                     } else if (Objects.equals(actionName, "POLICY_CHANGE")) {
-                        Log.i(TAG, "Received policy data from fleet server.");
+                        AppLog.i(TAG, "Received policy data from fleet server.");
                         writeDialog("Received policy data from fleet server.", true);
                         // Continue with policy data handling below...
 
                     } else if (Objects.equals(actionName, "UNENROLL")) {
-                        Log.i(TAG, "Received unenroll request from fleet server.");
+                        AppLog.i(TAG, "Received unenroll request from fleet server.");
                         writeDialog("Received unenroll request from fleet server.", true);
                         // Delete the enrollment data from the database
-                        Log.i(TAG, "Deleting enrollment data from database...");
+                        AppLog.i(TAG, "Deleting enrollment data from database...");
                         AppDatabase db = AppDatabase.getDatabase(context, "enrollment-data");
                         AppDatabase.databaseWriteExecutor.execute(() -> {
                             db.enrollmentDataDAO().delete();
-                            Log.i(TAG, "Enrollment data deleted successfully. Unenrollment complete.");
+                            AppLog.i(TAG, "Enrollment data deleted successfully. Unenrollment complete.");
                             writeDialog("Enrollment data deleted successfully. Unenrollment complete. Please restart the app to re-enroll.", true);
                             callbackActivity.onCallback(true);
                         });
 
                     } else {
-                        Log.e(TAG, "Checkin failed. Received unknown action from fleet server.");
+                        AppLog.e(TAG, "Checkin failed. Received unknown action from fleet server.");
                         writeDialog("Checkin failed. Received unknown action from fleet server.", false);
                         callbackActivity.onCallback(false);
                         return; // Exit early because we don't have a policy to process
@@ -134,34 +128,34 @@ public class CheckinRepository {
 
 
                     try {
-                        CheckinResponse.Action.PolicyData.Policy policy = checkinResponse.getActions().get(0).getData().getPolicy();
+                        FleetCheckinResponse.Action.PolicyData.Policy policy = checkinResponse.getActions().get(0).getData().getPolicy();
                     } catch (Exception e) {
-                        Log.e(TAG, "Checkin failed. Received POLICY_CHANGE action but policy data could not be parsed. Error: " + e.getMessage());
+                        AppLog.e(TAG, "Checkin failed. Received POLICY_CHANGE action but policy data could not be parsed. Error: " + e.getMessage());
                         writeDialog("Checkin failed. Received policy change action but policy data could not be parsed from response.", false);
                         callbackActivity.onCallback(false);
                         return;
                     }
                     
-                    Log.i(TAG, "Received policy data from fleet server.");
+                    AppLog.i(TAG, "Received policy data from fleet server.");
                     writeDialog("Received policy data from fleet server.", true);
 
                     // Parse policy data
                     PolicyData policyData = parsePolicy(checkinResponse);
 
                     if(policyData == null){
-                        Log.e(TAG, "Checkin failed. Policy data could not be parsed.");
+                        AppLog.e(TAG, "Checkin failed. Policy data could not be parsed.");
                         writeDialog("Checkin failed. Policy data could not be parsed.", false);
                         callbackActivity.onCallback(false);
                         return;
                     }
 
-                    Log.i(TAG, "Policy data parsed successfully.");
+                    AppLog.i(TAG, "Policy data parsed successfully.");
                     writeDialog("Policy data parsed successfully.", true);
 
                     // Ack the checkin
                     boolean success = ackPolicy(policyData);
                     if(!success){
-                        Log.e(TAG, "Checkin failed. Policy data acknowledgement failed.");
+                        AppLog.e(TAG, "Checkin failed. Policy data acknowledgement failed.");
                         writeDialog("Checkin failed. Policy data acknowledgement failed.", false);
                         callbackActivity.onCallback(false);
                         return;
@@ -172,7 +166,7 @@ public class CheckinRepository {
                         PolicyData currentPolicyData = db.policyDataDAO().getPolicyDataSync();
 
                         if (currentPolicyData != null && currentPolicyData.revision >= policyData.revision) {
-                                Log.i(TAG, "Policy data is up to date. No need to update.");
+                                AppLog.i(TAG, "Policy data is up to date. No need to update.");
 
                                 // Update lastUpdated to current time format 2024-03-19T21:25:27.937Z API 24
                                 @SuppressLint("SimpleDateFormat") SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
@@ -182,14 +176,17 @@ public class CheckinRepository {
                                 callbackActivity.onCallback(true);
 
                         } else {
-                                Log.i(TAG, "Policy data is outdated. Updating...");
+                                AppLog.i(TAG, "Policy data is outdated. Updating...");
                                 db.policyDataDAO().delete(); // Synchronously delete old policy data
                                 db.policyDataDAO().insertPolicyData(policyData); // Synchronously insert new policy data
-                                Log.i(TAG, "Policy data updated successfully.");
+                                AppLog.i(TAG, "Policy data updated successfully.");
 
                                 // Register background service
-                                int interval = policyData.checkinInterval;
-                                WorkScheduler.scheduleFleetCheckinWorker(context, interval, TimeUnit.SECONDS);
+                                int intervalCheckin = policyData.checkinInterval;
+                                WorkScheduler.scheduleFleetCheckinWorker(context, intervalCheckin, TimeUnit.SECONDS);
+                                int intervalPut = policyData.putInterval;
+                                WorkScheduler.scheduleElasticsearchWorker(context, intervalPut, TimeUnit.SECONDS);
+
                                 callbackActivity.onCallback(true);
                         }
 
@@ -211,19 +208,19 @@ public class CheckinRepository {
                         } catch (Exception e) {
                             writeDialog("Checkin to Fleet failed with code: " + response.code() + " (Error message could not be read)", false);
                         }
-                        Log.w(TAG, "Checkin to Fleet failed with code: " + response.code() +  ". Context: " + response.toString() + " Response: " + response.errorBody().string());
+                        AppLog.w(TAG, "Checkin to Fleet failed with code: " + response.code() +  ". Context: " + response.toString() + " Response: " + response.errorBody().string());
 
                     } catch (IOException e) {
-                        Log.e(TAG, "Checkin to Fleet failed with code: " + response.code() +  ". Context: " + response.toString() + " (Error body could not be read)");
+                        AppLog.e(TAG, "Checkin to Fleet failed with code: " + response.code() +  ". Context: " + response.toString() + " (Error body could not be read)");
                     }
                     callbackActivity.onCallback(false);
                 }
             }
 
             @Override
-            public void onFailure(@NonNull Call<CheckinResponse> call, Throwable t) {
+            public void onFailure(@NonNull Call<FleetCheckinResponse> call, Throwable t) {
                 if (t instanceof SocketTimeoutException) {
-                    Log.i(TAG, "Checkin successful but no new actions were available (timeout).");
+                    AppLog.i(TAG, "Checkin successful but no new actions were available (timeout).");
                     writeDialog("Checkin successful. No updates.", true);
                     // Update lastUpdated to current time format 2024-03-19T21:25:27.937Z API 24
                     @SuppressLint("SimpleDateFormat") SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
@@ -241,7 +238,7 @@ public class CheckinRepository {
                 } else {
                     // Handle failure
                     writeDialog("Unhandled exception in checkin: " + t.getMessage(), false);
-                    Log.e(TAG, "Unhandled exception in checkin: " + t.getMessage());
+                    AppLog.e(TAG, "Unhandled exception in checkin: " + t.getMessage());
                     callbackActivity.onCallback(false);
                 }
 
@@ -254,7 +251,7 @@ public class CheckinRepository {
     }
 
     private boolean ackPolicy(PolicyData policyData) {
-        Log.i(TAG, "Acknowledging policy data...");
+        AppLog.i(TAG, "Acknowledging policy data...");
         writeDialog("Acknowledging policy data...", true);
 
         // Create ack request
@@ -262,15 +259,15 @@ public class CheckinRepository {
         fleetApi.postAck("ApiKey " + enrollmentData.accessApiKey, enrollmentData.agentId, ackRequest).enqueue(new Callback<AckResponse>() {
             @Override
             public void onResponse(@NonNull Call<AckResponse> call, @NonNull Response<AckResponse> response) {
-                Log.d(TAG, "Got Ack Response from Fleet Server: " + new Gson().toJson(response.body()));
+                AppLog.d(TAG, "Got Ack Response from Fleet Server: " + new Gson().toJson(response.body()));
 
                 if (response.isSuccessful() && response.body() != null && response.body().getItems() != null && response.body().getItems().length > 0) {
                     if(response.body().getItems()[0].getStatus() == 200) {
-                        Log.i(TAG, "Policy data acknowledged successfully.");
+                        AppLog.i(TAG, "Policy data acknowledged successfully.");
                         writeDialog("Policy data acknowledged successfully.", true);
                     } else {
                         writeDialog("Policy data acknowledgement failed with code: " + response.body().getItems()[0].getStatus() +  ". Error: " + response.body().getItems()[0].getMessage(), false);
-                        Log.w(TAG, "Policy data acknowledgement failed with code: " + response.body().getItems()[0].getStatus() +  ". Error: " + response.body().getItems()[0].getMessage());
+                        AppLog.w(TAG, "Policy data acknowledgement failed with code: " + response.body().getItems()[0].getStatus() +  ". Error: " + response.body().getItems()[0].getMessage());
                     }
                 } else {
                     try {
@@ -281,10 +278,10 @@ public class CheckinRepository {
                         } catch (Exception e) {
                             writeDialog("Policy data acknowledgement failed with code: " + response.code() +  ". (Error message could not be read)", false);
                         }
-                        Log.w(TAG, "Policy data acknowledgement failed with code: " + response.code() +  ". Context: " + response.toString() + " Response: " + response.errorBody().string());
+                        AppLog.w(TAG, "Policy data acknowledgement failed with code: " + response.code() +  ". Context: " + response.toString() + " Response: " + response.errorBody().string());
 
                     } catch (Exception e) {
-                        Log.e(TAG, "Policy data acknowledgement failed with code: " + response.code() +  ". Context: " + response.toString() + " (Error body could not be read)");
+                        AppLog.e(TAG, "Policy data acknowledgement failed with code: " + response.code() +  ". Context: " + response.toString() + " (Error body could not be read)");
                     }
                 }
             }
@@ -293,7 +290,7 @@ public class CheckinRepository {
             public void onFailure(@NonNull Call<AckResponse> call, Throwable t) {
                 // Handle failure
                 writeDialog("Unhandled exception in policy data acknowledgement: " + t.getMessage(), false);
-                Log.e(TAG, "Unhandled exception in policy data acknowledgement: " + t.getMessage());
+                AppLog.e(TAG, "Unhandled exception in policy data acknowledgement: " + t.getMessage());
             }
         });
 
@@ -315,28 +312,28 @@ public class CheckinRepository {
         }
     }
 
-    private PolicyData parsePolicy(CheckinResponse response) {
+    private PolicyData parsePolicy(FleetCheckinResponse response) {
         String TAG_PARSE = TAG + " - parsePolicy";
 
         if (response.getActions() == null || response.getActions().isEmpty()) {
-            Log.e(TAG_PARSE, "No actions in response.");
+            AppLog.e(TAG_PARSE, "No actions in response.");
             return null;
         }
 
-        CheckinResponse.Action action = response.getActions().get(0);
+        FleetCheckinResponse.Action action = response.getActions().get(0);
 
         if (action == null || action.getData() == null || action.getData().getPolicy() == null) {
-            Log.e(TAG_PARSE, "Action, Action Data, or Policy is null.");
+            AppLog.e(TAG_PARSE, "Action, Action Data, or Policy is null.");
             return null;
         }
         
-        CheckinResponse.Action.PolicyData.Policy policy = action.getData().getPolicy();
+        FleetCheckinResponse.Action.PolicyData.Policy policy = action.getData().getPolicy();
         PolicyData policyData = new PolicyData();
         policyData.createdAt = action.getCreatedAt();
         policyData.revision = policy.getRevision();
 
         if (policy.getAgent() == null || policy.getAgent().getProtection() == null) {
-            Log.e(TAG_PARSE, "Agent or Protection data is missing.");
+            AppLog.e(TAG_PARSE, "Agent or Protection data is missing.");
             return null;
         }
 
@@ -344,14 +341,14 @@ public class CheckinRepository {
         policyData.uninstallTokenHash = policy.getAgent().getProtection().getUninstallTokenHash();
 
         if (policy.getInputs() == null || policy.getInputs().isEmpty() || policy.getInputs().get(0).getStreams() == null || policy.getInputs().get(0).getStreams().isEmpty()) {
-            Log.e(TAG_PARSE, "Inputs or Streams data is missing.");
+            AppLog.e(TAG_PARSE, "Inputs or Streams data is missing.");
             return null;
         }
 
-        CheckinResponse.Action.Input input = policy.getInputs().get(0);
+        FleetCheckinResponse.Action.Input input = policy.getInputs().get(0);
         policyData.inputName = input.getName();
 
-        CheckinResponse.Action.Input.Stream stream = input.getStreams().get(0);
+        FleetCheckinResponse.Action.Input.Stream stream = input.getStreams().get(0);
         policyData.allowUserUnenroll = stream.getAllowUserUnenroll();
         policyData.dataStreamDataset = stream.getDataStream().getDataset();
         policyData.ignoreOlder = stream.getIgnoreOlder();
@@ -363,9 +360,11 @@ public class CheckinRepository {
 
         policyData.checkinInterval = checkinIntervalSeconds;
         policyData.putInterval = putIntervalSeconds;
+        policyData.maxDocumentsPerRequest = stream.getMaxDocumentsPerRequest();
+
 
         if(stream.getPaths() == null || stream.getPaths().isEmpty()){
-            Log.e(TAG_PARSE, "Path data is missing.");
+            AppLog.e(TAG_PARSE, "Path data is missing.");
             return null;
         }
 
@@ -374,20 +373,20 @@ public class CheckinRepository {
 
 
         if (policy.getOutputs() == null || policy.getOutputs().isEmpty()) {
-            Log.e(TAG_PARSE, "Outputs data is missing.");
+            AppLog.e(TAG_PARSE, "Outputs data is missing.");
             return null;
         }
 
-        Map.Entry<String, CheckinResponse.Action.PolicyData.Policy.Output> entry = policy.getOutputs().entrySet().iterator().next();
-        CheckinResponse.Action.PolicyData.Policy.Output output = entry.getValue();
+        Map.Entry<String, FleetCheckinResponse.Action.PolicyData.Policy.Output> entry = policy.getOutputs().entrySet().iterator().next();
+        FleetCheckinResponse.Action.PolicyData.Policy.Output output = entry.getValue();
 
         if(output == null){
-            Log.e(TAG_PARSE, "Output data is missing.");
+            AppLog.e(TAG_PARSE, "Output data is missing.");
             return null;
         }
 
         if(output.getApiKey() == null || output.getHosts() == null || output.getSslCaTrustedFingerprint() == null){
-            Log.e(TAG_PARSE, "Output data is incomplete.");
+            AppLog.e(TAG_PARSE, "Output data is incomplete.");
             return null;
         }
 
@@ -396,7 +395,7 @@ public class CheckinRepository {
         policyData.sslCaTrustedFingerprint = output.getSslCaTrustedFingerprint();
 
         if(action.getId() == null){
-            Log.e(TAG_PARSE, "Action ID is missing.");
+            AppLog.e(TAG_PARSE, "Action ID is missing.");
             return null;
         }
         policyData.actionId = action.getId();
@@ -410,6 +409,11 @@ public class CheckinRepository {
     }
 
     private int timeIntervalToSeconds(String interval){
+        if(interval == null){
+            AppLog.w(TAG, "Time interval is null. Defaulting to 60 seconds.");
+            return 60;
+        }
+
         // Xm:
         if(interval.contains("m")){
             return Integer.parseInt(interval.replaceAll("[^0-9]", "")) * 60;
@@ -423,7 +427,7 @@ public class CheckinRepository {
             return Integer.parseInt(interval.replaceAll("[^0-9]", "")) * 3600;
         }
 
-        Log.w(TAG, "Unknown time interval format: " + interval + ". Defaulting to 60 seconds.");
+        AppLog.w(TAG, "Unknown time interval format: " + interval + ". Defaulting to 60 seconds.");
         return 60;
     }
 

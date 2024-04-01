@@ -175,7 +175,7 @@ public class AgentMetadata {
 
         // Construct and return the LocalMeta object with filled-in metadata
         AgentMetadata metadata = new AgentMetadata(new Local(elasticECSMeta, hostECSMeta, systemECSMeta));
-        Log.d("AgentMetadata", "Gathered Agent metadata: " + new Gson().toJson(metadata)); // Log the metadata object
+        AppLog.d("AgentMetadata", "Gathered Agent metadata: " + new Gson().toJson(metadata)); // Log the metadata object
 
         return metadata;
     }
@@ -195,7 +195,7 @@ public class AgentMetadata {
                 }
             }
         } catch (Exception e) {
-            Log.e("AgentMetadata", "Error fetching IP addresses", e);
+            AppLog.e("AgentMetadata", "Error fetching IP addresses", e);
         }
         return ipAddresses;
     }

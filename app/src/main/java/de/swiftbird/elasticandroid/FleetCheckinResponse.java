@@ -5,7 +5,7 @@ import com.google.gson.annotations.SerializedName;
 import java.util.List;
 import java.util.Map;
 
-public class CheckinResponse {
+public class FleetCheckinResponse {
     @SerializedName("ack_token")
     protected String ackToken;
 
@@ -320,8 +320,12 @@ public class CheckinResponse {
                 private String interval;
 
                 // Custom
-                @SerializedName("put_interval")
+                @SerializedName("es_request_interval")
                 private String put_interval;
+
+                @SerializedName("es_max_documents_per_request")
+                private int maxDocumentsPerRequest;
+
 
                 @SerializedName("checkin_interval")
                 private String checkin_interval;
@@ -362,6 +366,10 @@ public class CheckinResponse {
 
                 protected String getCheckinInterval() {
                     return checkin_interval;
+                }
+
+                protected int getMaxDocumentsPerRequest() {
+                    return maxDocumentsPerRequest;
                 }
             }
 

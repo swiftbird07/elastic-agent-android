@@ -10,6 +10,7 @@ public class SelfLogComp implements Component {
 
     private static SelfLogComp selfLogComp;
     private SelfLogCompBuffer buffer;
+    private AppStatisticsDataDAO statistic;
 
     public static SelfLogComp getInstance() {
         // Singleton pattern
@@ -24,6 +25,7 @@ public class SelfLogComp implements Component {
         // Initialize Room database and get the DAO
         AppDatabase db = AppDatabase.getDatabase(context, "");
         buffer = db.selfLogCompBuffer();
+        statistic = db.statisticsDataDAO();
     }
 
     @Override
@@ -35,6 +37,7 @@ public class SelfLogComp implements Component {
     public void addDocumentToBuffer(ElasticDocument document) {
         if (document instanceof SelfLogCompDocument && buffer != null) {
             buffer.insertDocument((SelfLogCompDocument) document);
+            statistic.increaseCombinedBufferSize(1);
         }
         else {
             return; // Ignore invalid documents

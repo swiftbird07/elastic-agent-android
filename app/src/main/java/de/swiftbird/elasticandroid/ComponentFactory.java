@@ -8,8 +8,8 @@ public class ComponentFactory {
     private static final Map<String, Supplier<?>> components = new HashMap<>();
 
     static {
-        // Register components by adding them to the map
-        components.put("android:self-log", SelfLogComp::new);
+        // New components can be added here
+        components.put("android://self-log", SelfLogComp::new);
     }
 
     public static Component createInstance(String key) {

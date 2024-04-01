@@ -27,6 +27,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity implements StatusCallback {
 
@@ -106,6 +107,21 @@ public class MainActivity extends AppCompatActivity implements StatusCallback {
                         .setPositiveButton("OK", /* listener = */ null)
                         .show();
                 checkinRepository.checkinAgent(enrollmentData, AgentMetadata.getMetadataFromDeviceAndDB(enrollmentData.agentId, enrollmentData.hostname), this, dialog, null, this);
+
+                // Also reset any backoff intervals
+                AppDatabase.databaseWriteExecutor.execute(() -> {
+                    db.policyDataDAO().resetBackoffCheckinInterval();
+                    db.policyDataDAO().resetBackoffPutInterval();
+                    PolicyData policyData =  db.policyDataDAO().getPolicyDataSync();
+
+                    // Remove all registered workers
+                    WorkScheduler.cancelAllWork(getApplicationContext());
+                    // Now add the worker back
+                    int intervalCheckin = policyData.checkinInterval;
+                    WorkScheduler.scheduleFleetCheckinWorker(getApplicationContext(), intervalCheckin, TimeUnit.SECONDS);
+                    int intervalPut = policyData.putInterval;
+                    WorkScheduler.scheduleElasticsearchWorker(getApplicationContext(), intervalPut, TimeUnit.SECONDS);
+                });
             });
         });
 
@@ -244,6 +260,17 @@ public class MainActivity extends AppCompatActivity implements StatusCallback {
         AppDatabase.databaseWriteExecutor.execute(() -> {
             db.policyDataDAO().delete();
         });
+
+        AppDatabase.databaseWriteExecutor.execute(() -> {
+            db.selfLogCompBuffer().deleteAllDocuments();
+        });
+
+        AppDatabase.databaseWriteExecutor.execute(() -> {
+            db.statisticsDataDAO().delete();
+        });
+
+        // Remove all registered workers
+        WorkScheduler.cancelAllWork(getApplicationContext());
 
         // Refresh the UI
         updateUIBasedOnEnrollment(new FleetEnrollData());

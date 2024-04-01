@@ -9,12 +9,14 @@ import androidx.room.RoomDatabase;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-@Database(entities = {FleetEnrollData.class, PolicyData.class, SelfLogCompDocument.class}, version = 10)
+@Database(entities = {FleetEnrollData.class, PolicyData.class, SelfLogCompDocument.class, AppStatisticsData.class}, version = 14)
 public abstract class AppDatabase extends RoomDatabase {
 
     public abstract FleetEnrollDataDAO enrollmentDataDAO();
 
     public abstract PolicyDataDAO policyDataDAO();
+
+    public abstract AppStatisticsDataDAO statisticsDataDAO();
 
     public  abstract  SelfLogCompBuffer selfLogCompBuffer();
 

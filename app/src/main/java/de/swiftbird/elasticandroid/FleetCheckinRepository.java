@@ -66,7 +66,7 @@ public class FleetCheckinRepository {
         // Initialize Retrofit instance
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(data.fleetUrl)
-                .client(NetworkBuilder.getOkHttpClient(data.verifyCert))
+                .client(NetworkBuilder.getOkHttpClient(data.verifyCert, null))
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
 
@@ -359,9 +359,12 @@ public class FleetCheckinRepository {
 
 
         policyData.checkinInterval = checkinIntervalSeconds;
-        policyData.putInterval = putIntervalSeconds;
-        policyData.maxDocumentsPerRequest = stream.getMaxDocumentsPerRequest();
+        policyData.backoffCheckinInterval = checkinIntervalSeconds;
 
+        policyData.putInterval = putIntervalSeconds;
+        policyData.backoffPutInterval = putIntervalSeconds;
+
+        policyData.maxDocumentsPerRequest = stream.getMaxDocumentsPerRequest();
 
         if(stream.getPaths() == null || stream.getPaths().isEmpty()){
             AppLog.e(TAG_PARSE, "Path data is missing.");
@@ -408,28 +411,67 @@ public class FleetCheckinRepository {
         return policyData;
     }
 
-    private int timeIntervalToSeconds(String interval){
-        if(interval == null){
-            AppLog.w(TAG, "Time interval is null. Defaulting to 60 seconds.");
+    public static int timeIntervalToSeconds(String interval) {
+        if (interval == null || interval.trim().isEmpty()) {
+            AppLog.w(TAG, "Time interval is null or empty. Defaulting to 60 seconds.");
             return 60;
         }
 
-        // Xm:
-        if(interval.contains("m")){
-            return Integer.parseInt(interval.replaceAll("[^0-9]", "")) * 60;
-        }
-        // Xs:
-        if(interval.contains("s")){
-            return Integer.parseInt(interval.replaceAll("[^0-9]", ""));
-        }
-        // Xh:
-        if(interval.contains("h")){
-            return Integer.parseInt(interval.replaceAll("[^0-9]", "")) * 3600;
+        int seconds = 0;
+        java.util.regex.Matcher matcher = java.util.regex.Pattern.compile("(\\d+w)|(\\d+d)|(\\d+h)|(\\d+m)|(\\d+s)").matcher(interval);
+        while (matcher.find()) {
+            if (matcher.group().endsWith("w")) {
+                seconds += Integer.parseInt(matcher.group().replaceAll("[^0-9]", "")) * 604800; // 7 days
+            } else if (matcher.group().endsWith("d")) {
+                seconds += Integer.parseInt(matcher.group().replaceAll("[^0-9]", "")) * 86400; // 24 hours
+            } else if (matcher.group().endsWith("h")) {
+                seconds += Integer.parseInt(matcher.group().replaceAll("[^0-9]", "")) * 3600;
+            } else if (matcher.group().endsWith("m")) {
+                seconds += Integer.parseInt(matcher.group().replaceAll("[^0-9]", "")) * 60;
+            } else if (matcher.group().endsWith("s")) {
+                seconds += Integer.parseInt(matcher.group().replaceAll("[^0-9]", ""));
+            }
         }
 
-        AppLog.w(TAG, "Unknown time interval format: " + interval + ". Defaulting to 60 seconds.");
-        return 60;
+        if (seconds == 0) {
+            AppLog.w(TAG, "Unknown time interval format: " + interval + ". Defaulting to 60 seconds.");
+            return 60;
+        }
+
+        return seconds;
     }
+
+    public static String secondsToTimeInterval(int totalSeconds) {
+        if (totalSeconds <= 0) {
+            return "0s"; // Handle non-positive inputs
+        }
+
+        int weeks = totalSeconds / 604800;
+        int days = (totalSeconds % 604800) / 86400;
+        int hours = (totalSeconds % 86400) / 3600;
+        int minutes = (totalSeconds % 3600) / 60;
+        int seconds = totalSeconds % 60;
+
+        StringBuilder sb = new StringBuilder();
+        if (weeks > 0) {
+            sb.append(weeks).append("w");
+        }
+        if (days > 0) {
+            sb.append(days).append("d");
+        }
+        if (hours > 0) {
+            sb.append(hours).append("h");
+        }
+        if (minutes > 0) {
+            sb.append(minutes).append("m");
+        }
+        if (seconds > 0 || sb.length() == 0) { // Include seconds if it's the only unit or add it to existing units
+            sb.append(seconds).append("s");
+        }
+
+        return sb.toString();
+    }
+
 
 }
 

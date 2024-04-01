@@ -27,7 +27,7 @@ import retrofit2.Response;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(sdk = {Build.VERSION_CODES.LOLLIPOP})
-public class EnrollmentRepositoryTest {
+public class FleetEnrollRepositoryTest {
 
     @Mock
     private Context mockContext;

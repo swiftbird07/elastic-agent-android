@@ -27,4 +27,16 @@ public interface PolicyDataDAO {
     @Query("DELETE FROM PolicyData")
     void delete();
 
+    // Backoff logic
+    @Query("UPDATE PolicyData SET backoff_put_interval = backoff_put_interval * 2")
+    void increaseBackoffPutInterval();
+
+    @Query("UPDATE PolicyData SET backoff_put_interval = put_interval")
+    void resetBackoffPutInterval();
+
+    @Query("UPDATE PolicyData SET backoff_checkin_interval = backoff_checkin_interval * 2")
+    void increaseBackoffCheckinInterval();
+
+    @Query("UPDATE PolicyData SET backoff_checkin_interval = checkin_interval")
+    void resetBackoffCheckinInterval();
 }

@@ -21,7 +21,7 @@ public interface SelfLogCompBuffer {
     @Query("SELECT * FROM SelfLogCompDocument ORDER BY timestamp ASC LIMIT :maxDocuments")
     List<SelfLogCompDocument> getOldestDocuments(int maxDocuments);
 
-    // Count the number of documents in the buffer
+    // Count the number of documents in the buffer, return 0 if no documents
     @Query("SELECT COUNT(*) FROM SelfLogCompDocument")
     int getDocumentCount();
 

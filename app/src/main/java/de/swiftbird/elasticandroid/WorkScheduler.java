@@ -23,7 +23,8 @@ public class WorkScheduler {
 
         OneTimeWorkRequest.Builder builder = new OneTimeWorkRequest.Builder(FleetCheckinWorker.class)
                 .setInitialDelay(interval, timeUnit)
-                .setConstraints(constraints);
+                .setConstraints(constraints)
+                .addTag(FLEET_CHECKIN_WORK_NAME);
 
         OneTimeWorkRequest workRequest = builder.build();
         WorkManager.getInstance(context).enqueueUniqueWork(FLEET_CHECKIN_WORK_NAME, ExistingWorkPolicy.REPLACE, workRequest);
@@ -35,11 +36,17 @@ public class WorkScheduler {
                 .setRequiredNetworkType(NetworkType.CONNECTED)
                 .build();
 
-        OneTimeWorkRequest.Builder builder = new OneTimeWorkRequest.Builder(FleetCheckinWorker.class)
+        OneTimeWorkRequest.Builder builder = new OneTimeWorkRequest.Builder(ElasticWorker.class)
                 .setInitialDelay(interval, timeUnit)
-                .setConstraints(constraints);
+                .setConstraints(constraints)
+                .addTag(ELASTICSEARCH_PUT_WORK_NAME);
 
         OneTimeWorkRequest workRequest = builder.build();
         WorkManager.getInstance(context).enqueueUniqueWork(ELASTICSEARCH_PUT_WORK_NAME, ExistingWorkPolicy.REPLACE, workRequest);
+    }
+
+    public static void cancelAllWork(Context context) {
+        AppLog.i("WorkScheduler", "Cancelling all work");
+        WorkManager.getInstance(context).cancelAllWork();
     }
 }

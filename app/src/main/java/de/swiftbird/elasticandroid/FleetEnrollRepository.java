@@ -62,7 +62,7 @@ public class FleetEnrollRepository {
         // Initialize Retrofit instance for networking
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(serverUrl)
-                .client(NetworkBuilder.getOkHttpClient(checkCert))
+                .client(NetworkBuilder.getOkHttpClient(checkCert, null))
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
 
@@ -128,8 +128,9 @@ public class FleetEnrollRepository {
 
                                         AppLog.d(TAG, "Response from Fleet Server: " + new Gson().toJson(enrollResponse));
 
-                                        // Save the enrollment info to the database
+                                        // Save the enrollment info and insert initial statistic to the database
                                         FleetEnrollData enrollmentData = parseAndSaveEnrollmentInfo(request, enrollResponse);
+
 
                                         AppLog.i(TAG, "Enrollment data saved to database. Starting initial checkin...");
                                         // We are not done yet. We need to do the initial checkin to get the policy
@@ -227,6 +228,8 @@ public class FleetEnrollRepository {
                 AppDatabase db = AppDatabase.getDatabase(context, "enrollment-data");
                 db.enrollmentDataDAO().insertEnrollmentInfo(enrollmentData);
                 AppLog.i(TAG, "Saving Enrollment data to db successful.");
+                // Saving initial statistics data
+                db.statisticsDataDAO().insert(new AppStatisticsData());
             }
         }).start();
 

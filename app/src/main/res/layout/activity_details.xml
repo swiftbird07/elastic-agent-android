@@ -24,8 +24,8 @@
             android:layout_marginTop="55dp"
             android:layout_marginBottom="10dp"
             android:layout_toEndOf="@+id/tAgentStatus"
-            android:text="Unenrolled"
-            android:textColor="@android:color/holo_red_dark"
+            android:text="Calculating..."
+            android:textColor="@android:color/holo_blue_dark"
             android:textSize="18sp"/>
 
 
@@ -340,7 +340,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Checkin Interval (Seconds):" />
+                        android:text="Checkin Interval:" />
 
                     <TextView
                         android:id="@+id/intervalValue"
@@ -410,10 +410,86 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Workers:" />
+                        android:text="Installed Workers:" />
 
                     <TextView
                         android:id="@+id/workersValue"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Elastic Interval:" />
+
+                    <TextView
+                        android:id="@+id/esIntervalValue"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Combined buffer size:" />
+
+                    <TextView
+                        android:id="@+id/combinedBufferSizeValue"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Last documents send at:" />
+
+                    <TextView
+                        android:id="@+id/lastDocumentsSendAtValue"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Last documents send size:" />
+
+                    <TextView
+                        android:id="@+id/lastDocumentsSendSizeValue"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"

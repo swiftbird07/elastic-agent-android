@@ -198,9 +198,26 @@ public class FleetEnrollActivity extends AppCompatActivity implements StatusCall
             AppLog.w(TAG, "Enrollment failed. Check logs for details.");
             // Delete enrollment data from database (as it is invalid)
             AppDatabase db = AppDatabase.getDatabase(this.getApplicationContext(), "enrollment-data");
+
             AppDatabase.databaseWriteExecutor.execute(() -> {
                 db.enrollmentDataDAO().delete();
             });
+
+            AppDatabase.databaseWriteExecutor.execute(() -> {
+                db.policyDataDAO().delete();
+            });
+
+            AppDatabase.databaseWriteExecutor.execute(() -> {
+                db.selfLogCompBuffer().deleteAllDocuments();
+            });
+
+            AppDatabase.databaseWriteExecutor.execute(() -> {
+                db.statisticsDataDAO().delete();
+            });
+
+            // Remove all registered workers
+            WorkScheduler.cancelAllWork(getApplicationContext());
+
             btnEnrollNow.setEnabled(true);
 
         }

@@ -39,8 +39,14 @@ public class PolicyData {
     @ColumnInfo(name = "checkin_interval")
     public int checkinInterval;
 
+    @ColumnInfo(name = "backoff_checkin_interval")
+    public int backoffCheckinInterval;
+
     @ColumnInfo(name = "put_interval")
     public int putInterval;
+
+    @ColumnInfo(name = "backoff_put_interval")
+    public int backoffPutInterval;
 
     @ColumnInfo(name = "max_documents_per_request")
     public int maxDocumentsPerRequest;

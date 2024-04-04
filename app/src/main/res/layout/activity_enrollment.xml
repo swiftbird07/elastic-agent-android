@@ -89,10 +89,11 @@ android:inputType="text"/>
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:text="Custom Root Certificate (optional)" />
+        android:text="Custom Root Certificate (optional, not implemented yet)"
+        />
 
 <EditText
-android:id="@+id/etTags"
+android:id="@+id/etFleetCert"
 android:layout_width="match_parent"
 android:layout_height="wrap_content"
 android:inputType="text"/>

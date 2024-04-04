@@ -1,11 +1,6 @@
 package de.swiftbird.elasticandroid;
 
-import android.content.Context;
 import android.util.Log;
-
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
 
 public class AppLog {
     private static SelfLogCompBuffer logDao;
@@ -47,7 +42,7 @@ public class AppLog {
 
                     SelfLogCompDocument document = new SelfLogCompDocument(enrollmentData, policyData, level, tag, message);
                     SelfLogComp selfLogComp = SelfLogComp.getInstance();
-                    selfLogComp.setup(AppInstance.getAppContext() , null, null);
+                    selfLogComp.setup(AppInstance.getAppContext() , null, null, "");
                     selfLogComp.addDocumentToBuffer(document);
                 } catch (Exception e) {
                     // Ignore any exceptions, as it may be that the agent is not enrolled yet and therefor can't send logs anyway

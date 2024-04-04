@@ -1,6 +1,7 @@
 package de.swiftbird.elasticandroid;
 
 import android.annotation.SuppressLint;
+import android.content.ComponentName;
 import android.content.Context;
 import android.util.Log;
 
@@ -12,6 +13,7 @@ import com.google.gson.Gson;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
 import java.util.TimeZone;
@@ -43,7 +45,7 @@ public class ElasticWorker extends Worker {
         AppDatabase db = AppDatabase.getDatabase(this.getApplicationContext(), "enrollment-data");
 
         // Synchronously fetch the enrollment data; adjust the method call as necessary based on your DAO
-        FleetEnrollData enrollmentData = db.enrollmentDataDAO().getEnrollmentInfoSync(1); // Assuming you have a method like this
+        FleetEnrollData enrollmentData = db.enrollmentDataDAO().getEnrollmentInfoSync(1);
         AgentMetadata agentMetadata = AgentMetadata.getMetadataFromDeviceAndDB(enrollmentData.agentId, enrollmentData.hostname);
         PolicyData policyData = db.policyDataDAO().getPolicyDataSync();
         AppStatisticsData statisticsData = db.statisticsDataDAO().getStatisticsSync();
@@ -101,11 +103,38 @@ public class ElasticWorker extends Worker {
                     // Remove everything behind the first "." to get the component name
                     String componentName = componentPath.split("\\.")[0];
 
+                    String subComponent = "";
+                    if(componentPath.split("\\.").length >= 2) {
+                        subComponent = componentPath.split("\\.")[1];
+                    }
+
                     Component component = ComponentFactory.createInstance(componentName);
-                    component.setup(getApplicationContext(), enrollmentData, policyData);
-                    newDocuments.addAll(component.getDocumentsFromBuffer(policyData.maxDocumentsPerRequest));
+                    if(!component.setup(getApplicationContext(), enrollmentData, policyData, subComponent)) {
+                        AppLog.w(TAG, "Component " + component.getPathName() + " setup failed");
+                        continue;
+                    }
+                    List<ElasticDocument> bufferedDocuments = component.getDocumentsFromBuffer(policyData.maxDocumentsPerRequest);
+
+                    if(bufferedDocuments == null) {
+                        AppLog.w(TAG, "Component " + component.getPathName() + " returned null documents");
+                        continue;
+                    }
+                    newDocuments.addAll(bufferedDocuments);
+
                 } catch (Exception e) {
-                    AppLog.e(TAG, "Error while processing component: " + e.getMessage());
+                    if (e instanceof IllegalArgumentException) {
+                        AppLog.w(TAG, "Component path " + componentPath + " defined in policy but app does not support it");
+                    } else {
+                        AppLog.e(TAG, "Unhandled app error while processing component: " + e.getMessage());
+                    }
+                }
+            }
+
+            // Now disable any components that were _not_ in the paths list
+            for (Component component : ComponentFactory.getAllInstances()) {
+                if (!policyData.paths.contains(component.getPathName())) {
+                    AppLog.i(TAG, "Disabling component: " + component.getPathName());
+                    component.disable(getApplicationContext(), enrollmentData, policyData);
                 }
             }
 
@@ -204,7 +233,6 @@ public class ElasticWorker extends Worker {
     private String createActionMetadata(ElasticDocument document) {
         return "{\"create\": {}}";
     }
-
 
 
 }

@@ -29,6 +29,12 @@ android {
         buildConfigField("String", "ENROLLMENT_STRING", "\"$enrollmentString\"")
         buildConfigField("String", "AGENT_VERSION", "\"8.10.2\"")
 
+        javaCompileOptions {
+            annotationProcessorOptions {
+                argument("room.schemaLocation", "$projectDir/schemas".toString())
+            }
+        }
+
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

@@ -10,6 +10,7 @@ public class ComponentFactory {
     static {
         // New components can be added here
         components.put("android://self-log", SelfLogComp::new);
+        components.put("android://security-logs", SecurityLogsComp::new);
     }
 
     public static Component createInstance(String key) {
@@ -18,5 +19,9 @@ public class ComponentFactory {
             return (Component) supplier.get();
         }
         throw new IllegalArgumentException("Component with key " + key + " not found.");
+    }
+
+    public static Component[] getAllInstances() {
+        return components.values().stream().map(Supplier::get).toArray(Component[]::new);
     }
 }

@@ -24,7 +24,7 @@ import kotlin.NotImplementedError;
 
 public class FleetEnrollActivity extends AppCompatActivity implements StatusCallback {
     private static final String TAG = "FleetEnrollActivity";
-    private EditText etServerUrl, etToken, etHostname, etTags;
+    private EditText etServerUrl, etToken, etHostname, etFleetCert;
     private androidx.appcompat.widget.SwitchCompat swCheckCA, swPinRootCA;
     private TextView tError, tStatus;
 
@@ -39,7 +39,7 @@ public class FleetEnrollActivity extends AppCompatActivity implements StatusCall
         etServerUrl = findViewById(R.id.etServerUrl);
         etToken = findViewById(R.id.etToken);
         etHostname = findViewById(R.id.etHostname);
-        etTags = findViewById(R.id.etTags);
+        etFleetCert = findViewById(R.id.etFleetCert);
         swCheckCA = findViewById(R.id.swCheckCA);
         swPinRootCA = findViewById(R.id.swPinRootCA);
         tError = findViewById(id.tError);
@@ -52,6 +52,12 @@ public class FleetEnrollActivity extends AppCompatActivity implements StatusCall
 
         // Disable camera feature for now TODO
         btnLoadFromQR.setEnabled(false);
+
+        // Disable certificate input for now TODO
+        etFleetCert.setEnabled(false);
+
+        // Disable cert pinning option for now TODO
+        swPinRootCA.setEnabled(false);
 
         // Check build config and enable button if set
         boolean isBuildConfigSet = BuildConfig.ENROLLMENT_STRING != null && !BuildConfig.ENROLLMENT_STRING.isEmpty();
@@ -99,7 +105,7 @@ public class FleetEnrollActivity extends AppCompatActivity implements StatusCall
         String serverUrl = etServerUrl.getText().toString().trim();
         String token = etToken.getText().toString().trim();
         String hostname = etHostname.getText().toString().trim();
-        String certificate = etTags.getText().toString().trim();
+        String certificate = etFleetCert.getText().toString().trim();
         boolean checkCA = swCheckCA.isChecked();
         boolean pinRootCA = swPinRootCA.isChecked();
 
@@ -174,7 +180,7 @@ public class FleetEnrollActivity extends AppCompatActivity implements StatusCall
             etServerUrl.setText(jsonObj.optString("serverUrl", ""));
             etToken.setText(jsonObj.optString("token", ""));
             etHostname.setText(hostname); // Set the potentially modified hostname
-            etTags.setText(jsonObj.optString("certificate", ""));
+            etFleetCert.setText(jsonObj.optString("certificate", ""));
             swCheckCA.setChecked(jsonObj.optBoolean("verifyServerCert", true));
             swPinRootCA.setChecked(jsonObj.optBoolean("pinRootCert", false));
             tError.setText("");

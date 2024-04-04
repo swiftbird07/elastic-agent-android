@@ -23,7 +23,7 @@ public class ComponentWorker extends Worker {
 
         for(String componentPath : policyData.paths.split(",")) {
             Component component = ComponentFactory.createInstance(componentPath);
-            component.setup(getApplicationContext(), enrollmentData, policyData);
+            component.setup(getApplicationContext(), enrollmentData, policyData, "");
             component.collectEvents(enrollmentData, policyData);
         }
 

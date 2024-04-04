@@ -1,0 +1,5 @@
+<device-admin xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-policies>
+        <!-- Currently no policies are required for this device admin receiver -->
+    </uses-policies>
+</device-admin>

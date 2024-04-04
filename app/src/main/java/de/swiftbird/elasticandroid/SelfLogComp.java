@@ -22,11 +22,12 @@ public class SelfLogComp implements Component {
     }
 
     @Override
-    public void setup(Context context, FleetEnrollData enrollmentData, PolicyData policyData) {
+    public boolean setup(Context context, FleetEnrollData enrollmentData, PolicyData policyData, String subComponent) {
         // Initialize Room database and get the DAO
         AppDatabase db = AppDatabase.getDatabase(context, "");
         buffer = db.selfLogCompBuffer();
         statistic = db.statisticsDataDAO();
+        return true;
     }
 
     @Override
@@ -63,5 +64,15 @@ public class SelfLogComp implements Component {
     @Override
     public List<String> getRequiredPermissions() {
         return Collections.emptyList();
+    }
+
+    @Override
+    public String getPathName() {
+        return "self-log";
+    }
+
+    @Override
+    public void disable(Context context, FleetEnrollData enrollmentData, PolicyData policyData) {
+        // No-op for this component
     }
 }

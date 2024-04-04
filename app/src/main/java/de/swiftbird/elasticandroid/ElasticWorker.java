@@ -2,6 +2,7 @@ package de.swiftbird.elasticandroid;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.work.Worker;
@@ -17,6 +18,7 @@ import java.util.TimeZone;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import okhttp3.MediaType;
 import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -53,20 +55,36 @@ public class ElasticWorker extends Worker {
                     if(!success) {
                         AppStatisticsDataDAO statisticsData = db.statisticsDataDAO();
                         statisticsData.increaseTotalFailures();
-                        // Use exponential backoff for the next check-in
-                        policyData.backoffPutInterval = policyData.backoffPutInterval * 2;
-                        db.policyDataDAO().increaseBackoffPutInterval();
 
-                        // Set agent health status to unhealthy
-                        db.statisticsDataDAO().setAgentHealth("Unhealthy");
+                        // Use exponential backoff for the next check-in if enanbled
+                        if(policyData.useBackoff) {
+                            int intendedBackoff = policyData.backoffPutInterval * 2;
 
-                        AppLog.w("ElasticWorker", "Elasticsearch PUT failed, increasing interval to " + policyData.backoffPutInterval + " seconds");
+                            // Use old backoff interval if the current interval is greater than the max interval
+                            if(intendedBackoff > policyData.maxBackoffInterval) {
+                                policyData.backoffPutInterval = policyData.maxBackoffInterval;
+                                db.policyDataDAO().setBackoffPutInterval(policyData.maxBackoffInterval);
+                            } else {
+                                // Configure the new backoff interval
+                                policyData.backoffPutInterval = intendedBackoff;
+                                db.policyDataDAO().setBackoffPutInterval(intendedBackoff);
+                            }
+
+                            // Set agent health status to unhealthy
+                            db.statisticsDataDAO().setAgentHealth("Unhealthy");
+                            AppLog.w("ElasticWorker", "Elasticsearch PUT failed, increasing interval to " + policyData.backoffPutInterval + " seconds");
+                        }
+
                     } else {
+                        // If Fleet check-in also succeeded, reset the agent health status
+                        if(policyData.backoffCheckinInterval == policyData.checkinInterval) {
+                            db.statisticsDataDAO().setAgentHealth("Healthy");
+                        }
                         // Reset the backoff interval
-                        db.statisticsDataDAO().setAgentHealth("Healthy");
                         policyData.backoffPutInterval = policyData.putInterval;
                         db.policyDataDAO().resetBackoffPutInterval();
                     }
+
                     // Schedule the next check-in
                     AppLog.i("ElasticWorker", "Scheduling next Elasticsearch PUT in " + policyData.backoffPutInterval + " seconds");
                     WorkScheduler.scheduleElasticsearchWorker(getApplicationContext(), policyData.backoffPutInterval, TimeUnit.SECONDS);
@@ -96,22 +114,38 @@ public class ElasticWorker extends Worker {
 
             // Make a PUT request to Elasticsearch using Retrofit
             String sslFingerprint = policyData.sslCaTrustedFingerprint;
+            String sslFullCert = policyData.sslCaTrustedFull;
             String esUrl = policyData.hosts;
-            boolean verifyCert = true; // we use the fingerprint anyway
+            boolean verifyCert = true; // we use the full cert provided by fleet anyway
             String elasticAccessApiKey = policyData.apiKey;
+            int timeoutSeconds = 30;
+
+            // Base64 encode the API key
+            String elasticAccessApiKeyEncoded = android.util.Base64.encodeToString(elasticAccessApiKey.getBytes(), android.util.Base64.NO_WRAP);
+
             String indexName = policyData.dataStreamDataset;
+
+            // Prepend logs- to the index name
+            if (!indexName.startsWith("logs-")) {
+                indexName = "logs-" + indexName + "-2.3.0";
+            }
+
+            Gson gson = new Gson();
+            RequestBody requestBody = createBulkRequestBody(newDocuments, gson);
 
             // Initialize Retrofit instance
             Retrofit retrofit = new Retrofit.Builder()
                     .baseUrl(esUrl)
-                    .client(NetworkBuilder.getOkHttpClient(verifyCert, sslFingerprint)) // TODO: Use SSL fingerprint verification
+                    .client(NetworkBuilder.getOkHttpClient(verifyCert, sslFullCert, timeoutSeconds))
                     .addConverterFactory(GsonConverterFactory.create())
                     .build();
 
             ElasticApi elasticApi = retrofit.create(ElasticApi.class);
-            elasticApi.putBulk("ApiKey " + elasticAccessApiKey, indexName, newDocuments).enqueue(new Callback<ElasticResponse>() {
+            elasticApi.putBulk("ApiKey " + elasticAccessApiKeyEncoded, indexName, requestBody).enqueue(new Callback<ElasticResponse>() {
                 @Override
                 public void onResponse(@NonNull Call<ElasticResponse> call, @NonNull Response<ElasticResponse> response) {
+                    AppLog.d(TAG, "Got Response from Elasticsearch Server: " + new Gson().toJson(response.body()));
+
                     Executors.newSingleThreadExecutor().execute(() -> {
                         if (response.isSuccessful()) {
                             AppLog.i(TAG, "Elasticsearch PUT successful");
@@ -151,4 +185,26 @@ public class ElasticWorker extends Worker {
 
         return Result.success();
     }
+
+    private RequestBody createBulkRequestBody(List<ElasticDocument> documents, Gson gson) {
+        StringBuilder bulkPayload = new StringBuilder();
+
+        for (ElasticDocument document : documents) {
+            // Assuming you have an action metadata line for each document (e.g., index action)
+            String actionMetadata = createActionMetadata(document);
+            String documentJson = gson.toJson(document);
+
+            bulkPayload.append(actionMetadata).append("\n");
+            bulkPayload.append(documentJson).append("\n");
+        }
+        Log.d(TAG, "Bulk payload: " + bulkPayload.toString());
+        return RequestBody.create(MediaType.parse("application/x-ndjson"), bulkPayload.toString());
+    }
+
+    private String createActionMetadata(ElasticDocument document) {
+        return "{\"create\": {}}";
+    }
+
+
+
 }

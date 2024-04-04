@@ -64,6 +64,15 @@ public class PolicyData {
     @ColumnInfo(name = "ssl_ca_trusted_fingerprint")
     public String sslCaTrustedFingerprint;
 
+    @ColumnInfo(name = "ssl_ca_trusted_full")
+    public String sslCaTrustedFull;
+
+    @ColumnInfo(name = "use_backoff")
+    public boolean useBackoff;
+
+    @ColumnInfo(name = "max_backoff_interval")
+    public int maxBackoffInterval;
+
     @ColumnInfo(name = "output_policy_id")
     public String outputPolicyId;
 

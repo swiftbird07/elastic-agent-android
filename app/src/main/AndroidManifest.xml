@@ -15,6 +15,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ElasticAgentAndroid"
         android:usesCleartextTraffic="true"
+        android:name=".AppInstance"
         tools:targetApi="31">
         <activity
             android:name=".MainActivity"

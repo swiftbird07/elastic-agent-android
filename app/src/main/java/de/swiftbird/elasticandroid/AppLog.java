@@ -38,17 +38,21 @@ public class AppLog {
     // Add similar methods for d, v, w, etc., as needed
 
     private static void insertLog(String level, String tag, String message) {
-        // Execute on a background thread to avoid blocking the main thread
-        new Thread(() -> {
-            SelfLogCompDocument document = new SelfLogCompDocument();
-            document.logLevel = level;
-            document.tag = tag;
-            document.message = message;
-            // Assuming ElasticsearchDocument has a timestamp field; set it if not auto-generated
-            document.timestamp = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US).format(new Date());
+            // Execute on a background thread to avoid blocking the main thread
+            new Thread(() -> {
+                try {
+                    AppDatabase db = AppDatabase.getDatabase(AppInstance.getAppContext(), "");
+                    FleetEnrollData enrollmentData = db.enrollmentDataDAO().getEnrollmentInfoSync(1);
+                    PolicyData policyData = db.policyDataDAO().getPolicyDataSync();
 
-            SelfLogComp selfLogComp = SelfLogComp.getInstance();
-            selfLogComp.addDocumentToBuffer(document);
-        }).start();
+                    SelfLogCompDocument document = new SelfLogCompDocument(enrollmentData, policyData, level, tag, message);
+                    SelfLogComp selfLogComp = SelfLogComp.getInstance();
+                    selfLogComp.setup(AppInstance.getAppContext() , null, null);
+                    selfLogComp.addDocumentToBuffer(document);
+                } catch (Exception e) {
+                    // Ignore any exceptions, as it may be that the agent is not enrolled yet and therefor can't send logs anyway
+                    return;
+                }
+            }).start();
     }
 }

@@ -323,7 +323,7 @@ public class FleetCheckinResponse {
                 @SerializedName("es_request_interval")
                 private String put_interval;
 
-                @SerializedName("es_max_documents_per_request")
+                @SerializedName("max_documents_per_request")
                 private int maxDocumentsPerRequest;
 
 
@@ -335,6 +335,12 @@ public class FleetCheckinResponse {
 
                 @SerializedName("allow_user_unenroll")
                 private boolean allowUserUnenroll;
+
+                @SerializedName("use_backoff")
+                private boolean useBackoff;
+
+               @SerializedName("max_backoff_interval")
+                private String maxBackoffInterval;
 
                 protected DataStream getDataStream() {
                     return dataStream;
@@ -371,6 +377,10 @@ public class FleetCheckinResponse {
                 protected int getMaxDocumentsPerRequest() {
                     return maxDocumentsPerRequest;
                 }
+
+                public boolean getUseBackoff() { return useBackoff; }
+
+                public String getMaxBackoffInterval() { return maxBackoffInterval; }
             }
 
 

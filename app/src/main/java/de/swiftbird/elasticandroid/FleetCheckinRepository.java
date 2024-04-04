@@ -66,7 +66,7 @@ public class FleetCheckinRepository {
         // Initialize Retrofit instance
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(data.fleetUrl)
-                .client(NetworkBuilder.getOkHttpClient(data.verifyCert, null))
+                .client(NetworkBuilder.getOkHttpClient(data.verifyCert, null, 5))
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
 
@@ -348,10 +348,13 @@ public class FleetCheckinRepository {
         FleetCheckinResponse.Action.Input input = policy.getInputs().get(0);
         policyData.inputName = input.getName();
 
+        // Streams also contains custom settings
         FleetCheckinResponse.Action.Input.Stream stream = input.getStreams().get(0);
         policyData.allowUserUnenroll = stream.getAllowUserUnenroll();
         policyData.dataStreamDataset = stream.getDataStream().getDataset();
         policyData.ignoreOlder = stream.getIgnoreOlder();
+        policyData.useBackoff = stream.getUseBackoff();
+        policyData.maxBackoffInterval = timeIntervalToSeconds(stream.getMaxBackoffInterval());
 
         // Parse Xm or Xs etc. to seconds
         int checkinIntervalSeconds = timeIntervalToSeconds(stream.getCheckinInterval());
@@ -396,6 +399,8 @@ public class FleetCheckinRepository {
         policyData.apiKey = output.getApiKey();
         policyData.hosts = String.join(",", output.getHosts()); // Concatenate hosts
         policyData.sslCaTrustedFingerprint = output.getSslCaTrustedFingerprint();
+        policyData.sslCaTrustedFull = output.getSslCertificateAuthorities().stream().findFirst().orElse(null);
+
 
         if(action.getId() == null){
             AppLog.e(TAG_PARSE, "Action ID is missing.");

@@ -31,11 +31,17 @@ public interface PolicyDataDAO {
     @Query("UPDATE PolicyData SET backoff_put_interval = backoff_put_interval * 2")
     void increaseBackoffPutInterval();
 
+    @Query("UPDATE PolicyData SET backoff_put_interval = :interval")
+    void setBackoffPutInterval(int interval);
+
     @Query("UPDATE PolicyData SET backoff_put_interval = put_interval")
     void resetBackoffPutInterval();
 
     @Query("UPDATE PolicyData SET backoff_checkin_interval = backoff_checkin_interval * 2")
     void increaseBackoffCheckinInterval();
+
+    @Query("UPDATE PolicyData SET backoff_checkin_interval = :interval")
+    void setBackoffCheckinInterval(int interval);
 
     @Query("UPDATE PolicyData SET backoff_checkin_interval = checkin_interval")
     void resetBackoffCheckinInterval();

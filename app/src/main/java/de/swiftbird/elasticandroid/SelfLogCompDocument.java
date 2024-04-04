@@ -11,7 +11,7 @@ public class SelfLogCompDocument extends ElasticDocument {
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "id")
     public int id;
-    @SerializedName("logLevel")
+    @SerializedName("log.level")
     @ColumnInfo(name = "log_level")
     public String logLevel;
 
@@ -23,8 +23,14 @@ public class SelfLogCompDocument extends ElasticDocument {
     @ColumnInfo(name = "message")
     public String message;
 
-    @SerializedName("@timestamp")
-    @ColumnInfo(name = "timestamp")
-    public String timestamp;
+    // Constructor using superclass constructor and setting own fields
+    public SelfLogCompDocument() {}
+    public SelfLogCompDocument(FleetEnrollData fleetEnrollData, PolicyData policyData, String logLevel, String tag, String message) {
+        super(fleetEnrollData, policyData);
+        this.logLevel = logLevel;
+        this.tag = tag;
+        this.message = message;
+    }
+
 }
 

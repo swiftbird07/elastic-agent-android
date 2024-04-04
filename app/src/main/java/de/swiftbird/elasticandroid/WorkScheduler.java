@@ -16,7 +16,7 @@ public class WorkScheduler {
     protected static final String ELASTICSEARCH_PUT_WORK_NAME = "elasticsearch-put";
 
     public static void scheduleFleetCheckinWorker(Context context, long interval, TimeUnit timeUnit) {
-        AppLog.i("WorkScheduler", "Scheduling fleet check-in worker");
+        AppLog.i("WorkScheduler", "Scheduling fleet check-in worker with interval " + interval + " " + timeUnit.toString());
         Constraints constraints = new Constraints.Builder()
                 .setRequiredNetworkType(NetworkType.CONNECTED)
                 .build();
@@ -31,7 +31,7 @@ public class WorkScheduler {
     }
 
     public static void scheduleElasticsearchWorker(Context context, long interval, TimeUnit timeUnit) {
-        AppLog.i("WorkScheduler", "Scheduling Elasticsearch put worker");
+        AppLog.i("WorkScheduler", "Scheduling Elasticsearch put worker with interval " + interval + " " + timeUnit.toString());
         Constraints constraints = new Constraints.Builder()
                 .setRequiredNetworkType(NetworkType.CONNECTED)
                 .build();

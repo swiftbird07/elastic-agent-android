@@ -1,11 +1,14 @@
 package de.swiftbird.elasticandroid;
 
+import android.annotation.SuppressLint;
+
 import androidx.annotation.Nullable;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.KeyStore;
+import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
@@ -20,56 +23,53 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 
 public  class NetworkBuilder {
-    public static OkHttpClient getOkHttpClient(boolean checkCA, @Nullable String sslCertFull) {
-        Interceptor authInterceptor = new Interceptor() {
-            @Override
-            public okhttp3.Response intercept(Chain chain) throws IOException {
-                Request originalRequest = chain.request();
-                Request newRequest = originalRequest.newBuilder()
-                        .header("User-Agent", "elastic agent " + BuildConfig.AGENT_VERSION)
-                        .build();
-                return chain.proceed(newRequest);
-            }
+    public static OkHttpClient getOkHttpClient(boolean checkCA, @Nullable String sslCertFull, @Nullable int timeoutSeconds) {
+        AppLog.d("NetworkBuilder", "Creating OkHttpClient with checkCA: " + checkCA + " and sslCertFull: " + sslCertFull);
+
+        Interceptor authInterceptor = chain -> {
+            Request originalRequest = chain.request();
+            Request newRequest = originalRequest.newBuilder()
+                    .header("User-Agent", "elastic agent " + BuildConfig.AGENT_VERSION)
+                    .build();
+            return chain.proceed(newRequest);
         };
 
-        OkHttpClient.Builder builder = new OkHttpClient.Builder().addInterceptor(authInterceptor);
+        OkHttpClient.Builder builder = new OkHttpClient.Builder();
+        builder.addInterceptor(authInterceptor);
 
-        // If sslCertFull is not null, configure OkHttpClient to use the provided certificate
         if (checkCA && sslCertFull != null && !sslCertFull.isEmpty()) {
             try {
                 CertificateFactory cf = CertificateFactory.getInstance("X.509");
-                InputStream caInput = new ByteArrayInputStream(sslCertFull.getBytes());
-                X509Certificate ca;
-                try {
-                    ca = (X509Certificate) cf.generateCertificate(caInput);
-                } finally {
-                    caInput.close();
+
+                // Create a KeyStore containing our trusted certificate
+                KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
+                keyStore.load(null, null); // Initialize the keyStore
+
+                try (InputStream caInput = new ByteArrayInputStream(sslCertFull.getBytes())) {
+                    Certificate ca = cf.generateCertificate(caInput);
+                    keyStore.setCertificateEntry("ca", ca);
                 }
 
-                // Create a KeyStore containing our trusted CAs
-                String keyStoreType = KeyStore.getDefaultType();
-                KeyStore keyStore = KeyStore.getInstance(keyStoreType);
-                keyStore.load(null, null);
-                keyStore.setCertificateEntry("ca", ca);
-
-                // Create a TrustManager that trusts the CAs in our KeyStore
-                String tmfAlgorithm = TrustManagerFactory.getDefaultAlgorithm();
-                TrustManagerFactory tmf = TrustManagerFactory.getInstance(tmfAlgorithm);
+                // Create a TrustManager that trusts the certificate in our KeyStore
+                TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
                 tmf.init(keyStore);
 
                 // Create an SSLContext that uses our TrustManager
                 SSLContext sslContext = SSLContext.getInstance("TLS");
                 sslContext.init(null, tmf.getTrustManagers(), null);
 
-                builder.sslSocketFactory(sslContext.getSocketFactory(), (X509TrustManager) tmf.getTrustManagers()[0]);
-                builder.hostnameVerifier((hostname, session) -> true);
+                X509TrustManager trustManager = (X509TrustManager) tmf.getTrustManagers()[0];
+                builder.sslSocketFactory(sslContext.getSocketFactory(), trustManager);
+
             } catch (Exception e) {
+                AppLog.e("NetworkBuilder", "Failed to set SSL certificate", e);
                 throw new RuntimeException("Failed to set SSL certificate", e);
             }
 
         } else {
-            // Fallback to trusting all certificates if sslCertFull is null
+            // Fallback to trusting all certificates if sslCertFull is null or checkCA is false
             try {
+                @SuppressLint("CustomX509TrustManager")
                 final TrustManager[] trustAllCerts = new TrustManager[]{
                         new X509TrustManager() {
                             @Override
@@ -96,7 +96,7 @@ public  class NetworkBuilder {
                 }
             }
 
-        return builder.readTimeout(5, TimeUnit.SECONDS)
-                .connectTimeout(15, TimeUnit.SECONDS).build();
+        return builder.readTimeout(timeoutSeconds, TimeUnit.SECONDS)
+                .connectTimeout(timeoutSeconds, TimeUnit.SECONDS).build();
     }
 }

@@ -2,6 +2,7 @@ package de.swiftbird.elasticandroid;
 
 
 import android.content.Context;
+import android.util.Log;
 
 import java.util.Collections;
 import java.util.List;
@@ -40,7 +41,7 @@ public class SelfLogComp implements Component {
             statistic.increaseCombinedBufferSize(1);
         }
         else {
-            return; // Ignore invalid documents
+            Log.w("SelfLogComp", "Invalid document type or buffer not initialized");
         }
     }
 

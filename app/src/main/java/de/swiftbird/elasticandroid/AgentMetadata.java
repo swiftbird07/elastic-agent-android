@@ -8,6 +8,7 @@ import androidx.annotation.Nullable;
 import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
 
+import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.util.ArrayList;
@@ -175,8 +176,6 @@ public class AgentMetadata {
 
         // Construct and return the LocalMeta object with filled-in metadata
         AgentMetadata metadata = new AgentMetadata(new Local(elasticECSMeta, hostECSMeta, systemECSMeta));
-        AppLog.d("AgentMetadata", "Gathered Agent metadata: " + new Gson().toJson(metadata)); // Log the metadata object
-
         return metadata;
     }
 
@@ -189,16 +188,17 @@ public class AgentMetadata {
                 Enumeration<InetAddress> inetAddresses = networkInterface.getInetAddresses();
                 while (inetAddresses.hasMoreElements()) {
                     InetAddress inetAddress = inetAddresses.nextElement();
-                    if (!inetAddress.isLoopbackAddress()) {
-                        ipAddresses.add(inetAddress.getHostAddress());
+                    if (!inetAddress.isLoopbackAddress() && inetAddress instanceof Inet4Address) {
+                        ipAddresses.add(inetAddress.getHostAddress()); // Only IPv4 addresses
                     }
                 }
             }
         } catch (Exception e) {
-            AppLog.e("AgentMetadata", "Error fetching IP addresses", e);
+            Log.e("AgentMetadata", "Error fetching IP addresses", e);
         }
         return ipAddresses;
     }
+
 
 
 }

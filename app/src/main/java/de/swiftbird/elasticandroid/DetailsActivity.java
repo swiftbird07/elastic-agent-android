@@ -42,6 +42,8 @@ public class DetailsActivity extends AppCompatActivity  {
     private TextView checkinIntervalValue;
     private TextView esUrlValue;
     private TextView esSslFingerprintValue;
+    private TextView useBackoffValue;
+    private TextView maxBackoffValue;
 
     // ES Texts
 
@@ -100,6 +102,8 @@ public class DetailsActivity extends AppCompatActivity  {
         checkinIntervalValue = findViewById(R.id.intervalValue);
         esUrlValue = findViewById(R.id.esUrlValue);
         esSslFingerprintValue = findViewById(R.id.esSslFingerprintValue);
+        useBackoffValue = findViewById(R.id.useBackoffValue);
+        maxBackoffValue = findViewById(R.id.maxBackoffValue);
 
         workersValue = findViewById(R.id.workersValue);
         esIntervalValue = findViewById(R.id.esIntervalValue);
@@ -191,6 +195,11 @@ public class DetailsActivity extends AppCompatActivity  {
         } else {
         checkinIntervalValue.setText(policyData.checkinInterval != -1 ? FleetCheckinRepository.secondsToTimeInterval(policyData.checkinInterval) : "Not Set");
         }
+
+        // Backoff
+        useBackoffValue.setText(policyData.useBackoff ? "Yes" : "No");
+        maxBackoffValue.setText(policyData.maxBackoffInterval != 0 ? FleetCheckinRepository.secondsToTimeInterval(policyData.maxBackoffInterval) : "Not Set");
+
     }
 
     private void updateUIBasedOnStatistics(AppStatisticsData statisticsData) {

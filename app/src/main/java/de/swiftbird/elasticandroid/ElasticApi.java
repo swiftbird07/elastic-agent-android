@@ -1,9 +1,6 @@
 package de.swiftbird.elasticandroid;
 
-import java.util.ArrayList;
-
 import okhttp3.RequestBody;
-import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.Header;
@@ -18,11 +15,11 @@ public interface ElasticApi {
                 @Body ElasticDocument elasticDocument);
 
         // Batch
-        @PUT("/{index}/_doc/_bulk")
+        @PUT("/{index}/_bulk")
         Call<ElasticResponse> putBulk(
                 @Header("Authorization") String accessApiKeyHeader,
                 @Path("index") String index,
-                @Body ArrayList<ElasticDocument> elasticDocument);
+                @Body RequestBody elasticDocument);
 
 
 

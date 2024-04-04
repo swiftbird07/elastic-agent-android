@@ -62,7 +62,7 @@ public class FleetEnrollRepository {
         // Initialize Retrofit instance for networking
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(serverUrl)
-                .client(NetworkBuilder.getOkHttpClient(checkCert, null))
+                .client(NetworkBuilder.getOkHttpClient(checkCert, null, 30))
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
 

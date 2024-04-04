@@ -37,24 +37,46 @@ public class FleetCheckinWorker extends Worker {
             public void onCallback(boolean success) {
                 // Create new thread to handle the callback
                 Executors.newSingleThreadExecutor().execute(() -> {
-                        if(!success) {
-                            AppStatisticsDataDAO statisticsData = db.statisticsDataDAO();
-                            statisticsData.increaseTotalFailures();
-                            // Use exponential backoff for the next check-in
-                            policyData.backoffCheckinInterval = policyData.backoffCheckinInterval * 2;
-                            db.policyDataDAO().increaseBackoffPutInterval();
-                            AppLog.w("FleetCheckinWorker", "Fleet checkin failed, increasing interval to " + policyData.putInterval + " seconds");
-                        } else {
-                            // Reset the backoff interval
-                            policyData.backoffCheckinInterval = policyData.checkinInterval;
-                            db.policyDataDAO().resetBackoffCheckinInterval();
+                    if (!success) {
+                        AppStatisticsDataDAO statisticsData = db.statisticsDataDAO();
+                        statisticsData.increaseTotalFailures();
+
+                        // Use exponential backoff for the next check-in if enanbled
+                        if (policyData.useBackoff) {
+                            int intendedBackoff = policyData.backoffCheckinInterval * 2;
+
+                            // Use old backoff interval if the current interval is greater than the max interval
+                            if (intendedBackoff > policyData.maxBackoffInterval) {
+                                policyData.backoffCheckinInterval = policyData.maxBackoffInterval;
+                                db.policyDataDAO().setBackoffCheckinInterval(policyData.maxBackoffInterval);
+                            } else {
+                                // Configure the new backoff interval
+                                policyData.backoffCheckinInterval = intendedBackoff;
+                                db.policyDataDAO().setBackoffCheckinInterval(intendedBackoff);
+                            }
+
+                            // Set agent health status to unhealthy
+                            db.statisticsDataDAO().setAgentHealth("Unhealthy");
+                            AppLog.w("FleetCheckinWorker", "Fleet checkin failed, increasing interval to " + policyData.backoffCheckinInterval + " seconds");
                         }
-                        // Schedule the next check-in
-                        AppLog.i("FleetCheckinWorker", "Scheduling next check-in in " + policyData.backoffCheckinInterval + " seconds");
-                        WorkScheduler.scheduleElasticsearchWorker(getApplicationContext(), policyData.backoffCheckinInterval, TimeUnit.SECONDS);
-                    });
-                }
+                    } else {
+                        // If Elasticsearch PUT also succeeded, reset the agent health status
+                        if (policyData.backoffPutInterval == policyData.putInterval) {
+                            db.statisticsDataDAO().setAgentHealth("Healthy");
+                        }
+                        // Reset the backoff interval
+                        policyData.backoffCheckinInterval = policyData.checkinInterval;
+                        db.policyDataDAO().resetBackoffCheckinInterval();
+                    }
+
+                    // Schedule the next check-in
+                    AppLog.i("FleetCheckinWorker", "Scheduling next Fleet checkin in " + policyData.backoffCheckinInterval + " seconds");
+                    WorkScheduler.scheduleFleetCheckinWorker(getApplicationContext(), policyData.backoffCheckinInterval, TimeUnit.SECONDS);
+                });
+
+            }
         };
+
 
         try {
             repository.checkinAgent(enrollmentData, agentMetadata, callback, null, null, getApplicationContext());
@@ -65,7 +87,4 @@ public class FleetCheckinWorker extends Worker {
 
         return Result.success();
     }
-
-
-
 }

@@ -11,6 +11,8 @@ public class ComponentFactory {
         // New components can be added here
         components.put("android://self-log", SelfLogComp::new);
         components.put("android://security-logs", SecurityLogsComp::new);
+        components.put("android://network-logs", NetworkLogsComp::new);
+        components.put("android://location", LocationComp::new);
     }
 
     public static Component createInstance(String key) {

@@ -11,6 +11,15 @@ public class SecurityLogsCompDocument extends ElasticDocument {
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "id")
     public int id;
+
+    @SerializedName("event.action")
+    @ColumnInfo(name = "event_action")
+    public String eventAction = "security";
+
+    @SerializedName("event.category")
+    @ColumnInfo(name = "event_category")
+    public String eventCategory = "log";
+
     @SerializedName("log.level")
     @ColumnInfo(name = "log_level")
     public String logLevel;

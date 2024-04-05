@@ -7,12 +7,16 @@ import android.app.admin.SecurityLog;
 import android.content.ComponentName;
 import android.content.Context;
 import android.os.Build;
-import android.util.Log;
+import android.util.Log; // We don't use AppLog for non-warnings/errors because this would double-log the messages that are sent anyway
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class SecurityLogsComp implements Component {
+
+    private static final String TAG = "SecurityLogsComp";
 
     private SecurityLogsCompBuffer buffer;
 
@@ -30,7 +34,12 @@ public class SecurityLogsComp implements Component {
 
 
     public void handleSecurityLogs(Context context) {
-        AppLog.i("SecurityLogsComp", "handleSecurityLogs - Received callback for security logs available.");
+        // First setup the component
+        AppDatabase db = AppDatabase.getDatabase(context, "");
+        this.buffer = db.securityLogCompBuffer();
+        this.statistic = db.statisticsDataDAO();
+
+        AppLog.i(TAG, "Received callback for security logs available.");
         ComponentName adminComponent = new ComponentName(context, AppDeviceAdminReceiver.class);
         DevicePolicyManager dpm = (DevicePolicyManager) context.getSystemService(Context.DEVICE_POLICY_SERVICE);
         try {
@@ -39,9 +48,8 @@ public class SecurityLogsComp implements Component {
                 if (logs != null) {
                     for (SecurityLog.SecurityEvent event : logs) {
                         // Process each security log event
-                        Log.i("SecurityLogsComp", "Security log event: " + event.toString());
+                        Log.d(TAG, "Security log event: " + event.toString());
 
-                        AppDatabase db = AppDatabase.getDatabase(context, "enrollment-data");
                         FleetEnrollData enrollmentData = db.enrollmentDataDAO().getEnrollmentInfoSync(1);
                         PolicyData policyData = db.policyDataDAO().getPolicyDataSync();
                         int logLevel;
@@ -77,13 +85,13 @@ public class SecurityLogsComp implements Component {
                         addDocumentToBuffer(new SecurityLogsCompDocument(enrollmentData, policyData, logLevelName, tagName, message));
                     }
                 } else {
-                    Log.d("SecurityLogsComp", "No security logs available.");
+                    AppLog.w(TAG, "No security logs were available, even though the callback was received.");
                 }
             } else {
-                Log.d("SecurityLogsComp", "Security logging not enabled.");
+                Log.d(TAG, "Security logging not enabled.");
             }
         } catch (Exception e) {
-            AppLog.e("SecurityLogsComp", "Failed to retrieve security logs: " + Arrays.toString(e.getStackTrace()));
+            AppLog.e(TAG, "Failed to retrieve security logs: " + Arrays.toString(e.getStackTrace()));
         }
 
     }
@@ -96,19 +104,28 @@ public class SecurityLogsComp implements Component {
         statistic = db.statisticsDataDAO();
 
         // Enable security logging
-        AppLog.d("SecurityLogsComp", "Setting up security logs component");
+        AppLog.d(TAG, "Setting up security logs component");
         DevicePolicyManager dpm = (DevicePolicyManager) context.getSystemService(Context.DEVICE_POLICY_SERVICE);
         ComponentName adminComponentName = new ComponentName(context, AppDeviceAdminReceiver.class);
         try {
             if (dpm.isDeviceOwnerApp(context.getPackageName())) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    Set<String> affiliationIds = new HashSet<>();
+                    affiliationIds.add("de.swiftbird.elasticandroid");
+                    dpm.setAffiliationIds(adminComponentName, affiliationIds);
+                }
                 dpm.setSecurityLoggingEnabled(adminComponentName, true);
-                AppLog.d("SecurityLogsComp", "Security logging enabled.");
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) { // Test TODO: Remove me
+                    dpm.setNetworkLoggingEnabled(adminComponentName, true);
+                }
+                AppLog.d(TAG, "Security logging enabled.");
                 return true;
             } else {
-                AppLog.w("SecurityLogsComp", "This app is not a device owner app, security logging can not be enabled.");
+                AppLog.w(TAG, "This app is not a device owner app, security logging can not be enabled.");
             }
         } catch (Exception e) {
-            AppLog.e("SecurityLogsComp", "Failed to enable security logging: " + e.getMessage());
+            AppLog.e(TAG, "Unhandled when enabling security logging: " + e.getMessage());
         }
         return false;
     }
@@ -125,7 +142,7 @@ public class SecurityLogsComp implements Component {
             statistic.increaseCombinedBufferSize(1);
         }
         else {
-            Log.w("SelfLogComp", "Invalid document type or buffer not initialized");
+            Log.w(TAG, "Invalid document type or buffer not initialized");
         }
     }
 
@@ -158,7 +175,7 @@ public class SecurityLogsComp implements Component {
     @Override
     public void disable(Context context, FleetEnrollData enrollmentData, PolicyData policyData) {
         /*
-        AppLog.d("SecurityLogsComp", "Disabling security logs component");
+        AppLog.d(TAG, "Disabling security logs component");
         DevicePolicyManager dpm = (DevicePolicyManager) context.getSystemService(Context.DEVICE_POLICY_SERVICE);
         ComponentName adminComponentName = new ComponentName(context, AppDeviceAdminReceiver.class);
         dpm.setSecurityLoggingEnabled(adminComponentName, false);

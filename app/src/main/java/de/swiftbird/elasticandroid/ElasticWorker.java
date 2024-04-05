@@ -177,7 +177,12 @@ public class ElasticWorker extends Worker {
 
                     Executors.newSingleThreadExecutor().execute(() -> {
                         if (response.isSuccessful()) {
-                            AppLog.i(TAG, "Elasticsearch PUT successful");
+                            if(response.body() == null || response.body().getErrors().equals("true")) {
+                                AppLog.w(TAG, "Elasticsearch PUT failed: " + response.message());
+                                statisticsDataDAO.increaseTotalFailures();
+                                callback.onCallback(false);
+                                return;
+                            }
 
                             // Set statistics data
                             @SuppressLint("SimpleDateFormat") SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");

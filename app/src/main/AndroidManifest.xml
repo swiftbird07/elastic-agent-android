@@ -57,8 +57,11 @@
 
             <intent-filter>
                 <action android:name="android.app.action.DEVICE_ADMIN_ENABLED" />
+                <action android:name="android.app.action.SECURITY_LOGS_AVAILABLE" />
+                <action android:name="android.app.action.NETWORK_LOGS_AVAILABLE"/>
             </intent-filter>
         </receiver>
+
     </application>
 
 </manifest>

@@ -1,5 +1,8 @@
 package de.swiftbird.elasticandroid;
 
+import androidx.room.ColumnInfo;
+import androidx.room.TypeConverters;
+
 import com.google.gson.annotations.SerializedName;
 
 import java.text.SimpleDateFormat;
@@ -42,7 +45,14 @@ public class ElasticDocument {
     protected String hostId;
 
     @SerializedName("host.ip")
-    protected String  hostIp;
+    @ColumnInfo(name = "hostIp")
+    @TypeConverters(InetAddressListConverter.class)
+    protected List<String>  hostIp;
+
+    @SerializedName("source.ip")
+    @ColumnInfo(name = "sourceIp")
+    @TypeConverters(InetAddressListConverter.class)
+    protected List<String>  sourceIp;
 
     @SerializedName("host.mac")
     protected String hostMac;
@@ -135,19 +145,19 @@ public class ElasticDocument {
         this.hostHostname = metadata.getLocal().host.hostname;
         this.hostId = metadata.getLocal().host.id;
 
-        this.hostIp = metadata.getLocal().host.ip.toString();
-
+        this.hostIp = metadata.getLocal().host.ip;
+        this.sourceIp = metadata.getLocal().host.ip;
 
         this.hostMac = metadata.getLocal().host.mac.get(0);
         this.hostName = metadata.getLocal().host.name;
         this.hostOsType = "android";
-        //this.hostOsBuild = metadata.getLocal().system.kernel;
-        //this.hostOsFamily = metadata.getLocal().system.family;
-        //this.hostOsKernel = metadata.getLocal().system.kernel;
-        //this.hostOsName = metadata.getLocal().system.name;
-        //this.hostOsNameText = metadata.getLocal().system.name;
-        //this.hostOsPlatform = metadata.getLocal().system.platform;
-        //this.hostOsVersion = metadata.getLocal().system.version;
+        this.hostOsBuild = metadata.getLocal().system.kernel;
+        this.hostOsFamily = metadata.getLocal().system.family;
+        this.hostOsKernel = metadata.getLocal().system.kernel;
+        //this.hostOsName = metadata.getLocal().system.name; // DOES NOT WORK
+        //this.hostOsNameText = metadata.getLocal().system.name; // DOES NOT WORK
+        this.hostOsPlatform = metadata.getLocal().system.platform;
+        this.hostOsVersion = metadata.getLocal().system.version;
 
 
         // Set the rest of the fields

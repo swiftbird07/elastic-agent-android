@@ -1,0 +1,1088 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 20,
+    "identityHash": "6ff74789fb99621f2130d5e2a6738542",
+    "entities": [
+      {
+        "tableName": "FleetEnrollData",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `agent_id` TEXT, `is_enrolled` INTEGER NOT NULL, `hostname` TEXT, `fleet_url` TEXT, `veryify_cert` INTEGER NOT NULL, `action` TEXT, `access_api_key` TEXT, `access_api_key_id` TEXT, `active` INTEGER NOT NULL, `enrolled_at` TEXT, `policy_id` TEXT, `status` TEXT, `type` TEXT, `last_checkin` TEXT, `last_policy_update` TEXT, `policy` TEXT, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "agentId",
+            "columnName": "agent_id",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "isEnrolled",
+            "columnName": "is_enrolled",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "hostname",
+            "columnName": "hostname",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "fleetUrl",
+            "columnName": "fleet_url",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "verifyCert",
+            "columnName": "veryify_cert",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "action",
+            "columnName": "action",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "accessApiKey",
+            "columnName": "access_api_key",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "accessApiKeyId",
+            "columnName": "access_api_key_id",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "active",
+            "columnName": "active",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "enrolledAt",
+            "columnName": "enrolled_at",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "policyId",
+            "columnName": "policy_id",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "status",
+            "columnName": "status",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "type",
+            "columnName": "type",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "lastCheckin",
+            "columnName": "last_checkin",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "lastPolicyUpdate",
+            "columnName": "last_policy_update",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "policy",
+            "columnName": "policy",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "id"
+          ],
+          "autoGenerate": false
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "PolicyData",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `created_at` TEXT, `revision` INTEGER NOT NULL, `protection_enabled` INTEGER NOT NULL, `uninstall_token_hash` TEXT, `input_name` TEXT, `allow_user_unenroll` INTEGER NOT NULL, `data_stream_dataset` TEXT, `ignore_older` TEXT, `interval` TEXT, `checkin_interval` INTEGER NOT NULL, `backoff_checkin_interval` INTEGER NOT NULL, `put_interval` INTEGER NOT NULL, `backoff_put_interval` INTEGER NOT NULL, `max_documents_per_request` INTEGER NOT NULL, `paths` TEXT, `api_key` TEXT, `hosts` TEXT, `ssl_ca_trusted_fingerprint` TEXT, `ssl_ca_trusted_full` TEXT, `use_backoff` INTEGER NOT NULL, `max_backoff_interval` INTEGER NOT NULL, `output_policy_id` TEXT, `last_updated` TEXT, `checkin_action_id` TEXT)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "created_at",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "revision",
+            "columnName": "revision",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "protectionEnabled",
+            "columnName": "protection_enabled",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "uninstallTokenHash",
+            "columnName": "uninstall_token_hash",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "inputName",
+            "columnName": "input_name",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "allowUserUnenroll",
+            "columnName": "allow_user_unenroll",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dataStreamDataset",
+            "columnName": "data_stream_dataset",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "ignoreOlder",
+            "columnName": "ignore_older",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "interval",
+            "columnName": "interval",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "checkinInterval",
+            "columnName": "checkin_interval",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "backoffCheckinInterval",
+            "columnName": "backoff_checkin_interval",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "putInterval",
+            "columnName": "put_interval",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "backoffPutInterval",
+            "columnName": "backoff_put_interval",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "maxDocumentsPerRequest",
+            "columnName": "max_documents_per_request",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "paths",
+            "columnName": "paths",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "apiKey",
+            "columnName": "api_key",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "hosts",
+            "columnName": "hosts",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "sslCaTrustedFingerprint",
+            "columnName": "ssl_ca_trusted_fingerprint",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "sslCaTrustedFull",
+            "columnName": "ssl_ca_trusted_full",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "useBackoff",
+            "columnName": "use_backoff",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "maxBackoffInterval",
+            "columnName": "max_backoff_interval",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "outputPolicyId",
+            "columnName": "output_policy_id",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "lastUpdated",
+            "columnName": "last_updated",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "actionId",
+            "columnName": "checkin_action_id",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "id"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "SelfLogCompDocument",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `log_level` TEXT, `tag` TEXT, `message` TEXT, `timestamp` TEXT, `agentEphemeralId` TEXT, `agentId` TEXT, `agentName` TEXT, `agentType` TEXT, `agentVersion` TEXT, `hostArchitecture` TEXT, `hostHostname` TEXT, `hostId` TEXT, `hostIp` TEXT, `sourceIp` TEXT, `hostMac` TEXT, `hostName` TEXT, `hostOsBuild` TEXT, `hostOsFamily` TEXT, `hostOsKernel` TEXT, `hostOsName` TEXT, `hostOsNameText` TEXT, `hostOsPlatform` TEXT, `hostOsVersion` TEXT, `hostOsType` TEXT, `componentId` TEXT, `componentOldState` TEXT, `componentState` TEXT, `dataStreamDataset` TEXT, `dataStreamNamespace` TEXT, `dataStreamType` TEXT, `ecsVersion` TEXT, `elasticAgentId` TEXT, `elasticAgentSnapshot` INTEGER NOT NULL, `elasticAgentVersion` TEXT, `elasticAgentIdStatus` TEXT, `eventDataset` TEXT)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "logLevel",
+            "columnName": "log_level",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "tag",
+            "columnName": "tag",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "message",
+            "columnName": "message",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "timestamp",
+            "columnName": "timestamp",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "agentEphemeralId",
+            "columnName": "agentEphemeralId",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "agentId",
+            "columnName": "agentId",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "agentName",
+            "columnName": "agentName",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "agentType",
+            "columnName": "agentType",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "agentVersion",
+            "columnName": "agentVersion",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "hostArchitecture",
+            "columnName": "hostArchitecture",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "hostHostname",
+            "columnName": "hostHostname",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "hostId",
+            "columnName": "hostId",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "hostIp",
+            "columnName": "hostIp",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "sourceIp",
+            "columnName": "sourceIp",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "hostMac",
+            "columnName": "hostMac",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "hostName",
+            "columnName": "hostName",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "hostOsBuild",
+            "columnName": "hostOsBuild",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "hostOsFamily",
+            "columnName": "hostOsFamily",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "hostOsKernel",
+            "columnName": "hostOsKernel",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "hostOsName",
+            "columnName": "hostOsName",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "hostOsNameText",
+            "columnName": "hostOsNameText",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "hostOsPlatform",
+            "columnName": "hostOsPlatform",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "hostOsVersion",
+            "columnName": "hostOsVersion",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "hostOsType",
+            "columnName": "hostOsType",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "componentId",
+            "columnName": "componentId",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "componentOldState",
+            "columnName": "componentOldState",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "componentState",
+            "columnName": "componentState",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "dataStreamDataset",
+            "columnName": "dataStreamDataset",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "dataStreamNamespace",
+            "columnName": "dataStreamNamespace",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "dataStreamType",
+            "columnName": "dataStreamType",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "ecsVersion",
+            "columnName": "ecsVersion",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "elasticAgentId",
+            "columnName": "elasticAgentId",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "elasticAgentSnapshot",
+            "columnName": "elasticAgentSnapshot",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "elasticAgentVersion",
+            "columnName": "elasticAgentVersion",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "elasticAgentIdStatus",
+            "columnName": "elasticAgentIdStatus",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "eventDataset",
+            "columnName": "eventDataset",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "id"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "AppStatisticsData",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `total_checkins` INTEGER NOT NULL, `total_failures` INTEGER NOT NULL, `last_documents_sent_at` TEXT, `last_documents_sent_count` INTEGER NOT NULL, `combined_buffer_size` INTEGER NOT NULL, `agent_health` TEXT, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "totalCheckins",
+            "columnName": "total_checkins",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "totalFailures",
+            "columnName": "total_failures",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastDocumentsSentAt",
+            "columnName": "last_documents_sent_at",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "lastDocumentsSentCount",
+            "columnName": "last_documents_sent_count",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "combinedBufferSize",
+            "columnName": "combined_buffer_size",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "agentHealth",
+            "columnName": "agent_health",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "id"
+          ],
+          "autoGenerate": false
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "SecurityLogsCompDocument",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `log_level` TEXT, `tag` TEXT, `message` TEXT, `timestamp` TEXT, `agentEphemeralId` TEXT, `agentId` TEXT, `agentName` TEXT, `agentType` TEXT, `agentVersion` TEXT, `hostArchitecture` TEXT, `hostHostname` TEXT, `hostId` TEXT, `hostIp` TEXT, `sourceIp` TEXT, `hostMac` TEXT, `hostName` TEXT, `hostOsBuild` TEXT, `hostOsFamily` TEXT, `hostOsKernel` TEXT, `hostOsName` TEXT, `hostOsNameText` TEXT, `hostOsPlatform` TEXT, `hostOsVersion` TEXT, `hostOsType` TEXT, `componentId` TEXT, `componentOldState` TEXT, `componentState` TEXT, `dataStreamDataset` TEXT, `dataStreamNamespace` TEXT, `dataStreamType` TEXT, `ecsVersion` TEXT, `elasticAgentId` TEXT, `elasticAgentSnapshot` INTEGER NOT NULL, `elasticAgentVersion` TEXT, `elasticAgentIdStatus` TEXT, `eventDataset` TEXT)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "logLevel",
+            "columnName": "log_level",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "tag",
+            "columnName": "tag",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "message",
+            "columnName": "message",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "timestamp",
+            "columnName": "timestamp",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "agentEphemeralId",
+            "columnName": "agentEphemeralId",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "agentId",
+            "columnName": "agentId",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "agentName",
+            "columnName": "agentName",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "agentType",
+            "columnName": "agentType",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "agentVersion",
+            "columnName": "agentVersion",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "hostArchitecture",
+            "columnName": "hostArchitecture",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "hostHostname",
+            "columnName": "hostHostname",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "hostId",
+            "columnName": "hostId",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "hostIp",
+            "columnName": "hostIp",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "sourceIp",
+            "columnName": "sourceIp",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "hostMac",
+            "columnName": "hostMac",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "hostName",
+            "columnName": "hostName",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "hostOsBuild",
+            "columnName": "hostOsBuild",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "hostOsFamily",
+            "columnName": "hostOsFamily",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "hostOsKernel",
+            "columnName": "hostOsKernel",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "hostOsName",
+            "columnName": "hostOsName",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "hostOsNameText",
+            "columnName": "hostOsNameText",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "hostOsPlatform",
+            "columnName": "hostOsPlatform",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "hostOsVersion",
+            "columnName": "hostOsVersion",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "hostOsType",
+            "columnName": "hostOsType",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "componentId",
+            "columnName": "componentId",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "componentOldState",
+            "columnName": "componentOldState",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "componentState",
+            "columnName": "componentState",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "dataStreamDataset",
+            "columnName": "dataStreamDataset",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "dataStreamNamespace",
+            "columnName": "dataStreamNamespace",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "dataStreamType",
+            "columnName": "dataStreamType",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "ecsVersion",
+            "columnName": "ecsVersion",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "elasticAgentId",
+            "columnName": "elasticAgentId",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "elasticAgentSnapshot",
+            "columnName": "elasticAgentSnapshot",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "elasticAgentVersion",
+            "columnName": "elasticAgentVersion",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "elasticAgentIdStatus",
+            "columnName": "elasticAgentIdStatus",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "eventDataset",
+            "columnName": "eventDataset",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "id"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "NetworkLogsCompDocument",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `appPackageName` TEXT, `dnsQuestionName` TEXT, `suricataEveDNSRrname` TEXT, `dnsResolvedIP` TEXT, `suricataEveDNSAnswersRdata` TEXT, `destinationIP` TEXT, `destinationPort` INTEGER NOT NULL, `message` TEXT, `timestamp` TEXT, `agentEphemeralId` TEXT, `agentId` TEXT, `agentName` TEXT, `agentType` TEXT, `agentVersion` TEXT, `hostArchitecture` TEXT, `hostHostname` TEXT, `hostId` TEXT, `hostIp` TEXT, `sourceIp` TEXT, `hostMac` TEXT, `hostName` TEXT, `hostOsBuild` TEXT, `hostOsFamily` TEXT, `hostOsKernel` TEXT, `hostOsName` TEXT, `hostOsNameText` TEXT, `hostOsPlatform` TEXT, `hostOsVersion` TEXT, `hostOsType` TEXT, `componentId` TEXT, `componentOldState` TEXT, `componentState` TEXT, `dataStreamDataset` TEXT, `dataStreamNamespace` TEXT, `dataStreamType` TEXT, `ecsVersion` TEXT, `elasticAgentId` TEXT, `elasticAgentSnapshot` INTEGER NOT NULL, `elasticAgentVersion` TEXT, `elasticAgentIdStatus` TEXT, `eventDataset` TEXT)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "appPackageName",
+            "columnName": "appPackageName",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "dnsQuestionName",
+            "columnName": "dnsQuestionName",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "suricataEveDNSRrname",
+            "columnName": "suricataEveDNSRrname",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "resolvedIPs",
+            "columnName": "dnsResolvedIP",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "suricataEveDNSAnswersRdata",
+            "columnName": "suricataEveDNSAnswersRdata",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "destinationIP",
+            "columnName": "destinationIP",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "destinationPort",
+            "columnName": "destinationPort",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "message",
+            "columnName": "message",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "timestamp",
+            "columnName": "timestamp",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "agentEphemeralId",
+            "columnName": "agentEphemeralId",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "agentId",
+            "columnName": "agentId",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "agentName",
+            "columnName": "agentName",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "agentType",
+            "columnName": "agentType",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "agentVersion",
+            "columnName": "agentVersion",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "hostArchitecture",
+            "columnName": "hostArchitecture",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "hostHostname",
+            "columnName": "hostHostname",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "hostId",
+            "columnName": "hostId",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "hostIp",
+            "columnName": "hostIp",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "sourceIp",
+            "columnName": "sourceIp",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "hostMac",
+            "columnName": "hostMac",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "hostName",
+            "columnName": "hostName",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "hostOsBuild",
+            "columnName": "hostOsBuild",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "hostOsFamily",
+            "columnName": "hostOsFamily",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "hostOsKernel",
+            "columnName": "hostOsKernel",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "hostOsName",
+            "columnName": "hostOsName",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "hostOsNameText",
+            "columnName": "hostOsNameText",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "hostOsPlatform",
+            "columnName": "hostOsPlatform",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "hostOsVersion",
+            "columnName": "hostOsVersion",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "hostOsType",
+            "columnName": "hostOsType",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "componentId",
+            "columnName": "componentId",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "componentOldState",
+            "columnName": "componentOldState",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "componentState",
+            "columnName": "componentState",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "dataStreamDataset",
+            "columnName": "dataStreamDataset",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "dataStreamNamespace",
+            "columnName": "dataStreamNamespace",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "dataStreamType",
+            "columnName": "dataStreamType",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "ecsVersion",
+            "columnName": "ecsVersion",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "elasticAgentId",
+            "columnName": "elasticAgentId",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "elasticAgentSnapshot",
+            "columnName": "elasticAgentSnapshot",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "elasticAgentVersion",
+            "columnName": "elasticAgentVersion",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "elasticAgentIdStatus",
+            "columnName": "elasticAgentIdStatus",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "eventDataset",
+            "columnName": "eventDataset",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "id"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [],
+        "foreignKeys": []
+      }
+    ],
+    "views": [],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '6ff74789fb99621f2130d5e2a6738542')"
+    ]
+  }
+}

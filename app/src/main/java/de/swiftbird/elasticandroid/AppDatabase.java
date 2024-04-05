@@ -4,21 +4,24 @@ import android.content.Context;
 
 import androidx.room.AutoMigration;
 import androidx.room.Database;
+import androidx.room.DeleteColumn;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
+import androidx.room.TypeConverters;
 import androidx.room.migration.AutoMigrationSpec;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 @Database(
-        entities = {FleetEnrollData.class, PolicyData.class, SelfLogCompDocument.class, AppStatisticsData.class, SecurityLogsCompDocument.class},
-        version = 18,
+        entities = {FleetEnrollData.class, PolicyData.class, SelfLogCompDocument.class, AppStatisticsData.class, SecurityLogsCompDocument.class, NetworkLogsCompDocument.class},
+        version = 24,
         exportSchema = true,
         autoMigrations = {
-                //@AutoMigration(from = 18, to = 19)
+                //@AutoMigration(from = 23, to = 24)
         }
 )
+@TypeConverters({InetAddressListConverter.class})
 public abstract class AppDatabase extends RoomDatabase {
 
     public abstract FleetEnrollDataDAO enrollmentDataDAO();
@@ -30,6 +33,8 @@ public abstract class AppDatabase extends RoomDatabase {
     public  abstract  SelfLogCompBuffer selfLogCompBuffer();
 
     public abstract SecurityLogsCompBuffer securityLogCompBuffer();
+
+    public abstract NetworkLogsCompBuffer networkLogsCompBuffer();
 
     private static volatile AppDatabase INSTANCE;
 

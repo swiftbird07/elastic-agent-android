@@ -63,7 +63,7 @@ public class SelfLogComp implements Component {
 
     @Override
     public List<String> getRequiredPermissions() {
-        return Collections.emptyList();
+        return null;
     }
 
     @Override

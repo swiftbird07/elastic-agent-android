@@ -2,8 +2,13 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION"/>
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
 
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
         android:allowBackup="true"
@@ -47,6 +52,10 @@
             android:name=".LegalActivity"
             android:theme="@style/Theme.ElasticAgentAndroid">
         </activity>
+        <activity
+            android:name=".PermissionRequestActivity"
+            android:theme="@style/Theme.ElasticAgentAndroid">
+        </activity>
         <receiver
             android:name=".AppDeviceAdminReceiver"
             android:permission="android.permission.BIND_DEVICE_ADMIN"
@@ -59,6 +68,12 @@
                 <action android:name="android.app.action.DEVICE_ADMIN_ENABLED" />
                 <action android:name="android.app.action.SECURITY_LOGS_AVAILABLE" />
                 <action android:name="android.app.action.NETWORK_LOGS_AVAILABLE"/>
+            </intent-filter>
+        </receiver>
+        <receiver android:name=".AppBroadcastReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
             </intent-filter>
         </receiver>
 

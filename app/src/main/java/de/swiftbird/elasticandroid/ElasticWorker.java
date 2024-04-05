@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Objects;
 import java.util.TimeZone;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -113,6 +114,8 @@ public class ElasticWorker extends Worker {
                         AppLog.w(TAG, "Component " + component.getPathName() + " setup failed");
                         continue;
                     }
+
+
                     List<ElasticDocument> bufferedDocuments = component.getDocumentsFromBuffer(policyData.maxDocumentsPerRequest);
 
                     if(bufferedDocuments == null) {
@@ -122,10 +125,10 @@ public class ElasticWorker extends Worker {
                     newDocuments.addAll(bufferedDocuments);
 
                 } catch (Exception e) {
-                    if (e instanceof IllegalArgumentException) {
+                    if (e instanceof IllegalArgumentException && Objects.requireNonNull(e.getMessage()).contains("not found")) {
                         AppLog.w(TAG, "Component path " + componentPath + " defined in policy but app does not support it");
                     } else {
-                        AppLog.e(TAG, "Unhandled app error while processing component: " + e.getMessage());
+                        AppLog.e(TAG, "Unhandled app error while processing component: " + Arrays.toString(e.getStackTrace()));
                     }
                 }
             }

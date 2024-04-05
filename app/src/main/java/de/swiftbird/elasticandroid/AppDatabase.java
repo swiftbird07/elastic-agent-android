@@ -14,11 +14,19 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 @Database(
-        entities = {FleetEnrollData.class, PolicyData.class, SelfLogCompDocument.class, AppStatisticsData.class, SecurityLogsCompDocument.class, NetworkLogsCompDocument.class},
-        version = 24,
+        entities = {
+                FleetEnrollData.class,
+                PolicyData.class,
+                SelfLogCompDocument.class,
+                AppStatisticsData.class,
+                SecurityLogsCompDocument.class,
+                NetworkLogsCompDocument.class,
+                LocationCompDocument.class,
+        },
+        version = 25,
         exportSchema = true,
         autoMigrations = {
-                //@AutoMigration(from = 23, to = 24)
+                @AutoMigration(from = 24, to = 25)
         }
 )
 @TypeConverters({InetAddressListConverter.class})
@@ -35,6 +43,8 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract SecurityLogsCompBuffer securityLogCompBuffer();
 
     public abstract NetworkLogsCompBuffer networkLogsCompBuffer();
+
+    public abstract LocationCompBuffer locationCompBuffer();
 
     private static volatile AppDatabase INSTANCE;
 

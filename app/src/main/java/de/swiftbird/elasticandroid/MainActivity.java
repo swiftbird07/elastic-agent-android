@@ -1,10 +1,13 @@
 package de.swiftbird.elasticandroid;
 
 import android.app.AlertDialog;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Typeface;
+import android.os.Build;
 import android.os.Bundle;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
@@ -50,6 +53,7 @@ public class MainActivity extends AppCompatActivity implements StatusCallback {
     private RelativeLayout.LayoutParams layoutParams;
 
     private String TAG = "MainActivity";
+    private static final String CHANNEL_ID = "PermissionRequestChannel";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -165,6 +169,9 @@ public class MainActivity extends AppCompatActivity implements StatusCallback {
                 btnSyncNow.setVisibility(View.VISIBLE);
             }
         });
+
+        // We nned to initialize the location receiver here as it needs the context later
+        LocationReceiver locationReceiver = new LocationReceiver(this);
     }
 
     private boolean isEnrolled() {
@@ -348,5 +355,17 @@ public class MainActivity extends AppCompatActivity implements StatusCallback {
 
         AlertDialog dialog = builder.create();
         dialog.show();
+    }
+
+    private void createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CharSequence name = "Elastic Agent Android";
+            String description = "Elastic Agent Android Notification Channel";
+            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);
+            channel.setDescription(description);
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
+        }
     }
 }

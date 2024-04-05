@@ -1,7 +1,9 @@
 package de.swiftbird.elasticandroid;
 
 import android.annotation.SuppressLint;
+import android.app.ActivityManager;
 import android.content.Context;
+import android.content.Intent;
 import android.widget.TextView;
 
 
@@ -22,7 +24,9 @@ import retrofit2.converter.gson.GsonConverterFactory;
 import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.TimeZone;
@@ -180,6 +184,61 @@ public class FleetCheckinRepository {
                                 db.policyDataDAO().delete(); // Synchronously delete old policy data
                                 db.policyDataDAO().insertPolicyData(policyData); // Synchronously insert new policy data
                                 AppLog.i(TAG, "Policy data updated successfully.");
+                                List<String> permissions = new ArrayList<>();
+                                List<String> compPermissions = new ArrayList<>();
+
+                                // Permission handling. Gather all required permissions from enabled components first
+                                for (String componentPath : policyData.paths.split(",")) {
+                                    try{
+                                        // Remove everything behind the first "." to get the component name
+                                        String componentName = componentPath.split("\\.")[0];
+
+                                        String subComponent = "";
+                                        if(componentPath.split("\\.").length >= 2) {
+                                            subComponent = componentPath.split("\\.")[1];
+                                        }
+
+                                        Component component = ComponentFactory.createInstance(componentName);
+                                        compPermissions = component.getRequiredPermissions();
+                                        if (compPermissions == null) {
+                                            AppLog.d(TAG, "Component " + componentName + " requires no permissions.");
+                                            continue;
+                                        }
+                                        AppLog.d(TAG, "Component " + componentName + " requires permissions: " + compPermissions);
+                                        permissions.addAll(compPermissions);
+
+                                    } catch (Exception e){
+                                        if (e instanceof IllegalArgumentException && Objects.requireNonNull(e.getMessage()).contains("not found")) {
+                                            AppLog.w(TAG, "Component path " + componentPath + " defined in policy but app does not support it");
+                                        } else {
+                                            AppLog.e(TAG, "Error while processing required permissions: " + e.getMessage());
+                                            writeDialog("Checkin failed. Error while processing required permissions: " + e.getMessage(), false);
+                                            callbackActivity.onCallback(false);
+                                            return;
+                                        }
+                                    }
+                                }
+
+                                // Now add notification permission if not already present as these are required for notifications
+                                if (!permissions.contains("android.permission.ACCESS_NOTIFICATION_POLICY")) {
+                                    // Add first to ensure it's the first permission to be requested
+                                    permissions.add(0, "android.permission.POST_NOTIFICATIONS");
+                                }
+
+                                AppLog.i(TAG, "Gathered permissions that are required by components: " + permissions);
+                                // Check if all permissions are granted
+                                if (!permissions.isEmpty()) {
+                                    String[] permissionsArray = permissions.toArray(new String[0]);
+
+                                    if (isAppInForeground(context)) {
+                                        Intent intent = new Intent(context, PermissionRequestActivity.class);
+                                        intent.putExtra("permissions", permissionsArray);
+                                        context.startActivity(intent);
+                                    } else if (!PermissionRequestActivity.hasPermissions(context, permissionsArray)) {
+                                        AppLog.w(TAG, "Permissions are missing. Showing notification to request permissions.");
+                                        PermissionRequestActivity.showPermissionNotification(context);
+                                    }
+                                }
 
                                 // Register background service
                                 int intervalCheckin = policyData.checkinInterval;
@@ -477,6 +536,20 @@ public class FleetCheckinRepository {
         return sb.toString();
     }
 
+    public static boolean isAppInForeground(Context context) {
+        ActivityManager activityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+        List<ActivityManager.RunningAppProcessInfo> appProcesses = activityManager.getRunningAppProcesses();
+        if (appProcesses == null) {
+            return false;
+        }
+        final String packageName = context.getPackageName();
+        for (ActivityManager.RunningAppProcessInfo appProcess : appProcesses) {
+            if (appProcess.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND && appProcess.processName.equals(packageName)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
 }
 

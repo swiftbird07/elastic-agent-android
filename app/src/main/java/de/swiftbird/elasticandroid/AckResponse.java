@@ -2,26 +2,18 @@ package de.swiftbird.elasticandroid;
 
 import com.google.gson.annotations.SerializedName;
 
+/**
+ * AckResponse models the JSON structure of a response from a fleet management system following an acknowledgment request.
+ * This class is prepared for Retrofit to easily deserialize the received JSON into a structured Java object. It specifically
+ * captures details about the action being acknowledged and the outcomes of such acknowledgments through an array of items,
+ * each item containing a status code and a message indicative of the result of the acknowledgment process.
+ */
 public class AckResponse {
-    // Retrofit will use this class to receive the ack response from fleet using this structure:
-    /*
-    {
-    "action": "acks",
-    "items": [
-        {
-            "message": "OK",
-            "status": 200
-        }
-        ]
-    }
-     */
-
     @SerializedName("action")
-    private String action;
+    private String action; // Indicates the action type of the acknowledgment, e.g., "acks".
 
     @SerializedName("items")
-    private Item[] items;
-
+    private Item[] items; // Array of individual acknowledgment outcomes.
 
     public String getAction() {
         return action;
@@ -32,20 +24,10 @@ public class AckResponse {
     }
 
     public class Item {
-
         @SerializedName("message")
-        private String message;
+        private String message; // Descriptive message of the acknowledgment outcome.
 
         @SerializedName("status")
-        private int status;
-
-        public String getMessage() {
-            return message;
-        }
-
-        public int getStatus() {
-            return status;
-        }
+        private int status; // HTTP status code representing the result of the acknowledgment.
     }
-
 }

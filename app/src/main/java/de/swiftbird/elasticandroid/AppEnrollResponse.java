@@ -1,5 +1,10 @@
 package de.swiftbird.elasticandroid;
 
+/**
+ * Represents the response received from the server upon the enrollment request of the application.
+ * This class encapsulates the response data, including details such as agent ID, agent name, a message indicating
+ * the outcome of the enrollment process, and the status of the enrollment.
+ */
 public class AppEnrollResponse {
     private Data data;
 
@@ -12,6 +17,10 @@ public class AppEnrollResponse {
         this.data = data;
     }
 
+    /**
+     * Inner class representing the data structure of the enrollment response.
+     * Contains the agent's ID, name, a message regarding the enrollment process, and its status.
+     */
     public static class Data {
         private String agent_id;
         private String agent_name;

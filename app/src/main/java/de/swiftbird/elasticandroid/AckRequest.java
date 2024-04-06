@@ -2,33 +2,48 @@ package de.swiftbird.elasticandroid;
 
 import com.google.gson.annotations.SerializedName;
 
+/**
+ * Represents an acknowledgment request to be sent to a fleet management system.
+ * This class models the structure of the data required by Retrofit to perform the acknowledgment action.
+ * It encapsulates a list of events, with each event capturing details about the acknowledgment action.
+ */
 public class AckRequest {
-    // Retrofit will use this class to send the ack to fleet using this structure:
-    /*
-      "type": "ACTION_RESULT",
-      "subtype": "ACKNOWLEDGED",
-      "agent_id": "396b14b9-2e23-4694-a6bc-675a519bb8ca",
-      "action_id": "policy:eb0088c0-e635-11ee-8207-1b9b3ac48589:5:1",
-      "message": "Policy update success."
-
+    /**
+     * Array of events to be acknowledged. Each event contains details such as type, subtype, agent ID, action ID, and a message.
      */
     @SerializedName("events")
     private Event[] events;
 
+    /**
+     * Represents a single event in the acknowledgment request.
+     * This nested class details the structure of an event, including its type, subtype, agent and action IDs, and a descriptive message.
+     */
     public class Event {
         @SerializedName("type")
         private String type;
+
         @SerializedName("subtype")
         private String subtype;
+
         @SerializedName("agent_id")
         private String agent_id;
+
         @SerializedName("action_id")
         private String action_id;
+
         @SerializedName("message")
         private String message;
-
     }
 
+    /**
+     * Constructs an acknowledgment request with specified details for a single event.
+     *
+     * @param type      The type of the event, e.g., "ACTION_RESULT".
+     * @param subtype   The subtype of the event, e.g., "ACKNOWLEDGED".
+     * @param agent_id  The unique identifier of the agent.
+     * @param action_id The unique identifier of the action being acknowledged.
+     * @param message   A descriptive message about the acknowledgment, e.g., "Policy update success."
+     */
     public AckRequest(String type, String subtype, String agent_id, String action_id, String message) {
         this.events = new Event[]{new Event()};
         events[0].type = type;
@@ -37,5 +52,4 @@ public class AckRequest {
         events[0].action_id = action_id;
         events[0].message = message;
     }
-
 }

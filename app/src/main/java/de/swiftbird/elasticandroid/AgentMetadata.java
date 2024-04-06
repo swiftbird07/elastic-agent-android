@@ -17,6 +17,13 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 
+/**
+ * AgentMetadata encapsulates the metadata of an agent device, including user-provided metadata,
+ * local device information, and tags. This class structures the metadata for serialization/deserialization
+ * with Gson, facilitating easy transmission or storage of device metadata within Elastic ecosystems.
+ * The metadata is categorized into Elastic ECS (Elastic Common Schema), host-specific data, and system information,
+ * providing a comprehensive view of the device's attributes.
+ */
 public class AgentMetadata {
 
         private String user_provided;
@@ -140,6 +147,17 @@ public class AgentMetadata {
         public String fullName;
     }
 
+    /**
+     * Constructs the agent metadata from device information and database values.
+     * This static method aggregates metadata from various sources, including the device's build information
+     * and network interfaces, to populate the fields of the AgentMetadata object. This method is particularly
+     * useful for initializing agent metadata with both static data from the Android device and dynamic data
+     * such as the agent's unique ID and hostname, if available.
+     *
+     * @param agentId  Optional unique identifier for the agent. If not null, it is used to populate the agent's ID field.
+     * @param hostname The hostname for the agent. Used for both host-specific metadata and as a generic identifier.
+     * @return A fully populated AgentMetadata object.
+     */
     public static AgentMetadata getMetadataFromDeviceAndDB(@Nullable String agentId, String hostname) {
         // Agent metadata from provided data
         AgentECSMeta agentECSMeta = new AgentECSMeta();
@@ -179,6 +197,13 @@ public class AgentMetadata {
         return metadata;
     }
 
+    /**
+     * Retrieves a list of IP addresses assigned to the device, excluding loopback addresses.
+     * This method iterates over all network interfaces of the device, collecting non-loopback, IPv4 addresses.
+     * It's useful for identifying the device's network interfaces that are accessible within a network.
+     *
+     * @return A List of String objects, each representing an IPv4 address assigned to the device.
+     */
     public static List<String> getDeviceIPs() {
         List<String> ipAddresses = new ArrayList<>();
         try {

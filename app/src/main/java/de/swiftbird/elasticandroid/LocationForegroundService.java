@@ -27,11 +27,21 @@ public class LocationForegroundService extends Service implements LocationListen
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         startForeground(1, buildForegroundNotification());
+        long minTimeMs;
+        float minDistanceMeters;
+        String provider;
 
-        // Get minTimeMs and minDistanceMeters from intent
-        long minTimeMs = intent.getLongExtra("minTimeMs", 30000);
-        float minDistanceMeters = intent.getFloatExtra("minDistanceMeters", 10);
-        String provider = intent.getStringExtra("provider");
+        try {
+            // Get minTimeMs and minDistanceMeters from intent
+            minTimeMs = intent.getLongExtra("minTimeMs", 30000);
+            minDistanceMeters = intent.getFloatExtra("minDistanceMeters", 10);
+            provider = intent.getStringExtra("provider");
+        } catch (Exception e) {
+            AppLog.e("LocationForegroundService", "Failed to get minTimeMs and minDistanceMeters from intent: " + e.getMessage());
+            minTimeMs = 300000;
+            minDistanceMeters = 10;
+            provider = null;
+        }
         if(provider == null) {
             provider = LocationManager.GPS_PROVIDER;
         }

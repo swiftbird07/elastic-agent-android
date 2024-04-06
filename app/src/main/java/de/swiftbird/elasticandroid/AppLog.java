@@ -86,6 +86,10 @@ public class AppLog {
                     AppDatabase db = AppDatabase.getDatabase(AppInstance.getAppContext(), "");
                     FleetEnrollData enrollmentData = db.enrollmentDataDAO().getEnrollmentInfoSync(1);
                     PolicyData policyData = db.policyDataDAO().getPolicyDataSync();
+                    boolean selfLogEnabled = policyData != null && policyData.paths != null && policyData.paths.contains("android://self-log");
+                    if(!selfLogEnabled) {
+                        return;
+                    }
 
                     // Get the path from the policy data for self-log in the "," separated format
                     String[] paths = policyData.paths.split(",");
@@ -98,10 +102,10 @@ public class AppLog {
                                 if (level.equals("DEBUG") && pathParts[1].equals("info")) {
                                     return;
                                 }
-                                if (level.equals("DEBUG") || level.equals("INFO") && pathParts[1].equals("warn")) {
+                                if ((level.equals("DEBUG") || level.equals("INFO")) && pathParts[1].equals("warn")) {
                                     return;
                                 }
-                                if (level.equals("INFO") || level.equals("WARN") && pathParts[1].equals("error")) {
+                                if ((level.equals("DEBUG") || level.equals("INFO") || level.equals("WARN")) && pathParts[1].equals("error")) {
                                     return;
                                 }
                             } else {

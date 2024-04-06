@@ -21,14 +21,17 @@ public class LocationReceiver implements android.location.LocationListener{
 
     private void handleLocationUpdate(android.location.Location location) {
         // Handle each location update
-        // Handle location update
         AppLog.d("LocationReceiver", "Location changed: " + location);
         LocationComp locationComp = LocationComp.getInstance();
         locationComp.setup_light(context);
         AppDatabase db = AppDatabase.getDatabase(context, "");
         PolicyData policyData = db.policyDataDAO().getPolicyDataSync();
         FleetEnrollData enrollmentData = db.enrollmentDataDAO().getEnrollmentInfoSync(1);
-        locationComp.addDocumentToBuffer(new LocationCompDocument(location, enrollmentData, policyData, context));
+        try {
+            locationComp.addDocumentToBuffer(new LocationCompDocument(location, enrollmentData, policyData, context));
+        } catch (Exception e) {
+            AppLog.e("LocationReceiver", "Error adding location document to buffer", e);
+        }
     }
 
     @Override

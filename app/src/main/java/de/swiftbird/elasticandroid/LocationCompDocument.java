@@ -133,7 +133,7 @@ public class LocationCompDocument extends ElasticDocument {
         this.locationTime = location.getTime();
         this.locationProvider = location.getProvider();
 
-        // Now lets parse the location data using GeoCoder
+        // Parse the location data using GeoCoder
         Geocoder geocoder = new Geocoder(context, Locale.getDefault());
         try {
             List<Address> addresses = geocoder.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
@@ -153,10 +153,11 @@ public class LocationCompDocument extends ElasticDocument {
 
                 AppLog.d("Geocoder", "Geocoder result: " + address);
 
+            } else {
+                AppLog.w("Geocoder", "No address found for location: " + location);
             }
         } catch (IOException e) {
-            // Handle the situation when the network is unavailable, or the service is currently unavailable.
-            AppLog.e("GeocoderError", "Geocoder failed", e);
+            AppLog.w("GeocoderError", "Geocoder failed: " + e.getMessage());
         }
 
     }

@@ -113,11 +113,15 @@ public class FleetCheckinRepository {
                     } else if (Objects.equals(actionName, "UNENROLL")) {
                         AppLog.i(TAG, "Received unenroll request from fleet server.");
                         writeDialog("Received unenroll request from fleet server.", true);
+                        // Cancel all scheduled work
+                        WorkScheduler.cancelAllWork(context);
                         // Delete the enrollment data from the database
                         AppLog.i(TAG, "Deleting enrollment data from database...");
                         AppDatabase db = AppDatabase.getDatabase(context, "enrollment-data");
                         AppDatabase.databaseWriteExecutor.execute(() -> {
                             db.enrollmentDataDAO().delete();
+                            db.policyDataDAO().delete();
+                            db.statisticsDataDAO().delete();
                             AppLog.i(TAG, "Enrollment data deleted successfully. Unenrollment complete.");
                             writeDialog("Enrollment data deleted successfully. Unenrollment complete. Please restart the app to re-enroll.", true);
                             callbackActivity.onCallback(true);

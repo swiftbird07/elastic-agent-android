@@ -258,6 +258,9 @@ public class MainActivity extends AppCompatActivity implements StatusCallback {
 
     private void unenrollAgent() {
         // TODO: Implement sending last data log to ES
+        // Remove all registered workers
+        WorkScheduler.cancelAllWork(getApplicationContext());
+
         // Delete the enrollment data from the database
         AppDatabase db = AppDatabase.getDatabase(this.getApplicationContext(), "enrollment-data");
         AppDatabase.databaseWriteExecutor.execute(() -> {
@@ -275,9 +278,6 @@ public class MainActivity extends AppCompatActivity implements StatusCallback {
         AppDatabase.databaseWriteExecutor.execute(() -> {
             db.statisticsDataDAO().delete();
         });
-
-        // Remove all registered workers
-        WorkScheduler.cancelAllWork(getApplicationContext());
 
         // Refresh the UI
         updateUIBasedOnEnrollment(new FleetEnrollData());

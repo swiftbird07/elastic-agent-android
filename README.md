@@ -6,16 +6,16 @@ Inofficial Elastic Agent for Android. This project is not affiliated with Elasti
 
 ## Planned Features
 
-- [ ] Enroll Agent to Elastic Fleet Server
-- [ ] Manage Agent via Kibana's Fleet Management
-- [ ] Send events to Elastic Stack depending on the current policy
-  - [ ]  Basic system information
-  - [ ]  Various android system logs (requires device admin permission)
-  - [ ]  Location information
+- [x] Enroll Agent to Elastic Fleet Server
+- [x] Manage Agent via Kibana's Fleet Management
+- [x] Send events to Elastic Stack depending on the current policy
+  - [x]  Basic system information
+  - [x]  Various android system logs (requires device admin permission)
+  - [x]  Location information
   - [ ]  Battery information
-  - [ ]  Network information
+  - [x]  Network information
     - [ ]   Network usage information
     - [ ]   Detailed HTTP request information
-    - [ ]   Detailed DNS request information
-    - [ ]   Other network request information
+    - [x]   Detailed DNS request information
+    - [x]   Flow data
 - [ ] Support for custom event types

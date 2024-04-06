@@ -40,6 +40,33 @@ public class AppLog {
                     FleetEnrollData enrollmentData = db.enrollmentDataDAO().getEnrollmentInfoSync(1);
                     PolicyData policyData = db.policyDataDAO().getPolicyDataSync();
 
+                    // Get the path from the policy data for self-log in the "," separated format
+                    String[] paths = policyData.paths.split(",");
+                    for (String path : paths) {
+                        if (path.startsWith("android://self-log")) {
+                            // The path is in the format "android://self-log.INFO"
+                            String[] pathParts = path.split("\\.");
+                            if (pathParts.length > 1) {
+                                // Check if the log level is high enough to be sent
+                                if (level.equals("DEBUG") && pathParts[1].equals("info")) {
+                                    return;
+                                }
+                                if (level.equals("DEBUG") || level.equals("INFO") && pathParts[1].equals("warn")) {
+                                    return;
+                                }
+                                if (level.equals("INFO") || level.equals("WARN") && pathParts[1].equals("error")) {
+                                    return;
+                                }
+                            } else {
+                                // If no log level is specified, send only INFO logs
+                                if (!level.equals("INFO")) {
+                                    return;
+                                }
+                            }
+                        }
+                    }
+
+
                     SelfLogCompDocument document = new SelfLogCompDocument(enrollmentData, policyData, level, tag, message);
                     SelfLogComp selfLogComp = SelfLogComp.getInstance();
                     selfLogComp.setup(AppInstance.getAppContext() , null, null, "");

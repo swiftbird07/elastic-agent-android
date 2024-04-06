@@ -1,8 +1,12 @@
 package de.swiftbird.elasticandroid;
 
+import static androidx.core.content.ContextCompat.startForegroundService;
+
 import android.content.Context;
+import android.content.Intent;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.util.Log;
@@ -92,16 +96,26 @@ public class LocationComp implements Component {
 
         int finalMinTimeMs = minTimeMs;
         int finalMinDistanceMeters = minDistanceMeters;
+        String provider;
 
         if ("coarse".equals(subComponent)) {
             // Setup the component for coarse location
-            requestLocationUpdates(LocationManager.NETWORK_PROVIDER, finalMinTimeMs, finalMinDistanceMeters);
+            provider = LocationManager.NETWORK_PROVIDER;
         } else if ("fine".equals(subComponent)) {
             // Setup the component for fine location
-            requestLocationUpdates(LocationManager.GPS_PROVIDER, finalMinTimeMs, finalMinDistanceMeters);
+            provider = LocationManager.GPS_PROVIDER;
         } else {
             AppLog.w(TAG, "Can't setup. Unknown sub-component: " + subComponent);
             return false;
+        }
+
+        // For background location updates enable sticky notification
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            Intent serviceIntent = new Intent(context, LocationForegroundService.class);
+            serviceIntent.putExtra("minTimeMs", finalMinTimeMs);
+            serviceIntent.putExtra("minDistanceMeters", finalMinDistanceMeters);
+            serviceIntent.putExtra("provider", provider);
+            context.startForegroundService(serviceIntent);
         }
         return true;
     }

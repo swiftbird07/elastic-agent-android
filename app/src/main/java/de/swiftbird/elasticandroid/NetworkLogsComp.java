@@ -162,12 +162,15 @@ public class NetworkLogsComp implements Component {
 
     @Override
     public void disable(Context context, FleetEnrollData enrollmentData, PolicyData policyData) {
+        /*
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             AppLog.d(TAG, "Disabling network logs component");
             DevicePolicyManager dpm = (DevicePolicyManager) context.getSystemService(Context.DEVICE_POLICY_SERVICE);
             ComponentName adminComponentName = new ComponentName(context, AppDeviceAdminReceiver.class);
             dpm.setNetworkLoggingEnabled(adminComponentName, false);
         }
+
+         */
     }
 
     

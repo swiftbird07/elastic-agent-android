@@ -233,6 +233,7 @@ public class FleetCheckinRepository {
                                     if (isAppInForeground(context)) {
                                         Intent intent = new Intent(context, PermissionRequestActivity.class);
                                         intent.putExtra("permissions", permissionsArray);
+                                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                                         context.startActivity(intent);
                                     } else if (!PermissionRequestActivity.hasPermissions(context, permissionsArray)) {
                                         AppLog.w(TAG, "Permissions are missing. Showing notification to request permissions.");
@@ -477,7 +478,7 @@ public class FleetCheckinRepository {
 
     public static int timeIntervalToSeconds(String interval) {
         if (interval == null || interval.trim().isEmpty()) {
-            AppLog.w(TAG, "Time interval is null or empty. Defaulting to 60 seconds.");
+            AppLog.w(TAG, "Time interval " + interval + " is null or empty. Defaulting to 60 seconds.");
             return 60;
         }
 

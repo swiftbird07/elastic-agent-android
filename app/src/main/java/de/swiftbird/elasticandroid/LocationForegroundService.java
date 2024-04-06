@@ -26,13 +26,21 @@ public class LocationForegroundService extends Service implements LocationListen
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        startForeground(1, buildForegroundNotification()); // Build your notification here
+        startForeground(1, buildForegroundNotification());
+
+        // Get minTimeMs and minDistanceMeters from intent
+        long minTimeMs = intent.getLongExtra("minTimeMs", 30000);
+        float minDistanceMeters = intent.getFloatExtra("minDistanceMeters", 10);
+        String provider = intent.getStringExtra("provider");
+        if(provider == null) {
+            provider = LocationManager.GPS_PROVIDER;
+        }
 
         // Assuming permissions have been granted
         try {
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
+            locationManager.requestLocationUpdates(provider, minTimeMs, minDistanceMeters, this);
         } catch (SecurityException e) {
-            // Handle exception
+            AppLog.w("LocationForegroundService", "Failed to request location updates: " + e.getMessage());
         }
 
         return START_STICKY;
@@ -54,7 +62,9 @@ public class LocationForegroundService extends Service implements LocationListen
     private Notification buildForegroundNotification() {
         NotificationChannel channel;
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            channel = new NotificationChannel("location_service", "Location Service", NotificationManager.IMPORTANCE_DEFAULT);
+            channel = new NotificationChannel("location_service", "Location Service", NotificationManager.IMPORTANCE_LOW);
+            channel.setDescription("No sound");
+            channel.setSound(null, null); // No sound for this channel
             NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
             if (manager != null) {
                 manager.createNotificationChannel(channel);
@@ -62,11 +72,11 @@ public class LocationForegroundService extends Service implements LocationListen
         }
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "location_service")
-                .setContentTitle("Location Tracking Active")
-                .setContentText("Your location is being tracked by the app.")
-                .setSmallIcon(R.drawable.icon) // Ensure you have a drawable resource for the icon
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT);
-
+                .setContentTitle("Elastic Agent Android")
+                .setContentText("Location service is running")
+                .setSmallIcon(R.drawable.icon)
+                .setPriority(NotificationCompat.PRIORITY_LOW)
+                .setOngoing(true);
         return builder.build();
     }
 

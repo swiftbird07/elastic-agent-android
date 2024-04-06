@@ -29,5 +29,13 @@ public class AckResponse {
 
         @SerializedName("status")
         private int status; // HTTP status code representing the result of the acknowledgment.
+
+        public String getMessage() {
+            return message;
+        }
+
+        public int getStatus() {
+            return status;
+        }
     }
 }

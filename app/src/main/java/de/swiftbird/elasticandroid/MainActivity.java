@@ -343,12 +343,10 @@ public class MainActivity extends AppCompatActivity implements StatusCallback {
 
         builder.setPositiveButton("ACCEPT", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
-                // User accepted the disclaimer, you might want to start a new activity here or just close the dialog.
             }
         });
         builder.setNegativeButton("DECLINE", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
-                // Kill the app or show a message that the app will be closed
                 finish();
             }
         });

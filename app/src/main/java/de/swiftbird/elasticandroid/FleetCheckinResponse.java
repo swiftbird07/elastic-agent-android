@@ -342,6 +342,9 @@ public class FleetCheckinResponse {
                @SerializedName("max_backoff_interval")
                 private String maxBackoffInterval;
 
+               @SerializedName("backoff_on_empty_buffer")
+                private boolean backoffOnEmptyBuffer;
+
                 protected DataStream getDataStream() {
                     return dataStream;
                 }
@@ -381,6 +384,8 @@ public class FleetCheckinResponse {
                 public boolean getUseBackoff() { return useBackoff; }
 
                 public String getMaxBackoffInterval() { return maxBackoffInterval; }
+
+                public boolean getBackoffOnEmptyBuffer() { return backoffOnEmptyBuffer; }
             }
 
 

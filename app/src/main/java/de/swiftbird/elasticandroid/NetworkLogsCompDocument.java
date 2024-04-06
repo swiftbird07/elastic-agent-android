@@ -56,12 +56,12 @@ public class NetworkLogsCompDocument extends ElasticDocument {
 
     @SerializedName("dns.resolved_ip") // This is a confusing ECS field name, as it can contain multiple IPs
     @ColumnInfo(name = "dnsResolvedIP")
-    @TypeConverters(InetAddressListConverter.class)
+    @TypeConverters(AppConverters.class)
     public List<InetAddress> resolvedIPs;
 
     @SerializedName("suricata.eve.dns.answers.rdata") // This is not ECS, but helpful to aggregate with Suricata logs, if available
     @ColumnInfo(name = "suricataEveDNSAnswersRdata")
-    @TypeConverters(InetAddressListConverter.class)
+    @TypeConverters(AppConverters.class)
     public List<InetAddress> suricataEveDNSAnswersRdata;
 
     @SerializedName("destination.ip")

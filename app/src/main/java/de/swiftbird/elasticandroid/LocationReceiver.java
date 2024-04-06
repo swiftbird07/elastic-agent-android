@@ -15,6 +15,12 @@ public class LocationReceiver implements android.location.LocationListener{
 
     @Override
     public void onLocationChanged(@NonNull android.location.Location location) {
+        // New thread to handle the location update
+        new Thread(() -> handleLocationUpdate(location)).start();
+    }
+
+    private void handleLocationUpdate(android.location.Location location) {
+        // Handle each location update
         // Handle location update
         AppLog.d("LocationReceiver", "Location changed: " + location);
         LocationComp locationComp = LocationComp.getInstance();
@@ -22,7 +28,7 @@ public class LocationReceiver implements android.location.LocationListener{
         AppDatabase db = AppDatabase.getDatabase(context, "");
         PolicyData policyData = db.policyDataDAO().getPolicyDataSync();
         FleetEnrollData enrollmentData = db.enrollmentDataDAO().getEnrollmentInfoSync(1);
-        locationComp.addDocumentToBuffer(new LocationCompDocument(location, enrollmentData, policyData));
+        locationComp.addDocumentToBuffer(new LocationCompDocument(location, enrollmentData, policyData, context));
     }
 
     @Override

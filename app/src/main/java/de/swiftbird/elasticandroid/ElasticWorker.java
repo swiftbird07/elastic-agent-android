@@ -75,7 +75,7 @@ public class ElasticWorker extends Worker {
 
                             // Set agent health status to unhealthy
                             db.statisticsDataDAO().setAgentHealth("Unhealthy");
-                            AppLog.w("ElasticWorker", "Elasticsearch PUT failed, increasing interval to " + policyData.backoffPutInterval + " seconds");
+                            AppLog.i("ElasticWorker", "Elasticsearch PUT failed (or empty and 'backoff if empty' enabled), increasing interval to " + policyData.backoffPutInterval + " seconds");
                         }
 
                     } else {
@@ -141,6 +141,19 @@ public class ElasticWorker extends Worker {
                 }
             }
 
+            // Check if newDocuments is empty
+            if (newDocuments.isEmpty()) {
+                AppLog.i(TAG, "No documents to send to Elasticsearch");
+                if(policyData.backoffOnEmptyBuffer) {
+                    AppLog.d(TAG, "Backoff on empty buffer enabled, will increase next backoff interval if possible");
+                    callback.onCallback(false);
+                } else {
+                    AppLog.d(TAG, "Backoff on empty buffer disabled, will not increase next backoff interval");
+                    callback.onCallback(true);
+                }
+                return Result.success();
+            }
+
             AppStatisticsDataDAO statisticsDataDAO = db.statisticsDataDAO();
             statisticsDataDAO.decreaseCombinedBufferSize(newDocuments.size());
 
@@ -159,7 +172,7 @@ public class ElasticWorker extends Worker {
 
             // Prepend logs- to the index name
             if (!indexName.startsWith("logs-")) {
-                indexName = "logs-" + indexName + "-2.3.0";
+                indexName = "logs-" + indexName + "-2.3.0"; // TODO: Make this dynamic
             }
 
             Gson gson = new Gson();

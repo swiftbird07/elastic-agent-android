@@ -63,8 +63,8 @@ public class LocationComp implements Component {
             return false;
         }
 
-        int minTimeMs = 0;
-        int minDistanceMeters = 0;
+        long minTimeMs = 0;
+        float minDistanceMeters = 0;
 
         if (paramsSet) {
             for (String paramPair : paramPairs) {
@@ -94,15 +94,17 @@ public class LocationComp implements Component {
             return false;
         }
 
-        int finalMinTimeMs = minTimeMs;
-        int finalMinDistanceMeters = minDistanceMeters;
+        long finalMinTimeMs = minTimeMs;
+        float finalMinDistanceMeters = minDistanceMeters;
         String provider;
 
         if ("coarse".equals(subComponent)) {
             // Setup the component for coarse location
+            AppLog.d(TAG, "Setting up location component for coarse location");
             provider = LocationManager.NETWORK_PROVIDER;
         } else if ("fine".equals(subComponent)) {
             // Setup the component for fine location
+            AppLog.d(TAG, "Setting up location component for fine location");
             provider = LocationManager.GPS_PROVIDER;
         } else {
             AppLog.w(TAG, "Can't setup. Unknown sub-component: " + subComponent);

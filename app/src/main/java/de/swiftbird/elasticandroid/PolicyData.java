@@ -73,6 +73,9 @@ public class PolicyData {
     @ColumnInfo(name = "max_backoff_interval")
     public int maxBackoffInterval;
 
+    @ColumnInfo(name = "backoff_on_empty_buffer", defaultValue = "0")
+    public boolean backoffOnEmptyBuffer;
+
     @ColumnInfo(name = "output_policy_id")
     public String outputPolicyId;
 

@@ -245,7 +245,7 @@ public class FleetCheckinRepository {
                                 int intervalCheckin = policyData.checkinInterval;
                                 WorkScheduler.scheduleFleetCheckinWorker(context, intervalCheckin, TimeUnit.SECONDS);
                                 int intervalPut = policyData.putInterval;
-                                WorkScheduler.scheduleElasticsearchWorker(context, intervalPut, TimeUnit.SECONDS);
+                                WorkScheduler.scheduleElasticsearchWorker(context, 5, TimeUnit.SECONDS); // Run almost immediately
 
                                 callbackActivity.onCallback(true);
                         }
@@ -415,6 +415,7 @@ public class FleetCheckinRepository {
         policyData.ignoreOlder = stream.getIgnoreOlder();
         policyData.useBackoff = stream.getUseBackoff();
         policyData.maxBackoffInterval = timeIntervalToSeconds(stream.getMaxBackoffInterval());
+        policyData.backoffOnEmptyBuffer = stream.getBackoffOnEmptyBuffer();
 
         // Parse Xm or Xs etc. to seconds
         int checkinIntervalSeconds = timeIntervalToSeconds(stream.getCheckinInterval());

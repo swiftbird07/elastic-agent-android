@@ -8,7 +8,7 @@ import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.List;
 
-public class InetAddressListConverter {
+public class AppConverters {
     @TypeConverter
     public static List<InetAddress> fromString(String value) {
         if (value == null) {
@@ -39,5 +39,18 @@ public class InetAddressListConverter {
     public static String fromStringList(List<String> list) {
         Gson gson = new Gson();
         return gson.toJson(list);
+    }
+
+    @TypeConverter
+    public static String fromGeoLocation(LocationCompDocument.GeoLocation geoLocation) {
+        if (geoLocation == null) return null;
+        return geoLocation.lat + "," + geoLocation.lon;
+    }
+
+    @TypeConverter
+    public static LocationCompDocument.GeoLocation toGeoLocation(String data) {
+        if (data == null) return null;
+        String[] pieces = data.split(",");
+        return new LocationCompDocument.GeoLocation(Double.parseDouble(pieces[0]), Double.parseDouble(pieces[1]));
     }
 }

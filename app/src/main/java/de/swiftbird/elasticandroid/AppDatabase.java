@@ -4,11 +4,9 @@ import android.content.Context;
 
 import androidx.room.AutoMigration;
 import androidx.room.Database;
-import androidx.room.DeleteColumn;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
 import androidx.room.TypeConverters;
-import androidx.room.migration.AutoMigrationSpec;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -23,13 +21,13 @@ import java.util.concurrent.Executors;
                 NetworkLogsCompDocument.class,
                 LocationCompDocument.class,
         },
-        version = 25,
+        version = 28,
         exportSchema = true,
         autoMigrations = {
-                @AutoMigration(from = 24, to = 25)
+                //@AutoMigration(from = 27, to = 28),
         }
 )
-@TypeConverters({InetAddressListConverter.class})
+@TypeConverters({AppConverters.class})
 public abstract class AppDatabase extends RoomDatabase {
 
     public abstract FleetEnrollDataDAO enrollmentDataDAO();

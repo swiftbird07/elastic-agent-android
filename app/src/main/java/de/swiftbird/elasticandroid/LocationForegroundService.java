@@ -37,8 +37,9 @@ public class LocationForegroundService extends Service implements LocationListen
         }
 
         // Assuming permissions have been granted
+        AppLog.d("LocationForegroundService", "Requesting location updates with minTimeMs=" + minTimeMs + ", minDistanceMeters=" + minDistanceMeters + ", provider=" + provider);
         try {
-            locationManager.requestLocationUpdates(provider, minTimeMs, minDistanceMeters, this);
+            locationManager.requestLocationUpdates(provider, minTimeMs, minDistanceMeters, new LocationReceiver(this.getApplicationContext()));
         } catch (SecurityException e) {
             AppLog.w("LocationForegroundService", "Failed to request location updates: " + e.getMessage());
         }
@@ -71,12 +72,18 @@ public class LocationForegroundService extends Service implements LocationListen
             }
         }
 
+        boolean setOngoing = true;
+        // If this is a debug build we allow the notification to be swiped away
+        if (BuildConfig.DEBUG) {
+            setOngoing = false;
+        }
+
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "location_service")
                 .setContentTitle("Elastic Agent Android")
                 .setContentText("Location service is running")
                 .setSmallIcon(R.drawable.icon)
                 .setPriority(NotificationCompat.PRIORITY_LOW)
-                .setOngoing(true);
+                .setOngoing(setOngoing);
         return builder.build();
     }
 

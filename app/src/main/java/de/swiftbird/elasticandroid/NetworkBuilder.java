@@ -24,7 +24,7 @@ import okhttp3.Request;
 
 public  class NetworkBuilder {
     public static OkHttpClient getOkHttpClient(boolean checkCA, @Nullable String sslCertFull, @Nullable int timeoutSeconds) {
-        AppLog.d("NetworkBuilder", "Creating OkHttpClient with checkCA: " + checkCA + " and sslCertFull: " + sslCertFull);
+        //AppLog.d("NetworkBuilder", "Creating OkHttpClient with checkCA: " + checkCA + " and sslCertFull: " + sslCertFull);
 
         Interceptor authInterceptor = chain -> {
             Request originalRequest = chain.request();

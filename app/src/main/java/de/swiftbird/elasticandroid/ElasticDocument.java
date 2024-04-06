@@ -46,12 +46,12 @@ public class ElasticDocument {
 
     @SerializedName("host.ip")
     @ColumnInfo(name = "hostIp")
-    @TypeConverters(InetAddressListConverter.class)
+    @TypeConverters(AppConverters.class)
     protected List<String>  hostIp;
 
     @SerializedName("source.ip")
     @ColumnInfo(name = "sourceIp")
-    @TypeConverters(InetAddressListConverter.class)
+    @TypeConverters(AppConverters.class)
     protected List<String>  sourceIp;
 
     @SerializedName("host.mac")

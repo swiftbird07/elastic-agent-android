@@ -1,8 +1,8 @@
 {
   "formatVersion": 1,
   "database": {
-    "version": 25,
-    "identityHash": "c2721d74f84eeb0121608f6de1e3194a",
+    "version": 27,
+    "identityHash": "15728253a9c9d47635eac3137c5a0bbc",
     "entities": [
       {
         "tableName": "FleetEnrollData",
@@ -122,7 +122,7 @@
       },
       {
         "tableName": "PolicyData",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `created_at` TEXT, `revision` INTEGER NOT NULL, `protection_enabled` INTEGER NOT NULL, `uninstall_token_hash` TEXT, `input_name` TEXT, `allow_user_unenroll` INTEGER NOT NULL, `data_stream_dataset` TEXT, `ignore_older` TEXT, `interval` TEXT, `checkin_interval` INTEGER NOT NULL, `backoff_checkin_interval` INTEGER NOT NULL, `put_interval` INTEGER NOT NULL, `backoff_put_interval` INTEGER NOT NULL, `max_documents_per_request` INTEGER NOT NULL, `paths` TEXT, `api_key` TEXT, `hosts` TEXT, `ssl_ca_trusted_fingerprint` TEXT, `ssl_ca_trusted_full` TEXT, `use_backoff` INTEGER NOT NULL, `max_backoff_interval` INTEGER NOT NULL, `backoff_on_empty_buffer` INTEGER NOT NULL, `output_policy_id` TEXT, `last_updated` TEXT, `checkin_action_id` TEXT)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `created_at` TEXT, `revision` INTEGER NOT NULL, `protection_enabled` INTEGER NOT NULL, `uninstall_token_hash` TEXT, `input_name` TEXT, `allow_user_unenroll` INTEGER NOT NULL, `data_stream_dataset` TEXT, `ignore_older` TEXT, `interval` TEXT, `checkin_interval` INTEGER NOT NULL, `backoff_checkin_interval` INTEGER NOT NULL, `put_interval` INTEGER NOT NULL, `backoff_put_interval` INTEGER NOT NULL, `max_documents_per_request` INTEGER NOT NULL, `paths` TEXT, `api_key` TEXT, `hosts` TEXT, `ssl_ca_trusted_fingerprint` TEXT, `ssl_ca_trusted_full` TEXT, `use_backoff` INTEGER NOT NULL, `max_backoff_interval` INTEGER NOT NULL, `backoff_on_empty_buffer` INTEGER NOT NULL DEFAULT 0, `output_policy_id` TEXT, `last_updated` TEXT, `checkin_action_id` TEXT)",
         "fields": [
           {
             "fieldPath": "id",
@@ -260,7 +260,8 @@
             "fieldPath": "backoffOnEmptyBuffer",
             "columnName": "backoff_on_empty_buffer",
             "affinity": "INTEGER",
-            "notNull": true
+            "notNull": true,
+            "defaultValue": "0"
           },
           {
             "fieldPath": "outputPolicyId",
@@ -1146,7 +1147,7 @@
       },
       {
         "tableName": "LocationCompDocument",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `eventAction` TEXT, `eventCategory` TEXT, `observerGeoLocationLong` REAL NOT NULL, `observerGeoLocationLat` REAL NOT NULL, `locationProvider` TEXT, `locationAccuracy` REAL NOT NULL, `locationAltitude` REAL NOT NULL, `locationSpeed` REAL NOT NULL, `locationBearing` REAL NOT NULL, `locationTime` INTEGER NOT NULL, `timestamp` TEXT, `agentEphemeralId` TEXT, `agentId` TEXT, `agentName` TEXT, `agentType` TEXT, `agentVersion` TEXT, `hostArchitecture` TEXT, `hostHostname` TEXT, `hostId` TEXT, `hostIp` TEXT, `sourceIp` TEXT, `hostMac` TEXT, `hostName` TEXT, `hostOsBuild` TEXT, `hostOsFamily` TEXT, `hostOsKernel` TEXT, `hostOsName` TEXT, `hostOsNameText` TEXT, `hostOsPlatform` TEXT, `hostOsVersion` TEXT, `hostOsType` TEXT, `componentId` TEXT, `componentOldState` TEXT, `componentState` TEXT, `dataStreamDataset` TEXT, `dataStreamNamespace` TEXT, `dataStreamType` TEXT, `ecsVersion` TEXT, `elasticAgentId` TEXT, `elasticAgentSnapshot` INTEGER NOT NULL, `elasticAgentVersion` TEXT, `elasticAgentIdStatus` TEXT, `eventDataset` TEXT)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `eventAction` TEXT, `eventCategory` TEXT, `observerGeoLocationLong` REAL NOT NULL, `observerGeoLocationLat` REAL NOT NULL, `observerGeoCityName` TEXT, `observerGeoContinentCode` TEXT, `observerGeoContinentName` TEXT, `observerGeoCountryIsoCode` TEXT, `observerGeoCountryName` TEXT, `observerGeoName` TEXT, `observerGeoPostalCode` TEXT, `observerGeoRegionIsoCode` TEXT, `observerGeoRegionName` TEXT, `observerGeoStreetAddress` TEXT, `locationProvider` TEXT, `locationAccuracy` REAL NOT NULL, `locationAltitude` REAL NOT NULL, `locationSpeed` REAL NOT NULL, `locationBearing` REAL NOT NULL, `locationTime` INTEGER NOT NULL, `timestamp` TEXT, `agentEphemeralId` TEXT, `agentId` TEXT, `agentName` TEXT, `agentType` TEXT, `agentVersion` TEXT, `hostArchitecture` TEXT, `hostHostname` TEXT, `hostId` TEXT, `hostIp` TEXT, `sourceIp` TEXT, `hostMac` TEXT, `hostName` TEXT, `hostOsBuild` TEXT, `hostOsFamily` TEXT, `hostOsKernel` TEXT, `hostOsName` TEXT, `hostOsNameText` TEXT, `hostOsPlatform` TEXT, `hostOsVersion` TEXT, `hostOsType` TEXT, `componentId` TEXT, `componentOldState` TEXT, `componentState` TEXT, `dataStreamDataset` TEXT, `dataStreamNamespace` TEXT, `dataStreamType` TEXT, `ecsVersion` TEXT, `elasticAgentId` TEXT, `elasticAgentSnapshot` INTEGER NOT NULL, `elasticAgentVersion` TEXT, `elasticAgentIdStatus` TEXT, `eventDataset` TEXT)",
         "fields": [
           {
             "fieldPath": "id",
@@ -1177,6 +1178,66 @@
             "columnName": "observerGeoLocationLat",
             "affinity": "REAL",
             "notNull": true
+          },
+          {
+            "fieldPath": "observerGeoCityName",
+            "columnName": "observerGeoCityName",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "observerGeoContinentCode",
+            "columnName": "observerGeoContinentCode",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "observerGeoContinentName",
+            "columnName": "observerGeoContinentName",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "observerGeoCountryIsoCode",
+            "columnName": "observerGeoCountryIsoCode",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "observerGeoCountryName",
+            "columnName": "observerGeoCountryName",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "observerGeoName",
+            "columnName": "observerGeoName",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "observerGeoPostalCode",
+            "columnName": "observerGeoPostalCode",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "observerGeoRegionIsoCode",
+            "columnName": "observerGeoRegionIsoCode",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "observerGeoRegionName",
+            "columnName": "observerGeoRegionName",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "observerGeoStreetAddress",
+            "columnName": "observerGeoStreetAddress",
+            "affinity": "TEXT",
+            "notNull": false
           },
           {
             "fieldPath": "locationProvider",
@@ -1426,7 +1487,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'c2721d74f84eeb0121608f6de1e3194a')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '15728253a9c9d47635eac3137c5a0bbc')"
     ]
   }
 }

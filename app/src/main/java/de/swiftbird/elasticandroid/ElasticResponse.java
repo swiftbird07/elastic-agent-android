@@ -2,28 +2,23 @@ package de.swiftbird.elasticandroid;
 
 import com.google.gson.annotations.SerializedName;
 
+/**
+ * Represents a response from Elasticsearch, encapsulating details about the outcome
+ * of an operation, such as indexing a document or executing a bulk request. It includes
+ * information about any errors that occurred, as well as metrics like the time taken
+ * for the operation to complete.
+ */
 public class ElasticResponse {
 
-    /*
-    {
-  "error": {
-    "root_cause": [
-      {
-        "type": "parse_exception",
-        "reason": "request body is required"
-      }
-    ],
-    "type": "parse_exception",
-    "reason": "request body is required"
-  },
-  "status": 400
-}
-     */
     private String errors;
     private int took;
 
     private Error error;
 
+    /**
+     * Inner class representing detailed error information from Elasticsearch,
+     * including the type of error and a descriptive reason.
+     */
     public static class Error {
         @SerializedName("type")
         private String type;
@@ -42,7 +37,13 @@ public class ElasticResponse {
 
 
 
-    // Constructor (mostly for testing)
+    /**
+     * Constructs an instance of ElasticResponse, primarily for testing purposes,
+     * allowing manual creation of response objects.
+     *
+     * @param errors A raw error message or description.
+     * @param took The time taken for the operation, in milliseconds.
+     */
     public ElasticResponse(String errors, int took) {
         this.errors = errors;
         this.took = took;
@@ -52,13 +53,5 @@ public class ElasticResponse {
         return errors;
     }
 
-    public int getTook() {
-        return took;
-    }
-
-
-    public Error getError() {
-        return error;
-    }
 
 }

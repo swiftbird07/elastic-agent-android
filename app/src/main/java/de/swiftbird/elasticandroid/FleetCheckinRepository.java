@@ -32,6 +32,12 @@ import java.util.Objects;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Manages check-in processes between the Elastic Agent and Fleet server, including
+ * sending check-in requests, processing Fleet server responses, and updating local
+ * policy data based on the server's instructions. This class uses Retrofit to
+ * communicate with the Fleet server and handles the parsing of policy data received.
+ */
 public class FleetCheckinRepository {
 
     //private final Context context;
@@ -47,10 +53,21 @@ public class FleetCheckinRepository {
     private TextView tStatus;
 
 
+    /**
+     * Constructor for the repository. Initializes Retrofit and other necessary components.
+     *
+     * @param context Application context for initializing network components.
+     */
     public FleetCheckinRepository(Context context) {
         //this.context = context;
     }
 
+    /**
+     * Gets the singleton instance of the FleetCheckinRepository, creating it if necessary.
+     *
+     * @param context Application context for the repository.
+     * @return The singleton instance of the FleetCheckinRepository.
+     */
     public static FleetCheckinRepository getInstance(Context context) {
         if (instance == null) {
             instance = new FleetCheckinRepository(context);
@@ -58,6 +75,17 @@ public class FleetCheckinRepository {
         return instance;
     }
 
+    /**
+     * Performs a check-in operation with the Fleet server, updating the agent's state
+     * and policies based on the response.
+     *
+     * @param data The current enrollment data of the agent.
+     * @param metadata Metadata about the agent to be included in the check-in request.
+     * @param callbackActivity Callback to handle UI updates based on the check-in result.
+     * @param dialog Optional dialog for displaying status messages (used when updating policy via the MainActivity button).
+     * @param tStatus Optional TextView for displaying status messages (used to display check-in status in the EnrollActivity during enrollment).
+     * @param context Application context.
+     */
     public void checkinAgent(FleetEnrollData data, AgentMetadata metadata, StatusCallback callbackActivity, @Nullable AlertDialog dialog, @Nullable TextView tStatus, Context context) {
         this.dialog = dialog;
         this.tStatus = tStatus;
@@ -188,62 +216,9 @@ public class FleetCheckinRepository {
                                 db.policyDataDAO().delete(); // Synchronously delete old policy data
                                 db.policyDataDAO().insertPolicyData(policyData); // Synchronously insert new policy data
                                 AppLog.i(TAG, "Policy data updated successfully.");
-                                List<String> permissions = new ArrayList<>();
-                                List<String> compPermissions = new ArrayList<>();
 
-                                // Permission handling. Gather all required permissions from enabled components first
-                                for (String componentPath : policyData.paths.split(",")) {
-                                    try{
-                                        // Remove everything behind the first "." to get the component name
-                                        String componentName = componentPath.split("\\.")[0];
-
-                                        String subComponent = "";
-                                        if(componentPath.split("\\.").length >= 2) {
-                                            subComponent = componentPath.split("\\.")[1];
-                                        }
-
-                                        Component component = ComponentFactory.createInstance(componentName);
-                                        compPermissions = component.getRequiredPermissions();
-                                        if (compPermissions == null) {
-                                            AppLog.d(TAG, "Component " + componentName + " requires no permissions.");
-                                            continue;
-                                        }
-                                        AppLog.d(TAG, "Component " + componentName + " requires permissions: " + compPermissions);
-                                        permissions.addAll(compPermissions);
-
-                                    } catch (Exception e){
-                                        if (e instanceof IllegalArgumentException && Objects.requireNonNull(e.getMessage()).contains("not found")) {
-                                            AppLog.w(TAG, "Component path " + componentPath + " defined in policy but app does not support it");
-                                        } else {
-                                            AppLog.e(TAG, "Error while processing required permissions: " + e.getMessage());
-                                            writeDialog("Checkin failed. Error while processing required permissions: " + e.getMessage(), false);
-                                            callbackActivity.onCallback(false);
-                                            return;
-                                        }
-                                    }
-                                }
-
-                                // Now add notification permission if not already present as these are required for notifications
-                                if (!permissions.contains("android.permission.ACCESS_NOTIFICATION_POLICY")) {
-                                    // Add first to ensure it's the first permission to be requested
-                                    permissions.add(0, "android.permission.POST_NOTIFICATIONS");
-                                }
-
-                                AppLog.i(TAG, "Gathered permissions that are required by components: " + permissions);
-                                // Check if all permissions are granted
-                                if (!permissions.isEmpty()) {
-                                    String[] permissionsArray = permissions.toArray(new String[0]);
-
-                                    if (isAppInForeground(context)) {
-                                        Intent intent = new Intent(context, PermissionRequestActivity.class);
-                                        intent.putExtra("permissions", permissionsArray);
-                                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                                        context.startActivity(intent);
-                                    } else if (!PermissionRequestActivity.hasPermissions(context, permissionsArray)) {
-                                        AppLog.w(TAG, "Permissions are missing. Showing notification to request permissions.");
-                                        PermissionRequestActivity.showPermissionNotification(context);
-                                    }
-                                }
+                                // Perform permission check
+                                performPermissionCheck(policyData, callbackActivity, context);
 
                                 // Register background service
                                 int intervalCheckin = policyData.checkinInterval;
@@ -309,11 +284,83 @@ public class FleetCheckinRepository {
             }
         });
 
-        
-
-
     }
 
+    /**
+     * Performs a permission check based on the policy data received from the Fleet server.
+     * This method checks if all required permissions are granted and requests them if necessary.
+     * If the app is in the foreground, a dialog is shown to request permissions. Otherwise, a
+     * notification is displayed to prompt the user to grant the required permissions.
+     *
+     * @param policyData The policy data received from the Fleet server.
+     * @param callbackActivity Callback to handle UI updates based on the permission check result.
+     * @param context Application context.
+     */
+    private void performPermissionCheck(PolicyData policyData, StatusCallback callbackActivity, Context context) {
+        List<String> permissions = new ArrayList<>();
+        List<String> compPermissions = new ArrayList<>();
+
+        // Permission handling. Gather all required permissions from enabled components first
+        for (String componentPath : policyData.paths.split(",")) {
+            try{
+                // Remove everything behind the first "." to get the component name
+                String componentName = componentPath.split("\\.")[0];
+
+                String subComponent = "";
+                if(componentPath.split("\\.").length >= 2) {
+                    subComponent = componentPath.split("\\.")[1];
+                }
+
+                Component component = ComponentFactory.createInstance(componentName);
+                compPermissions = component.getRequiredPermissions();
+                if (compPermissions == null) {
+                    AppLog.d(TAG, "Component " + componentName + " requires no permissions.");
+                    continue;
+                }
+                AppLog.d(TAG, "Component " + componentName + " requires permissions: " + compPermissions);
+                permissions.addAll(compPermissions);
+
+            } catch (Exception e){
+                if (e instanceof IllegalArgumentException && Objects.requireNonNull(e.getMessage()).contains("not found")) {
+                    AppLog.w(TAG, "Component path " + componentPath + " defined in policy but app does not support it");
+                } else {
+                    AppLog.e(TAG, "Error while processing required permissions: " + e.getMessage());
+                    writeDialog("Checkin failed. Error while processing required permissions: " + e.getMessage(), false);
+                    callbackActivity.onCallback(false);
+                    return;
+                }
+            }
+        }
+
+        // Now add notification permission if not already present as these are required for notifications
+        if (!permissions.contains("android.permission.ACCESS_NOTIFICATION_POLICY")) {
+            // Add first to ensure it's the first permission to be requested
+            permissions.add(0, "android.permission.POST_NOTIFICATIONS");
+        }
+
+        AppLog.i(TAG, "Gathered permissions that are required by components: " + permissions);
+        // Check if all permissions are granted
+        if (!permissions.isEmpty()) {
+            String[] permissionsArray = permissions.toArray(new String[0]);
+
+            if (isAppInForeground(context)) {
+                Intent intent = new Intent(context, PermissionRequestActivity.class);
+                intent.putExtra("permissions", permissionsArray);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                context.startActivity(intent);
+            } else if (!PermissionRequestActivity.hasPermissions(context, permissionsArray)) {
+                AppLog.w(TAG, "Permissions are missing. Showing notification to request permissions.");
+                PermissionRequestActivity.showPermissionNotification(context);
+            }
+        }
+    }
+
+    /**
+     * Acknowledges the policy data received from the Fleet server.
+     *
+     * @param policyData The policy data to acknowledge.
+     * @return true if the acknowledgment was successful, false otherwise.
+     */
     private boolean ackPolicy(PolicyData policyData) {
         AppLog.i(TAG, "Acknowledging policy data...");
         writeDialog("Acknowledging policy data...", true);
@@ -361,21 +408,38 @@ public class FleetCheckinRepository {
         return true;
     }
 
-    private void writeDialog(String s, boolean success) {
+    /**
+     * Updates the UI based on the status of the check-in or acknowledgment process.
+     * This method displays a dialog or updates a TextView with the provided message.
+     * If the operation was successful, the message is displayed in green text. If it
+     * failed, the message is displayed in red text (except for the dialog).
+     *
+     * If the operation was called from the background, no UI updates are performed.
+     *
+     * @param message The message to display.
+     * @param success Indicates whether the operation was successful.
+     */
+    private void writeDialog(String message, boolean success) {
         if(dialog != null && dialog.isShowing()){
-            dialog.setMessage(s);
+            dialog.setMessage(message);
         }
 
         if(dialog == null && tStatus != null){
             if(success){
-                tStatus.setText("Checkin: " + s);
+                tStatus.setText("Checkin: " + message);
             } else {
                 tStatus.setTextColor(tStatus.getResources().getColor(android.R.color.holo_red_dark));
-                tStatus.setText("Checkin Error: " + s);
+                tStatus.setText("Checkin Error: " + message);
             }
         }
     }
 
+    /**
+     * Parses the policy data from the Fleet server's check-in response.
+     *
+     * @param response The check-in response from the Fleet server.
+     * @return The parsed PolicyData object or null if parsing failed.
+     */
     private PolicyData parsePolicy(FleetCheckinResponse response) {
         String TAG_PARSE = TAG + " - parsePolicy";
 
@@ -481,6 +545,13 @@ public class FleetCheckinRepository {
         return policyData;
     }
 
+    /**
+     * Converts a time interval string (e.g., "5m", "1h", "2d") to seconds.
+     * Opposite of {@link #secondsToTimeInterval(int)}.
+     *
+     * @param interval The time interval string to convert. Supported formats: "Xw", "Xd", "Xh", "Xm", "Xs".
+     * @return The time interval in seconds.
+     */
     public static int timeIntervalToSeconds(String interval) {
         if (interval == null || interval.trim().isEmpty()) {
             AppLog.w(TAG, "Time interval " + interval + " is null or empty. Defaulting to 60 seconds.");
@@ -511,6 +582,13 @@ public class FleetCheckinRepository {
         return seconds;
     }
 
+    /**
+     * Converts seconds to a human-readable time interval string (e.g., "5m", "1h").
+     * Opposite of {@link #timeIntervalToSeconds(String)}.
+     *
+     * @param totalSeconds The number of seconds to convert.
+     * @return A human-readable time interval string.
+     */
     public static String secondsToTimeInterval(int totalSeconds) {
         if (totalSeconds <= 0) {
             return "0s"; // Handle non-positive inputs
@@ -542,6 +620,12 @@ public class FleetCheckinRepository {
         return sb.toString();
     }
 
+    /**
+     * Checks whether the application is currently running in the foreground.
+     *
+     * @param context Application context.
+     * @return true if the app is in the foreground, false otherwise.
+     */
     public static boolean isAppInForeground(Context context) {
         ActivityManager activityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
         List<ActivityManager.RunningAppProcessInfo> appProcesses = activityManager.getRunningAppProcesses();

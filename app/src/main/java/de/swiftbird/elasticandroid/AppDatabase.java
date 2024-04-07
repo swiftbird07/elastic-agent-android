@@ -12,7 +12,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
- * Central database class for the application, using the Room persistence library to manage SQLite database operations.
+ * Central abstract database class for the application, using the Room persistence library to manage SQLite database operations.
  * This class defines all entities that form the database and their respective DAOs for data access. It implements a singleton
  * pattern to ensure that only one instance of the database is created throughout the application's lifecycle.
  *

@@ -5,6 +5,12 @@ import com.google.gson.annotations.SerializedName;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Models the response received from a Fleet server upon an agent's check-in.
+ * This response includes any actions the server requires the agent to take,
+ * such as applying new policy configurations, performing diagnostics, or other
+ * operational commands.
+ */
 public class FleetCheckinResponse {
     @SerializedName("ack_token")
     protected String ackToken;
@@ -23,6 +29,10 @@ public class FleetCheckinResponse {
         return actions;
     }
 
+    /**
+     * Represents an individual action item within the check-in response.
+     * Actions can include policy updates, diagnostic requests, or other commands.
+     */
     public class Action {
         @SerializedName("agent_id")
         private String agentId;
@@ -57,6 +67,10 @@ public class FleetCheckinResponse {
             return type;
         }
 
+        /**
+         * Contains the detailed policy data associated with a POLICY_CHANGE action.
+         * This includes the agent configuration, input streams, and output settings.
+         */
         public class PolicyData {
             @SerializedName("policy")
             private Policy policy;
@@ -135,6 +149,10 @@ public class FleetCheckinResponse {
                     }
                 }
 
+                /**
+                 * Defines an output target for the agent, typically an Elasticsearch
+                 * cluster, including connection and authentication details.
+                 */
                 public class Output {
                     @SerializedName("api_key")
                     private String apiKey;
@@ -188,7 +206,10 @@ public class FleetCheckinResponse {
         }
 
 
-
+        /**
+         * Contains the detailed agent configuration, including protection settings
+         * and other agent-specific details.
+         */
         public class Agent {
             @SerializedName("protection")
             private Protection protection;
@@ -199,6 +220,10 @@ public class FleetCheckinResponse {
         }
 
 
+        /**
+         * Contains the protection settings for the agent, including the uninstall
+         * token hash and whether protection is enabled.
+         */
         public class Protection {
             @SerializedName("enabled")
             private boolean enabled;
@@ -216,6 +241,10 @@ public class FleetCheckinResponse {
         }
 
 
+        /**
+         * Defines an input within the policy, potentially including multiple
+         * data streams for the agent to monitor and report.
+         */
         public class Input {
             @SerializedName("type")
             private String type;
@@ -306,6 +335,10 @@ public class FleetCheckinResponse {
                 }
             }
 
+            /**
+             * Represents a single stream within an input, detailing the specific
+             * data collection or reporting behavior expected of the agent.
+             */
             public class Stream {
                 @SerializedName("data_stream")
                 private DataStream dataStream;
@@ -389,6 +422,10 @@ public class FleetCheckinResponse {
             }
 
 
+            /**
+             * Details the Elasticsearch data stream to which collected data
+             * should be reported.
+             */
             public class DataStream {
                 @SerializedName("dataset")
                 private String dataset;

@@ -202,6 +202,13 @@ public class FleetEnrollRepository {
 
     }
 
+    /**
+     * Parses the enrollment response from the Fleet server and saves the enrollment data to the local database.
+     *
+     * @param request The {@link AppEnrollRequest} containing details necessary for enrollment.
+     * @param response The {@link FleetEnrollResponse} containing the enrollment response from the Fleet server.
+     * @return The {@link FleetEnrollData} object representing the enrollment data.
+     */
     private FleetEnrollData parseAndSaveEnrollmentInfo(AppEnrollRequest request, FleetEnrollResponse response) {
 
         FleetEnrollResponse.Item item = response.getItem();

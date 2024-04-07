@@ -4,6 +4,11 @@ import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
+/**
+ * Represents the persistent data related to an agent's enrollment with a Fleet server.
+ * This entity is stored in the local database and includes details necessary for managing
+ * the agent's state and configuration as per the Fleet server's policy.
+ */
 @Entity
 public class FleetEnrollData {
     @PrimaryKey

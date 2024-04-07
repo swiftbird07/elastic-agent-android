@@ -22,6 +22,11 @@ import java.text.MessageFormat;
 import de.swiftbird.elasticandroid.R.id;
 import kotlin.NotImplementedError;
 
+/**
+ * Activity for handling the enrollment process of an Elastic Agent with a Fleet server.
+ * Provides UI for inputting necessary enrollment information and initiates the enrollment process.
+ * Supports loading enrollment data from the clipboard, a QR code, or build configuration.
+ */
 public class FleetEnrollActivity extends AppCompatActivity implements StatusCallback {
     private static final String TAG = "FleetEnrollActivity";
     private EditText etServerUrl, etToken, etHostname, etFleetCert;
@@ -30,6 +35,12 @@ public class FleetEnrollActivity extends AppCompatActivity implements StatusCall
 
     private Button btnEnrollNow;
 
+    /**
+     * Initializes the activity, setting up the UI components and their event listeners.
+     * @param savedInstanceState If the activity is being re-initialized after previously being shut down,
+     *                           this Bundle contains the data it most recently supplied in onSaveInstanceState(Bundle).
+     *                           Note: Otherwise it is null.
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -69,6 +80,10 @@ public class FleetEnrollActivity extends AppCompatActivity implements StatusCall
         btnLoadFromConfig.setOnClickListener(v -> loadFromBuildConfig());
     }
 
+    /**
+     * Loads the enrollment data from the clipboard and autofills the input fields.
+     * Hint: The enrollment string can be generated using the create_enrollment_string.sh script.
+     */
     private void loadFromClipboard() {
         CharSequence base64EnrollmentString = "";
         ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
@@ -88,18 +103,32 @@ public class FleetEnrollActivity extends AppCompatActivity implements StatusCall
         }
     }
 
+    /**
+     * Loads the enrollment data from a QR code and autofills the input fields.
+     * Not implemented yet.
+     * TODO: Implement QR code scanning.
+     */
     private void loadFromQRCode() {
         // Trigger QR code scanning and handle result
         throw new NotImplementedError("QR code scanning is not implemented yet.");
-        //String base64EnrollmentString = "exampleBase64String"; //TODO:  Replace with actual QR handling
+        //String base64EnrollmentString = "exampleBase64String";
         //autofillFromEnrollmentString(base64EnrollmentString);
     }
 
+    /**
+     * Loads the enrollment data from the build configuration and autofills the input fields.
+     * Useful for mass enrollment of devices with a pre-configured enrollment string.
+     * The enrollment string should be stored in the BuildConfig.ENROLLMENT_STRING field.
+     * Hint: The enrollment string can be generated using the create_enrollment_string.sh script.
+     */
     private void loadFromBuildConfig() {
         String base64EnrollmentString = BuildConfig.ENROLLMENT_STRING;
         autofillFromEnrollmentString(base64EnrollmentString);
     }
 
+    /**
+     * Initiates the enrollment process by validating the input fields and sending an enrollment request to the Fleet server.
+     */
     private void attemptEnrollment() {
         tError.setText("");
         String serverUrl = etServerUrl.getText().toString().trim();
@@ -168,6 +197,10 @@ public class FleetEnrollActivity extends AppCompatActivity implements StatusCall
         }
     }
 
+    /**
+     * Autofills the input fields with the provided enrollment string (clipboard, QR code, or build configuration).
+     * @param base64EnrollmentString The base64-encoded enrollment data to autofill the input fields.
+     */
     private void autofillFromEnrollmentString(String base64EnrollmentString) {
         try {
             String jsonString = new String(android.util.Base64.decode(base64EnrollmentString, android.util.Base64.DEFAULT));
@@ -189,6 +222,10 @@ public class FleetEnrollActivity extends AppCompatActivity implements StatusCall
         }
     }
 
+    /**
+     * Callback method for handling the enrollment result.
+     * @param success True if the enrollment was successful, false otherwise.
+     */
     @Override
     public void onCallback(boolean success) {
         if (success) {

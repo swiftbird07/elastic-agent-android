@@ -9,12 +9,29 @@ import androidx.work.WorkerParameters;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * A background worker that handles periodic check-in with the Fleet server.
+ * It fetches the current enrollment and policy data, then uses the FleetCheckinRepository
+ * to perform the check-in operation. Depending on the check-in result and policy settings,
+ * it might adjust the check-in frequency or mark the agent as unhealthy.
+ */
 public class FleetCheckinWorker extends Worker {
 
+    /**
+     * Initializes a new instance of the FleetCheckinWorker.
+     *
+     * @param context Application context.
+     * @param workerParams Parameters for the work.
+     */
     public FleetCheckinWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
     }
 
+    /**
+     * Performs the check-in operation asynchronously.
+     *
+     * @return The result of the work, indicating success or retry requirements.
+     */
     @NonNull
     @Override
     public Result doWork() {

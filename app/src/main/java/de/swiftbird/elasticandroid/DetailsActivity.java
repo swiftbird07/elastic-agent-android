@@ -19,6 +19,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import de.swiftbird.elasticandroid.R.id;
 
+/**
+ * Activity that presents a comprehensive view of the agent's status post-enrollment,
+ * aggregating data from enrollment details, fleet policy settings, and Elasticsearch statistics.
+ * It serves as a diagnostic tool for administrators to assess the agent's operational status
+ * without direct log inspection. The activity auto-refreshes to provide up-to-date information.
+ */
 public class DetailsActivity extends AppCompatActivity  {
 
     // Enrollment Texts
@@ -146,6 +152,11 @@ public class DetailsActivity extends AppCompatActivity  {
         handler.removeCallbacks(runnableCode);
     }
 
+    /**
+     * Updates the UI with the latest enrollment data, adjusting visibility and content
+     * based on the current enrollment status of the agent.
+     * @param enrollmentData The latest enrollment data for the agent.
+     */
     private void updateUIBasedOnEnrollment(FleetEnrollData enrollmentData) {
         this.enrollmentData = enrollmentData;
         if (isEnrolled()) {
@@ -169,6 +180,11 @@ public class DetailsActivity extends AppCompatActivity  {
         }
     }
 
+    /**
+     * Updates the UI with the latest policy data, reflecting the current policy settings
+     * applied to the agent from the fleet management.
+     * @param policyData The latest policy data for the agent.
+     */
     private void updateUIBasedOnPolicy(PolicyData policyData) {
         // Update the UI based on the policy data
         tLastCheckinValue.setText(policyData.lastUpdated != null ? policyData.lastUpdated : "Never");
@@ -202,6 +218,11 @@ public class DetailsActivity extends AppCompatActivity  {
 
     }
 
+    /**
+     * Updates the UI with the latest Elasticsearch statistics, providing insights into
+     * the agent's data reporting and buffer status.
+     * @param statisticsData The latest statistics data from Elasticsearch.
+     */
     private void updateUIBasedOnStatistics(AppStatisticsData statisticsData) {
         // Update the UI based on the statistics data
         lastDocumentsSendAtValue.setText(statisticsData.lastDocumentsSentAt != null ? statisticsData.lastDocumentsSentAt : "Never");
@@ -212,6 +233,11 @@ public class DetailsActivity extends AppCompatActivity  {
     }
 
 
+    /**
+     * Controls the visibility of enrollment details within the UI based on the agent's
+     * enrollment status.
+     * @param show Indicates whether to show or hide the enrollment details section.
+     */
     private void showEnrollmentDetails(boolean show) {
         // If using View visibility to show/hide enrollment details, implement logic here
         int visibility = show ? View.VISIBLE : View.GONE;
@@ -226,6 +252,10 @@ public class DetailsActivity extends AppCompatActivity  {
         combinedBufferSizeValue.setVisibility(visibility);
     }
 
+    /**
+     * Determines if the agent is currently enrolled based on the presence of enrollment data.
+     * @return True if the agent is enrolled, false otherwise.
+     */
     private boolean isEnrolled() {
         try {
             return enrollmentData.isEnrolled;
@@ -234,6 +264,10 @@ public class DetailsActivity extends AppCompatActivity  {
         }
     }
 
+    /**
+     * Central method to refresh the UI with the latest data across all categories
+     * (enrollment, policy, and statistics).
+     */
     private void update(){
         AppLog.d(TAG, "Updating UI...");
 
@@ -256,10 +290,15 @@ public class DetailsActivity extends AppCompatActivity  {
                 updateUIBasedOnStatistics(statisticsData);
             }
         });
-
-
     }
 
+    /**
+     * Observes the status of work tasks related to the agent's operations, updating the UI
+     * with the status and health based on the outcomes of these tasks.
+     * @param workName The name of the work task to observe.
+     * @param workersValue TextView to display the work status.
+     * @param failing A flag indicating if any work task has failed.
+     */
     private void observeWorkAndSetStatus(String workName, TextView workersValue, AtomicBoolean failing) {
         WorkManager.getInstance(getApplicationContext())
                 .getWorkInfosByTagLiveData(workName)
@@ -300,6 +339,10 @@ public class DetailsActivity extends AppCompatActivity  {
     }
 
 
+    /**
+     * Sets up observation for work tasks using WorkManager, updating the UI with the current
+     * status and health of the agent based on work task outcomes.
+     */
     private void setupWorkObservation() {
         workersValue.setText("");
         AtomicBoolean failing = new AtomicBoolean(failingBool);

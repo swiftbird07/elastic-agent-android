@@ -107,7 +107,7 @@ public class FleetCheckinRepository {
         String ackToken = null; // TODO: Get ack token from previous checkin response if available
 
         // Create checkin request
-        FleetCheckinRequest checkinRequest = new FleetCheckinRequest("online", ackToken, metadata, "Elastic Agent (Android) checkin.", null, null);
+        FleetCheckinRequest checkinRequest = new FleetCheckinRequest("online", ackToken, metadata, "Elastic Agent (Android) checkin.");
         fleetApi.postCheckin("ApiKey " + data.accessApiKey, data.agentId, checkinRequest).enqueue(new Callback<FleetCheckinResponse>() {
             @Override
             public void onResponse(@NonNull Call<FleetCheckinResponse> call, @NonNull Response<FleetCheckinResponse> response) {

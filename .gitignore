@@ -1,6 +1,10 @@
-.gradle
+# Ignore everything in the build directory
 **/build/
-!src/**/build/
+# But do not ignore the apk directory and its contents
+!**/build/outputs/apk/
+
+# Ignore Gradle system files
+.gradle
 
 # Ignore Gradle GUI config
 gradle-app.setting
@@ -12,11 +16,15 @@ gradle-app.setting
 .gradletasknamecache
 
 # Eclipse Gradle plugin generated files
-# Eclipse Core
 .project
-# JDT-specific (Eclipse Java Development Tools)
 .classpath
+
+# Environment files
 *.env
 .env
+
+# macOS filesystem file
 .DS_Store
+
+# IntelliJ IDEA / Android Studio project files
 .idea/

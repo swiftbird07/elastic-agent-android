@@ -65,7 +65,7 @@ public abstract class AppDatabase extends RoomDatabase {
      * @param name The name of the database file.
      * @return The singleton instance of AppDatabase.
      */
-    public static AppDatabase getDatabase(final Context context, String name) {
+    protected static AppDatabase getDatabase(final Context context, String name) {
         if (INSTANCE == null) {
             synchronized (AppDatabase.class) {
                 if (INSTANCE == null) {

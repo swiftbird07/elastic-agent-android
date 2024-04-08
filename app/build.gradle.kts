@@ -23,7 +23,7 @@ android {
         minSdk = 24
         targetSdk = 34
         versionCode = 1
-        versionName = "1.1"
+        versionName = "1.2"
         android.buildFeatures.buildConfig = true
 
         val enrollmentString = props.getProperty("ENROLLMENT_STRING") ?: ""
@@ -51,8 +51,8 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
     buildFeatures {
         viewBinding = true
@@ -72,32 +72,32 @@ dependencies {
     androidTestImplementation(libs.espresso.core)
 
     // Retrofit for network requests
-    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation(libs.retrofit)
     // Gson converter for parsing JSON responses
-    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation(libs.converter.gson)
 
     // LiveData for reactive UI updates
-    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.3.1")
+    implementation(libs.lifecycle.livedata.ktx)
 
     // ViewModel for managing UI-related data in a lifecycle-conscious way
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.3.1")
+    implementation(libs.lifecycle.viewmodel.ktx)
 
-    val roomVersion = "2.4.2"
+    implementation(libs.room.runtime)
+    kapt(libs.room.compiler)
 
-    implementation("androidx.room:room-runtime:$roomVersion")
-    kapt("androidx.room:room-compiler:$roomVersion")
-
+    //noinspection UseTomlInstead
     implementation("com.google.android.material:material")
-    implementation("androidx.work:work-runtime:2.7.1")
+
+    implementation(libs.work.runtime)
     // Unit testing dependencies
-    testImplementation("junit:junit:4.13.2")
-    testImplementation("org.mockito:mockito-core:3.+")
+    testImplementation(libs.junit)
+    testImplementation(libs.mockito.core)
 
     // For Android-specific mocking
-    testImplementation("org.robolectric:robolectric:4.+")
-    androidTestImplementation("androidx.work:work-testing:2.7.1")
+    testImplementation(libs.robolectric)
+    androidTestImplementation(libs.work.testing)
 
-    implementation("com.google.android.gms:play-services-oss-licenses:17.0.0")
+    implementation(libs.play.services.oss.licenses)
 
 }
 

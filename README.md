@@ -22,7 +22,40 @@ Elastic Agent Android supports a variety of components that collect different ty
 
 ## Quick Start
 
-Stay tuned for a quick start guide on how to deploy Elastic Agent Android on your device, enroll it with a Fleet server, and start collecting valuable data.
+To get started with Elastic Agent Android, follow these steps:
+
+### 1. Download the APK
+Download the latest APK from the [Artifacts section](https://github.com/swiftbird07/elastic-agent-android/actions) of the GitHub Actions page. Choose the latest successful build and download the APK file from the artifacts dropdown.
+
+### 2. Create a New Policy in Fleet
+In your Fleet server, create a new policy using the "Custom Logs" integration (a "real" Android integration will be available in the future)
+This policy will define which components of the Elastic Agent Android will be activated.
+
+### 3. Configure the Policy
+- Under "Paths", specify one path for each component you wish to activate. Examples include:
+    - `android://self-log.warn` for warning level self logs.
+    - `android://location.fine?minTimeMs=300000&minDistanceMeters=50` for fine location updates every 5 minutes or 50 meters.
+    - `android://security-logs.all` for all security logs (device owner required).
+    - `android://network-logs.all` for all network logs (device owner required).
+- In "Advanced options" -> "Custom Configurations", add:
+```yaml
+  max_documents_per_request: 200
+  put_interval: 1m
+  checkin_interval: 1m
+  use_backoff: true
+  max_backoff_interval: 5m
+  backoff_on_empty_buffer: false
+```
+These settings control how documents are batched and sent to Elasticsearch, with options for backoff strategies.
+
+### 4. Install the App
+Install the downloaded APK on your target Android device.
+
+### 5. Enroll the Agent
+Open the app and tap on "Enroll Agent". Fill in the server URL, enrollment token, and hostname. You can also toggle SSL verification as needed. For mass enrollment, these fields can be autofilled using the clipboard or build configurations.
+
+### 6. Verify the Enrollment
+After enrolling, the agent should report as "Healthy" within a few seconds, and you should start seeing events in Elasticsearch based on the `put_interval` setting.
 
 ## Contributions and Feedback
 

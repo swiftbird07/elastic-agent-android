@@ -289,7 +289,6 @@ public class ElasticWorker extends Worker {
         StringBuilder bulkPayload = new StringBuilder();
 
         for (ElasticDocument document : documents) {
-            // Assuming you have an action metadata line for each document (e.g., index action)
             String actionMetadata = createActionMetadata(document);
             String documentJson = gson.toJson(document);
 

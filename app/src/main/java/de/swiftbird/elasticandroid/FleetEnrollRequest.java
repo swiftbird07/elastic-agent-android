@@ -2,6 +2,11 @@ package de.swiftbird.elasticandroid;
 
 import com.google.gson.annotations.SerializedName;
 
+/**
+ * Represents an enrollment request sent to the Fleet server to enroll an agent.
+ * This class contains all details required by the Fleet server to
+ * authenticate and authorize the agent's enrollment request.
+ */
 public class FleetEnrollRequest {
     private String type;
     @SerializedName("metadata")

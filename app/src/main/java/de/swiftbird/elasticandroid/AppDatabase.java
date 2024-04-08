@@ -33,10 +33,10 @@ import java.util.concurrent.Executors;
                 NetworkLogsCompDocument.class,
                 LocationCompDocument.class,
         },
-        version = 28,
+        version = 29,
         exportSchema = true,
         autoMigrations = {
-                //@AutoMigration(from = 27, to = 28),
+                @AutoMigration(from = 28, to = 29),
         }
 )
 @TypeConverters({AppConverters.class})

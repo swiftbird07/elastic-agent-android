@@ -11,6 +11,17 @@ import java.net.InetAddress;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * Represents network log events captured by the application, including DNS queries and TCP connections.
+ * This entity is stored in the application's Room database and is used to aggregate network events
+ * before processing or transmission to a centralized logging system.
+ *
+ * <p>The class extends {@link ElasticDocument} to include common Elastic Stack fields and additional
+ * network-specific information such as DNS query names, resolved IP addresses, and TCP connection details.</p>
+ *
+ * <p>Fields are annotated for serialization into JSON using {@link com.google.gson.annotations.SerializedName}
+ * and for storage in the SQLite database using Room annotations.</p>
+ */
 @Entity
 public class NetworkLogsCompDocument extends ElasticDocument {
     @PrimaryKey(autoGenerate = true)
@@ -95,6 +106,18 @@ public class NetworkLogsCompDocument extends ElasticDocument {
     public NetworkLogsCompDocument() {}
 
 
+    /**
+     * Constructs a new {@code NetworkLogsCompDocument} for a DNS query event.
+     *
+     * @param enrollmentData The enrollment data of the agent.
+     * @param policyData The policy data associated with the agent.
+     * @param type The type of the network event, expected to be "DNS" for this constructor.
+     * @param packageName The package name of the app initiating the DNS query.
+     * @param hostname The hostname being queried.
+     * @param inetAddresses The list of {@link InetAddress} objects representing resolved IP addresses for the hostname.
+     * @param message Additional message or context about the DNS event.
+     * @throws IllegalArgumentException if the event type is not "DNS".
+     */
     public NetworkLogsCompDocument(FleetEnrollData enrollmentData, PolicyData policyData, String type, String packageName, String hostname, List<InetAddress> inetAddresses, String message){
         super(enrollmentData, policyData);
 
@@ -127,6 +150,18 @@ public class NetworkLogsCompDocument extends ElasticDocument {
         this.eventCategory = "network";
     }
 
+    /**
+     * Constructs a new {@code NetworkLogsCompDocument} for a TCP connection event.
+     *
+     * @param enrollmentData The enrollment data of the agent.
+     * @param policyData The policy data associated with the agent.
+     * @param type The type of the network event, expected to be "CONNECT" for this constructor.
+     * @param packageName The package name of the app initiating the connection.
+     * @param inetAddress The {@link InetAddress} of the destination IP address.
+     * @param port The destination port of the connection.
+     * @param message Additional message or context about the TCP connection event.
+     * @throws IllegalArgumentException if the event type is not "CONNECT".
+     */
     public NetworkLogsCompDocument(FleetEnrollData enrollmentData, PolicyData policyData, String type, String packageName, InetAddress inetAddress, int port, String message){
         super(enrollmentData, policyData);
 

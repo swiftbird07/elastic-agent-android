@@ -14,10 +14,10 @@ public class ComponentFactory {
 
     static {
         // Initial component registration.
-        components.put("android://self-log", SelfLogComp::new);
-        components.put("android://security-logs", SecurityLogsComp::new);
-        components.put("android://network-logs", NetworkLogsComp::new);
-        components.put("android://location", LocationComp::new);
+        components.put("android://self-log", SelfLogComp::getInstance);
+        components.put("android://security-logs", SecurityLogsComp::getInstance);
+        components.put("android://network-logs", NetworkLogsComp::getInstance);
+        components.put("android://location", LocationComp::getInstance);
         // Additional components can be registered here following the URI scheme.
     }
 

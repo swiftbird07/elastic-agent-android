@@ -7,6 +7,19 @@ import android.util.Log;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * Manages the collection and storage of internal application logs for the Elastic Android application.
+ * This component facilitates the recording of operational events, errors, and informational messages within the app,
+ * helping in debugging and monitoring activities.
+ *
+ * <p>Logs are captured and stored persistently using a Room database, allowing for their retrieval and analysis over time.
+ * The {@link SelfLogCompDocument} class represents individual log entries, which are managed by this component.</p>
+ *
+ * <p>The {@link AppLog} class is utilized to add logs to the buffer. It abstracts the complexity of directly interacting with
+ * the logging mechanism, providing a simple interface for recording logs from anywhere within the application.</p>
+ *
+ * <p>For method documentation, refer to the Component interface.
+ */
 public class SelfLogComp implements Component {
 
     private static SelfLogComp selfLogComp;

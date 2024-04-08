@@ -2,6 +2,11 @@ package de.swiftbird.elasticandroid;
 import com.google.gson.annotations.SerializedName;
 import java.util.List;
 
+/**
+ * Represents the response received from the Fleet server after enrolling an agent.
+ * This class contains details about the enrollment status and the agent's access key that is later used for communication.
+ * with the Fleet server.
+ */
 public class FleetEnrollResponse {
     private String action;
     private Item item;
@@ -21,23 +26,6 @@ public class FleetEnrollResponse {
 
         @SerializedName("active")
 
-        /* {
-    "action": "created",
-    "item": {
-        "access_api_key": "TW1Gc1hZNEIydUdpYWJxV0tFT0I6T0ZQY3ptN0xUYlM2N2FvUDItOHJnUQ==",
-        "access_api_key_id": "MmFsXY4B2uGiabqWKEOB",
-        "actions": null,
-        "active": true,
-        "enrolled_at": "2024-03-20T19:52:33Z",
-        "id": "b2fe83e2-fffc-4b14-85e2-315ec9ac9538",
-        "local_metadata": null,
-        "policy_id": "eb0088c0-e635-11ee-8207-1b9b3ac48589",
-        "status": "online",
-        "tags": [],
-        "type": "PERMANENT",
-        "user_provided_metadata": null
-    }
-} */
         private Boolean active;
 
         @SerializedName("enrolled_at")
@@ -58,7 +46,18 @@ public class FleetEnrollResponse {
         @SerializedName("type")
         private String type;
 
-        // Constructor (mostly for testing)
+        /**
+         * Constrctor only used for testing
+         * @param accessApiKey
+         * @param accessApiKeyId
+         * @param active
+         * @param enrolledAt
+         * @param id
+         * @param policyId
+         * @param status
+         * @param tags
+         * @param type
+         */
         public Item(String accessApiKey, String accessApiKeyId, Boolean active, String enrolledAt, String id, String policyId, String status, List<String> tags, String type) {
             this.accessApiKey = accessApiKey;
             this.accessApiKeyId = accessApiKeyId;

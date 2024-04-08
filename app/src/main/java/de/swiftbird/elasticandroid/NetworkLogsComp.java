@@ -16,6 +16,21 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * Optional component that manages the collection, storage, and processing of network log events for the application.
+ * Utilizes Android's Device Owner capabilities to access and manage network logging, including DNS and Connect events.
+ * This component is essential for monitoring network activity as part of security or diagnostic features within the application.
+ *
+ * <p>It leverages the {@link AppDeviceAdminReceiver} for enabling and retrieving network logs, processing these logs,
+ * and storing relevant information in a local database for later use or transmission.</p>
+ *
+ * <p>Usage of this component requires the application to be a device owner app, which has to be set up during the
+ * device provisioning process.
+ *
+ * <p>Note: Enabling network logging and retrieving logs are features available only on devices running Android Oreo (API level 26) or above.</p>
+ *
+ * <p>For missing documentation, refer to the Component interface.
+ */
 public class NetworkLogsComp implements Component {
     
     private static final String TAG = "NetworkLogsComp";
@@ -33,6 +48,13 @@ public class NetworkLogsComp implements Component {
         return NetworkLogsComp;
     }
 
+    /**
+     * Processes available network log events. This method retrieves and processes network log events from the
+     * {@link AppDeviceAdminReceiver}, converting them into a format suitable for storage and/or transmission.
+     *
+     * @param context The application context.
+     * @param batchToken A token indicating the batch of network logs to be retrieved.
+     */
     public void handleNetworkLogs(Context context, long batchToken) {
         // First setup the component
         AppDatabase db = AppDatabase.getDatabase(context, "");
@@ -84,6 +106,16 @@ public class NetworkLogsComp implements Component {
 
     }
 
+    /**
+     * Sets up the network logs component for collecting network events. This method initializes the component,
+     * enabling network logging through the {@link AppDeviceAdminReceiver} and setting necessary configurations.
+     *
+     * @param context The application context.
+     * @param enrollmentData Data regarding the device's enrollment status.
+     * @param policyData Policy data affecting how network logs are handled.
+     * @param subComponent A string identifier for the sub-component, not used in this context.
+     * @return {@code true} if setup was successful and network logging is supported and enabled; otherwise, {@code false}.
+     */
     @Override
     public boolean setup(Context context, FleetEnrollData enrollmentData, PolicyData policyData, String subComponent) {
         // Initialize Room database and get the DAO
@@ -160,17 +192,22 @@ public class NetworkLogsComp implements Component {
         return "network-logs";
     }
 
+    /**
+     * This method disables network logging through the {@link AppDeviceAdminReceiver}
+     * and cleans up any resources used by the component.
+     *
+     * @param context The application context.
+     * @param enrollmentData Data regarding the device's enrollment status.
+     * @param policyData Policy data affecting how network logs are handled.
+     */
     @Override
     public void disable(Context context, FleetEnrollData enrollmentData, PolicyData policyData) {
-        /*
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             AppLog.d(TAG, "Disabling network logs component");
             DevicePolicyManager dpm = (DevicePolicyManager) context.getSystemService(Context.DEVICE_POLICY_SERVICE);
             ComponentName adminComponentName = new ComponentName(context, AppDeviceAdminReceiver.class);
             dpm.setNetworkLoggingEnabled(adminComponentName, false);
         }
-
-         */
     }
 
     

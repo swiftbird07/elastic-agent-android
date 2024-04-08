@@ -14,6 +14,14 @@ import android.util.Log;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * Optional component that implements the Component interface, specializing in handling location data.
+ * It encapsulates functionality for setting up location tracking, managing location updates, and buffering
+ * received location data for later processing or transmission. This component supports different location
+ * accuracy modes and leverages Android's LocationManager for obtaining location updates.
+ * <p>
+ * For missing documentation, refer to the Component interface.
+ */
 public class LocationComp implements Component {
 
     private static final String TAG = "LocationComp";
@@ -25,6 +33,10 @@ public class LocationComp implements Component {
     private HandlerThread locationHandlerThread;
     private Handler locationHandler;
 
+    /**
+     * Provides access to the singleton instance of LocationComp, creating it if necessary.
+     * @return The singleton instance of LocationComp.
+     */
     public static LocationComp getInstance() {
         // Singleton pattern
         if (locationComp == null) {
@@ -34,6 +46,17 @@ public class LocationComp implements Component {
     }
 
 
+    /**
+     * Configures the location component based on specified settings. It initializes required resources,
+     * such as database access objects and the location listener, and starts location updates with specified
+     * parameters if necessary.
+     *
+     * @param context The application context.
+     * @param enrollmentData Data related to the enrollment of the device.
+     * @param policyData The current policy data affecting location tracking.
+     * @param subComponent A string representing specific settings or configurations for location tracking.
+     * @return A boolean indicating whether setup was successful.
+     */
     @Override
     public boolean setup(Context context, FleetEnrollData enrollmentData, PolicyData policyData, String subComponent) {
         AppLog.d(TAG, "Setting up location component");
@@ -122,25 +145,30 @@ public class LocationComp implements Component {
         return true;
     }
 
+    /**
+     * Performs a lightweight setup, initializing only essential resources without starting location updates.
+     * This can be used in scenarios where full setup is not required immediately upon device startup.
+     *
+     * @param context The application context.
+     */
     public void setup_light(Context context) {
         AppDatabase db = AppDatabase.getDatabase(context, "");
         this.buffer = db.locationCompBuffer();
         this.statistic = db.statisticsDataDAO();
     }
 
-    private void requestLocationUpdates(String provider, int minTimeMs, int minDistanceMeters) {
-        try {
-            locationManager.requestLocationUpdates(provider, minTimeMs, minDistanceMeters, locationListener, locationHandlerThread.getLooper());
-            AppLog.d(TAG, "Location updates requested for provider: " + provider + " with minTimeMs: " + minTimeMs + " and minDistanceMeters: " + minDistanceMeters);
-        } catch (SecurityException e) {
-            AppLog.e(TAG, "Failed to request location updates because of missing permissions: " + e.getMessage());
-        }
-    }
-
+    /**
+     * Initiates the collection of events. This is a no-op for this component as location updates are
+     * collected in real-time via the locationListener.
+     *
+     * @param enrollmentData Data related to the enrollment of the device.
+     * @param policyData The current policy data.
+     */
     @Override
     public void collectEvents(FleetEnrollData enrollmentData, PolicyData policyData) {
         // No-op for this component (location updates are collected in real-time)
     }
+
 
     @Override
     public void addDocumentToBuffer(ElasticDocument document) {
@@ -151,6 +179,7 @@ public class LocationComp implements Component {
             Log.w(TAG, "Invalid document type or buffer not initialized");
         }
     }
+
 
     @Override
     public <T extends ElasticDocument> List<T> getDocumentsFromBuffer(int maxDocuments) {

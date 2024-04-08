@@ -26,6 +26,12 @@ import java.text.MessageFormat;
 
 import de.swiftbird.elasticandroid.R.id;
 
+/**
+ * HelpActivity provides a simple informational screen for the application.
+ * It displays help for the end-user as well as administrators. It also displays the version of the application.
+ * and its compatibility with the Elastic Agent.
+ * Be aware that the static help text is written in the layout file.
+ */
 public class HelpActivity extends AppCompatActivity  {
 
     private TextView tvVersionInfo;

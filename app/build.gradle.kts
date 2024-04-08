@@ -11,6 +11,7 @@ plugins {
     id("com.android.application")
     kotlin("android")
     kotlin("kapt")
+    id("com.google.android.gms.oss-licenses-plugin")
 }
 
 android {
@@ -42,7 +43,11 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = false
+            isDebuggable = false // make debugging is disabled for release builds
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+        }
+        debug {
+            isDebuggable = true
         }
     }
     compileOptions {
@@ -77,7 +82,7 @@ dependencies {
     // ViewModel for managing UI-related data in a lifecycle-conscious way
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.3.1")
 
-    val roomVersion = "2.4.2" // Use the latest version available
+    val roomVersion = "2.4.2"
 
     implementation("androidx.room:room-runtime:$roomVersion")
     kapt("androidx.room:room-compiler:$roomVersion")
@@ -91,6 +96,8 @@ dependencies {
     // For Android-specific mocking
     testImplementation("org.robolectric:robolectric:4.+")
     androidTestImplementation("androidx.work:work-testing:2.7.1")
+
+    implementation("com.google.android.gms:play-services-oss-licenses:17.0.0")
 
 }
 

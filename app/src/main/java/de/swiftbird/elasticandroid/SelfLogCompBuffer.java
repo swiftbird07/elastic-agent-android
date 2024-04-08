@@ -6,6 +6,12 @@ import androidx.room.Query;
 
 import java.util.List;
 
+/**
+ * Data Access Object (DAO) for handling the storage and retrieval of {@link SelfLogCompDocument} objects,
+ * which represent log events collected by the agent itself.
+ *
+ * Functionality is similar to LocationCompBuffer.java so we will not repeat the documentation here.
+ */
 @Dao
 public interface SelfLogCompBuffer {
     @Insert

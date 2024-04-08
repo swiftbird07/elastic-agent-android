@@ -32,6 +32,14 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * The main activity of the Elastic Agent Android application, serving as the entry point.
+ * This activity displays the current enrollment status of the agent, provides options to
+ * enroll/unenroll, sync data, view details, and access help, licenses, and legal information.
+ *
+ * It implements the {@link StatusCallback} interface to handle callbacks from asynchronous
+ * operations like enrollment and data synchronization.
+ */
 public class MainActivity extends AppCompatActivity implements StatusCallback {
 
     private Button btnSyncNow;
@@ -55,6 +63,10 @@ public class MainActivity extends AppCompatActivity implements StatusCallback {
     private String TAG = "MainActivity";
     private static final String CHANNEL_ID = "PermissionRequestChannel";
 
+    /**
+     * Initializes the activity, setting up UI components and event handlers. It also checks
+     * if the app is being launched for the first time to show the legal disclaimer.
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -152,6 +164,10 @@ public class MainActivity extends AppCompatActivity implements StatusCallback {
 
     }
 
+    /**
+     * onResume is overridden to refresh the UI based on the current enrollment status each
+     * time the activity comes into the foreground.
+     */
     @Override
     protected void onResume() {
         super.onResume();
@@ -174,6 +190,11 @@ public class MainActivity extends AppCompatActivity implements StatusCallback {
         LocationReceiver locationReceiver = new LocationReceiver(this);
     }
 
+    /**
+     * Checks whether the agent is currently enrolled.
+     *
+     * @return {@code true} if the agent is enrolled, {@code false} otherwise.
+     */
     private boolean isEnrolled() {
         try {
             return enrollmentData.isEnrolled;
@@ -182,6 +203,11 @@ public class MainActivity extends AppCompatActivity implements StatusCallback {
         }
     }
 
+    /**
+     * Updates the UI components based on the enrollment data.
+     *
+     * @param enrollmentData The current enrollment data.
+     */
     private void updateUIBasedOnEnrollment(FleetEnrollData enrollmentData) {
         this.enrollmentData = enrollmentData;
         if (isEnrolled()) {
@@ -247,7 +273,9 @@ public class MainActivity extends AppCompatActivity implements StatusCallback {
 
 
 
-
+    /**
+     * Shows a dialog confirming the agent's unenrollment.
+     */
     private void showUnenrollmentDialog() {
         new AlertDialog.Builder(this)
                 .setMessage("Are you sure you want to unenroll?")
@@ -256,6 +284,10 @@ public class MainActivity extends AppCompatActivity implements StatusCallback {
                 .show();
     }
 
+    /**
+     * Performs the unenrollment of the agent, including cleanup of data and stopping any
+     * ongoing operations.
+     */
     private void unenrollAgent() {
         // TODO: Implement sending last data log to ES
         // Remove all registered workers
@@ -283,6 +315,11 @@ public class MainActivity extends AppCompatActivity implements StatusCallback {
         updateUIBasedOnEnrollment(new FleetEnrollData());
     }
 
+    /**
+     * Callback method for handling the result of asynchronous enrollment and checkin operations.
+     *
+     * @param success {@code true} if the operation was successful, {@code false} otherwise.
+     */
     @Override
     public void onCallback(boolean success) {
         if (success) {
@@ -304,6 +341,12 @@ public class MainActivity extends AppCompatActivity implements StatusCallback {
         }
     }
 
+    /**
+     * Formats a date string from one pattern to another (used in the top text view to show the enrollment date).
+     *
+     * @param dateUnformatted The unformatted date string.
+     * @return The formatted date string.
+     */
     private String formatDate(String dateUnformatted){
         try {
             String originalPattern = "yyyy-MM-dd"; // Assume original format
@@ -321,6 +364,9 @@ public class MainActivity extends AppCompatActivity implements StatusCallback {
 
     }
 
+    /**
+     * Shows the legal disclaimer in a dialog box the first time the app is run.
+     */
     private void showLegalDisclaimer() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Legal Disclaimer");
@@ -355,6 +401,9 @@ public class MainActivity extends AppCompatActivity implements StatusCallback {
         dialog.show();
     }
 
+    /**
+     * Creates a notification channel for the app. This is required for API level 26 and above.
+     */
     private void createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             CharSequence name = "Elastic Agent Android";

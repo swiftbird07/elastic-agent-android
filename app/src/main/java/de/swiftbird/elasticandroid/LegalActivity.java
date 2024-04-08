@@ -5,6 +5,10 @@ import android.widget.Button;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 
+/**
+ * LegalActivity displays the legal disclaimer for the application.
+ * It provides information about the software's warranty, liability, and prohibited uses.
+ */
 public class LegalActivity extends AppCompatActivity {
 
     private Button btnBack;

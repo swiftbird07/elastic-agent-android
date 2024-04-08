@@ -14,6 +14,26 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * Optional component that manages the security log events, leveraging the Device Policy Manager to enable and access security logs.
+ * This component is integral to monitoring, auditing, and analyzing security-related events that occur on the device,
+ * aiding in identifying potential security threats or policy violations.
+ *
+ * <p>It relies on {@link AppDeviceAdminReceiver} to activate security logging and fetch security log entries. The fetched logs
+ * are processed and stored in a local database, enabling persistent storage and analysis of security events over time.</p>
+ *
+ * <p>Activation of this component requires the app to be designated as a device owner, a status achieved during the initial
+ * device setup. This elevated status grants the app the ability to access sensitive logs and perform system-level operations
+ * related to security.</p>
+ *
+ * <p>Important: The capability to enable security logging and retrieve logs is available only on devices running
+ * Android Oreo (API level 26) or newer. This reflects the Android platform's evolving approach to security and device management.</p>
+ *
+ * <p>This component plays a critical role in maintaining device security, offering insights into the device's operational
+ * integrity and the actions of users and apps that could impact security posture.</p>
+ *
+ * <p>For missing documentation, refer to the Component interface.
+ */
 public class SecurityLogsComp implements Component {
 
     private static final String TAG = "SecurityLogsComp";
@@ -31,8 +51,12 @@ public class SecurityLogsComp implements Component {
         return securityLogsComp;
     }
 
-
-
+    /**
+     * Processes available security log events. This method retrieves and processes security log events from the
+     * {@link AppDeviceAdminReceiver}, converting them into a format suitable for storage and/or transmission.
+     *
+     * @param context The application context.
+     */
     public void handleSecurityLogs(Context context) {
         // First setup the component
         AppDatabase db = AppDatabase.getDatabase(context, "");
@@ -96,6 +120,16 @@ public class SecurityLogsComp implements Component {
 
     }
 
+    /**
+     * Sets up the security logs component for collecting security events. This method initializes the component,
+     * enabling security logging through the {@link AppDeviceAdminReceiver} and setting necessary configurations.
+     *
+     * @param context The application context.
+     * @param enrollmentData Data regarding the device's enrollment status.
+     * @param policyData Policy data affecting how security logs are handled.
+     * @param subComponent A string identifier for the sub-component, not used in this context.
+     * @return {@code true} if setup was successful and security logging is supported and enabled; otherwise, {@code false}.
+     */
     @Override
     public boolean setup(Context context, FleetEnrollData enrollmentData, PolicyData policyData, String subComponent) {
         // Initialize Room database and get the DAO
@@ -116,9 +150,6 @@ public class SecurityLogsComp implements Component {
                 }
                 dpm.setSecurityLoggingEnabled(adminComponentName, true);
 
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) { // Test TODO: Remove me
-                    dpm.setNetworkLoggingEnabled(adminComponentName, true);
-                }
                 AppLog.d(TAG, "Security logging enabled.");
                 return true;
             } else {
@@ -172,17 +203,28 @@ public class SecurityLogsComp implements Component {
         return "security-logs";
     }
 
+    /**
+     * This method disables security logging through the {@link AppDeviceAdminReceiver}
+     * and cleans up any resources used by the component.
+     *
+     * @param context The application context.
+     * @param enrollmentData Data regarding the device's enrollment status.
+     * @param policyData Policy data affecting how security logs are handled.
+     */
     @Override
     public void disable(Context context, FleetEnrollData enrollmentData, PolicyData policyData) {
-        /*
         AppLog.d(TAG, "Disabling security logs component");
         DevicePolicyManager dpm = (DevicePolicyManager) context.getSystemService(Context.DEVICE_POLICY_SERVICE);
         ComponentName adminComponentName = new ComponentName(context, AppDeviceAdminReceiver.class);
         dpm.setSecurityLoggingEnabled(adminComponentName, false);
-
-         */
     }
 
+    /**
+     * This method returns the name of the security event tag based on the tag ID.
+     *
+     * @param tag The tag ID of the security event.
+     * @return The name of the security event tag.
+     */
     public String getSecurityEventTagName(int tag) {
         switch (tag) {
             case 210002:

@@ -14,6 +14,20 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
 
+/**
+ * Represents location events captured by the application, including GPS coordinates and geographical information.
+ * This entity is stored in the application's Room database and is used to aggregate location events before processing
+ * or transmission to a centralized logging system.
+ * <p>
+*  The class extends {@link ElasticDocument} to include common Elastic Stack fields and additional location-specific
+*  information such as geographical names, postal codes, and street addresses.
+*  Fields are annotated for serialization into JSON using {@link com.google.gson.annotations.SerializedName}
+*  and for storage in the SQLite database using Room annotations.
+*  <p>
+*  The class also includes a nested class {@link GeoLocation} to represent a geographical location with latitude
+*  and longitude.
+*  </p>
+ */
 @Entity
 public class LocationCompDocument extends ElasticDocument {
 
@@ -34,6 +48,9 @@ public class LocationCompDocument extends ElasticDocument {
     @SerializedName("observer.geo.location")
     public GeoLocation observerGeoLocation;
 
+    /**
+     * Nested class to represent an ECS geo-location with latitude and longitude.
+     */
     public static class GeoLocation {
         @SerializedName("lat")
         public double lat;
@@ -120,6 +137,14 @@ public class LocationCompDocument extends ElasticDocument {
     public LocationCompDocument() {
     }
 
+    /**
+     * Constructs a LocationCompDocument from a Location object, enriching it with geographical information using the Geocoder if possible.
+     *
+     * @param location The raw location data.
+     * @param enrollmentData Enrollment data for context.
+     * @param policyData Policy data for context.
+     * @param context Android context for accessing the Geocoder.
+     */
     public LocationCompDocument(Location location, FleetEnrollData enrollmentData, PolicyData policyData, android.content.Context context) {
         super(enrollmentData, policyData);
         this.eventAction = "location-update";

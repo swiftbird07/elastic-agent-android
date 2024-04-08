@@ -6,6 +6,12 @@ import androidx.room.Query;
 
 import java.util.List;
 
+/**
+ * Data Access Object (DAO) for handling the storage and retrieval of {@link NetworkLogsCompDocument} objects,
+ * which represent network log events collected by the Android operating system.
+ *
+ * Functionality is similar to LocationCompBuffer.java so we will not repeat the documentation here.
+ */
 @Dao
 public interface NetworkLogsCompBuffer {
     @Insert

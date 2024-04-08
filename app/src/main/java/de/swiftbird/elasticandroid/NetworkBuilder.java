@@ -22,7 +22,28 @@ import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 
+/**
+ * Provides utility methods for creating instances of {@link OkHttpClient} with specific
+ * configurations, including optional SSL certificate pinning and custom headers.
+ */
 public  class NetworkBuilder {
+
+    /**
+     * Creates and configures an {@link OkHttpClient} instance with optional SSL certificate pinning and
+     * a custom User-Agent header. This method allows for configuring the client to either trust all certificates,
+     * trust certificates specified via a full certificate string or use the default system trust manager.
+     *
+     * @param checkCA        Indicates whether the CA (Certificate Authority) should be checked. If {@code true},
+     *                       the method uses the provided {@code sslCertFull} string to pin the certificate
+     *                       or the system trust manager if the string is null or empty. If {@code false},
+     *                       the client trusts all certificates.
+     * @param sslCertFull    The full SSL certificate string for pinning. This is used only if {@code checkCA} is true
+     *                       and the string is not null or empty.
+     * @param timeoutSeconds The timeout in seconds for both read and connect operations.
+     * @return An {@link OkHttpClient} instance configured according to the specified parameters.
+     * @throws RuntimeException If SSL certificate pinning is requested but fails due to any reason,
+     *                          this exception is thrown, encapsulating the original exception.
+     */
     public static OkHttpClient getOkHttpClient(boolean checkCA, @Nullable String sslCertFull, @Nullable int timeoutSeconds) {
         //AppLog.d("NetworkBuilder", "Creating OkHttpClient with checkCA: " + checkCA + " and sslCertFull: " + sslCertFull);
 

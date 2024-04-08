@@ -1,5 +1,9 @@
 package de.swiftbird.elasticandroid;
 
+/**
+ * Represents the response received when querying the status of the Fleet server.
+ * It contains the health and availability of the Fleet server.
+ */
 public class FleetStatusResponse {
     private String name;
     private String status;

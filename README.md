@@ -22,9 +22,10 @@ Elastic Agent Android supports a variety of components that collect different ty
 
 ## Compatibility
 
-Elastic Agent Android is designed to work with Android devices running Android 7.0 (Nougat) and above. 
-The app is built using the latest Android SDK and follows best practices for compatibility and performance.
-To enroll the agent, you will need a Fleet server running Elastic Agent 8.10.2 or later (possibly earlier versions, but not tested).
+Elastic Agent Android is designed to work with Android devices running **Android 7.0 (Nougat) and above**. 
+The app is built using the latest Android SDK and follows best practices for compatibility and performance. 
+
+To enroll the agent, you will need a Fleet server running **Elastic / Fleet 8.10.2 or later** (possibly earlier versions, but not tested).
 
 ## Quick Start
 

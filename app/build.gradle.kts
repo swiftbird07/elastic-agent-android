@@ -10,7 +10,7 @@ if (envFile.exists()) {
 plugins {
     id("com.android.application")
     kotlin("android")
-    kotlin("kapt")
+    //kotlin("kapt")
     id("com.google.android.gms.oss-licenses-plugin")
 }
 
@@ -51,8 +51,8 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_15
+        targetCompatibility = JavaVersion.VERSION_15
     }
     buildFeatures {
         viewBinding = true
@@ -83,7 +83,7 @@ dependencies {
     implementation(libs.lifecycle.viewmodel.ktx)
 
     implementation(libs.room.runtime)
-    kapt(libs.room.compiler)
+    //kapt(libs.room.compiler)
 
     //noinspection UseTomlInstead
     implementation("com.google.android.material:material")
@@ -98,6 +98,9 @@ dependencies {
     androidTestImplementation(libs.work.testing)
 
     implementation(libs.play.services.oss.licenses)
+
+    implementation(libs.room.runtime)
+    annotationProcessor(libs.room.compiler)
 
 }
 

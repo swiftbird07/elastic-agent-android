@@ -1,6 +1,7 @@
 # Elastic Agent Android (Unofficial)
 
-![Elastic Agent Android Logo](https://user-images.githubusercontent.com/path-to-your-logo.png)
+![Elastic Agent Android Logo](logo_elastic_agent.psd)
+
 
 Elastic Agent Android is an unofficial implementation of the Elastic Agent for Android devices, bringing the powerful observability and management features of the Elastic Stack to the Android ecosystem. With Elastic Agent Android, you can enroll your Android devices into a Fleet server and start collecting a wide range of data directly into Elasticsearch, allowing for real-time monitoring, alerting, and analysis.
 
@@ -27,3 +28,8 @@ Stay tuned for a quick start guide on how to deploy Elastic Agent Android on you
 
 We are open to feature requests, contributions, questions, and any feedback. If you're interested in contributing or have suggestions for improvement, please feel free to reach out or submit an issue/pull request on our GitHub repository.
 
+---
+This project is not affiliated with Elastic or Elastic Agent. It is an independent implementation created by the community for educational and experimental purposes.
+The maintainers of this project are not responsible for any misuse or damage caused by the software. Use at your own risk. See license for more details.
+The Elastic Agent logo is a registered trademark of Elastic N.V. and is used here for illustrative purposes only and does not imply any affiliation with or endorsement by Elastic N.V.
+```

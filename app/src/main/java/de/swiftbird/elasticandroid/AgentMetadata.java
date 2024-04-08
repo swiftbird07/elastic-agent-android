@@ -28,14 +28,14 @@ public class AgentMetadata {
 
         private String user_provided;
         private Local local;
-        private List<String> tags;
+        private List<String> tags = new ArrayList<>();
 
         public String getUser_provided() {
             return user_provided;
         }
 
-        public void setUser_provided(String user_provided) {
-            this.user_provided = user_provided;
+        public void setUser_provided(String userProvided) {
+            this.user_provided = userProvided;
         }
 
         public Local getLocal() {

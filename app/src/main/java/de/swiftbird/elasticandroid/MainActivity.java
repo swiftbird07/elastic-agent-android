@@ -349,7 +349,7 @@ public class MainActivity extends AppCompatActivity implements StatusCallback {
      */
     private String formatDate(String dateUnformatted){
         try {
-            String originalPattern = "yyyy-MM-dd"; // Assume original format
+            String originalPattern = "yyyy-MM-dd";
             String desiredPattern = "MMMM d, yyyy";
             SimpleDateFormat originalFormat = new SimpleDateFormat(originalPattern, Locale.getDefault());
             SimpleDateFormat desiredFormat = new SimpleDateFormat(desiredPattern, Locale.getDefault());

@@ -57,7 +57,7 @@ public class ElasticWorker extends Worker {
         // Obtain an instance of the AppDatabase
         AppDatabase db = AppDatabase.getDatabase(this.getApplicationContext(), "enrollment-data");
 
-        // Synchronously fetch the enrollment data; adjust the method call as necessary based on your DAO
+        // Synchronously fetch the enrollment data; adjust the method call as necessary based on the DAO
         FleetEnrollData enrollmentData = db.enrollmentDataDAO().getEnrollmentInfoSync(1);
         AgentMetadata agentMetadata = AgentMetadata.getMetadataFromDeviceAndDB(enrollmentData.agentId, enrollmentData.hostname);
         PolicyData policyData = db.policyDataDAO().getPolicyDataSync();

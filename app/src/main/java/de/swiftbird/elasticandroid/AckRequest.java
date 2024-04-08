@@ -26,10 +26,10 @@ public class AckRequest {
         private String subtype;
 
         @SerializedName("agent_id")
-        private String agent_id;
+        private String agentId;
 
         @SerializedName("action_id")
-        private String action_id;
+        private String actionId;
 
         @SerializedName("message")
         private String message;
@@ -48,8 +48,8 @@ public class AckRequest {
         this.events = new Event[]{new Event()};
         events[0].type = type;
         events[0].subtype = subtype;
-        events[0].agent_id = agent_id;
-        events[0].action_id = action_id;
+        events[0].agentId = agent_id;
+        events[0].actionId = action_id;
         events[0].message = message;
     }
 }

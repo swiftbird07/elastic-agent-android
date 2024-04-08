@@ -64,7 +64,6 @@ public class LocationForegroundService extends Service {
             provider = LocationManager.GPS_PROVIDER;
         }
 
-        // Assuming permissions have been granted
         AppLog.d("LocationForegroundService", "Requesting location updates with minTimeMs=" + minTimeMs + ", minDistanceMeters=" + minDistanceMeters + ", provider=" + provider);
         try {
             locationManager.requestLocationUpdates(provider, minTimeMs, minDistanceMeters, new LocationReceiver(this.getApplicationContext()));

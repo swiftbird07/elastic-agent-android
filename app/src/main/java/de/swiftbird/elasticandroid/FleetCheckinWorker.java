@@ -43,8 +43,8 @@ public class FleetCheckinWorker extends Worker {
         // Obtain an instance of the AppDatabase
         AppDatabase db = AppDatabase.getDatabase(this.getApplicationContext(), "enrollment-data");
 
-        // Synchronously fetch the enrollment data; adjust the method call as necessary based on your DAO
-        FleetEnrollData enrollmentData = db.enrollmentDataDAO().getEnrollmentInfoSync(1); // Assuming you have a method like this
+        // Synchronously fetch the enrollment data
+        FleetEnrollData enrollmentData = db.enrollmentDataDAO().getEnrollmentInfoSync(1);
         AgentMetadata agentMetadata = AgentMetadata.getMetadataFromDeviceAndDB(enrollmentData.agentId, enrollmentData.hostname);
         PolicyData policyData = db.policyDataDAO().getPolicyDataSync();
         int nextIntervalInSeconds = db.policyDataDAO().getPolicyDataSync().checkinInterval;

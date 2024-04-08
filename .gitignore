@@ -1,7 +1,7 @@
 # Ignore everything in the build directory
 app/build/
 # But do not ignore the apk directory and its contents
-!app/build/outputs/apk/
+!app/build/outputs/apk/*
 
 # Ignore Gradle system files
 .gradle

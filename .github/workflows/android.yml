@@ -34,8 +34,8 @@ jobs:
     - name: Upload APK
       uses: actions/upload-artifact@v2
       with:
-        name: app-release.apk
-        path: app/build/outputs/apk/release/app-release.apk
+        name: elastic-agent-android.apk
+        path: app/build/outputs/apk/release/elastic-agent-android.apk
 
 
   test:

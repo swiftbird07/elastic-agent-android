@@ -1,21 +1,29 @@
-# Elastic Agent Android
+# Elastic Agent Android (Unofficial)
 
-[![Android CI](https://github.com/swiftbird07/elastic-agent-android/actions/workflows/android.yml/badge.svg)](https://github.com/swiftbird07/elastic-agent-android/actions/workflows/android.yml)
+![Elastic Agent Android Logo](https://user-images.githubusercontent.com/path-to-your-logo.png)
 
-Inofficial Elastic Agent for Android. This project is not affiliated with Elastic.
+Elastic Agent Android is an unofficial implementation of the Elastic Agent for Android devices, bringing the powerful observability and management features of the Elastic Stack to the Android ecosystem. With Elastic Agent Android, you can enroll your Android devices into a Fleet server and start collecting a wide range of data directly into Elasticsearch, allowing for real-time monitoring, alerting, and analysis.
 
-## Planned Features
+## Use Cases
 
-- [x] Enroll Agent to Elastic Fleet Server
-- [x] Manage Agent via Kibana's Fleet Management
-- [x] Send events to Elastic Stack depending on the current policy
-  - [x]  Basic system information
-  - [x]  Various android system logs (requires device admin permission)
-  - [x]  Location information
-  - [ ]  Battery information
-  - [x]  Network information
-    - [ ]   Network usage information
-    - [ ]   Detailed HTTP request information
-    - [x]   Detailed DNS request information
-    - [x]   Flow data
-- [ ] Support for custom event types
+Elastic Agent Android aims to extend the powerful features of Elastic Observability and Security to mobile devices, providing detailed insights and security monitoring for Android devices. Whether you're managing a fleet of corporate devices or looking for a way to integrate mobile device data into your Elastic Stack, Elastic Agent Android offers a versatile and powerful solution.
+
+## Features
+
+Elastic Agent Android supports a variety of components that collect different types of data from the Android device, including:
+
+- **Location:** Sends periodic location updates to Elasticsearch, with configurable intervals.
+- **Network Logs:** Collects network logs (DNS, TCP connections) provided by the Android OS.
+- **Security Logs:** Gathers security-related logs, offering insights into the device's security posture.
+- **Self Log:** Logs the agent's own operational logs for diagnostics and monitoring.
+
+> **Note:** The Network Logs and Security Logs components require the device to be configured as a device owner. More details can be found in our [wiki page](#).
+
+## Quick Start
+
+Stay tuned for a quick start guide on how to deploy Elastic Agent Android on your device, enroll it with a Fleet server, and start collecting valuable data.
+
+## Contributions and Feedback
+
+We are open to feature requests, contributions, questions, and any feedback. If you're interested in contributing or have suggestions for improvement, please feel free to reach out or submit an issue/pull request on our GitHub repository.
+

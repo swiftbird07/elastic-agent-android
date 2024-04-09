@@ -32,7 +32,7 @@ To enroll the agent, you will need a Fleet server running **Elastic / Fleet 8.10
 To get started with Elastic Agent Android, follow these steps:
 
 ### 1. Download the APK
-Download the latest APK from the [Artifacts section](https://github.com/swiftbird07/elastic-agent-android/actions) of the GitHub Actions page. Choose the latest successful build and download the APK file from the artifacts section.
+Download the latest APK from the [Artifacts section](https://github.com/swiftbird07/elastic-agent-android/actions) of the GitHub Actions page. Choose the latest successful build and download the APK by scrolling down and clicking on the `elastic-agent-android.apk`.
 
 ### 2. Create a New Policy in Fleet
 In your Fleet server, create a new policy using the "Custom Logs" integration (a "real" Android integration will be available in the future)
@@ -66,10 +66,10 @@ After enrolling, the agent should report as "Healthy" within a few seconds, and 
 
 ## Contributions and Feedback
 
-We are open to feature requests, contributions, questions, and any feedback. If you're interested in contributing or have suggestions for improvement, please feel free to reach out or submit an issue/pull request on our GitHub repository.
+We are open to feature requests, contributions, questions, and any feedback. If you're interested in contributing or have suggestions for improvement, please feel free to reach out or submit an issue/pull request on our GitHub repository. 
 
-
+ 
 ---
-This project is not affiliated with Elastic or Elastic Agent. It is an independent implementation created by the community for educational and experimental purposes.
+**Disclaimer:** This project is not affiliated with Elastic or Elastic Agent. It is an independent implementation created by the community for educational and experimental purposes.
 The maintainers of this project are not responsible for any misuse or damage caused by the software. Use at your own risk. See license for more details.
 The Elastic Agent logo is a registered trademark of Elastic N.V. and is used here for illustrative purposes only and does not imply any affiliation with or endorsement by Elastic N.V.

@@ -71,6 +71,6 @@ We are open to feature requests, contributions, questions, and any feedback. If 
 
  
 ---
-**Disclaimer:** This project is not affiliated with Elastic or Elastic Agent. It is an independent implementation created by the community for educational and experimental purposes.
+_**Disclaimer:** This project is not affiliated with Elastic or Elastic Agent. It is an independent implementation created by the community for educational and experimental purposes.
 The maintainers of this project are not responsible for any misuse or damage caused by the software. Use at your own risk. See license for more details.
-The Elastic Agent logo is a registered trademark of Elastic N.V. and is used here for illustrative purposes only and does not imply any affiliation with or endorsement by Elastic N.V.
+The Elastic Agent logo is a registered trademark of Elastic N.V. and is used here for illustrative purposes only and does not imply any affiliation with or endorsement by Elastic N.V._

@@ -10,7 +10,7 @@ import java.util.List;
  * Data Access Object (DAO) for handling the storage and retrieval of {@link SecurityLogsCompDocument} objects,
  * which represent security log events collected by the Android operating system.
  *
- * Functionality is similar to LocationCompBuffer.java so we will not repeat the documentation here.
+ * <p></p>Functionality is similar to LocationCompBuffer.java so we see the same methods there.</p>
  */
 @Dao
 public interface SecurityLogsCompBuffer {

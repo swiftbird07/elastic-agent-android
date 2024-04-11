@@ -1,13 +1,11 @@
 package de.swiftbird.elasticandroid;
 
 import android.content.Context;
-
 import androidx.work.Constraints;
 import androidx.work.ExistingWorkPolicy;
 import androidx.work.NetworkType;
 import androidx.work.OneTimeWorkRequest;
 import androidx.work.WorkManager;
-
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -20,7 +18,6 @@ import java.util.concurrent.TimeUnit;
  * <p>The scheduler also provides the ability to cancel all scheduled tasks, offering control over task execution and resource management.</p>
  */
 public class WorkScheduler {
-
     protected static final String FLEET_CHECKIN_WORK_NAME = "fleet_checkin";
     protected static final String ELASTICSEARCH_PUT_WORK_NAME = "elasticsearch-put";
 
@@ -32,10 +29,11 @@ public class WorkScheduler {
      * @param interval  The delay before the task is executed, specified in the units provided by the {@code timeUnit} parameter.
      * @param timeUnit  The time unit for the {@code interval} parameter, e.g., {@link TimeUnit#MINUTES}.
      */
-    public static void scheduleFleetCheckinWorker(Context context, long interval, TimeUnit timeUnit) {
+    public static void scheduleFleetCheckinWorker(Context context, long interval, TimeUnit timeUnit, boolean constraintBatteryNotLow) {
         AppLog.i("WorkScheduler", "Scheduling fleet check-in worker with interval " + interval + " " + timeUnit.toString());
         Constraints constraints = new Constraints.Builder()
                 .setRequiredNetworkType(NetworkType.CONNECTED)
+                .setRequiresBatteryNotLow(constraintBatteryNotLow)
                 .build();
 
         OneTimeWorkRequest.Builder builder = new OneTimeWorkRequest.Builder(FleetCheckinWorker.class)
@@ -44,6 +42,7 @@ public class WorkScheduler {
                 .addTag(FLEET_CHECKIN_WORK_NAME);
 
         OneTimeWorkRequest workRequest = builder.build();
+        // We need to use unique work and not a periodic worker, as the interval is dynamic and likely under the minimum scheduling interval of 15 minutes.
         WorkManager.getInstance(context).enqueueUniqueWork(FLEET_CHECKIN_WORK_NAME, ExistingWorkPolicy.REPLACE, workRequest);
     }
 
@@ -55,10 +54,11 @@ public class WorkScheduler {
      * @param interval  The delay before the task is executed, specified in the units provided by the {@code timeUnit} parameter.
      * @param timeUnit  The time unit for the {@code interval} parameter, e.g., {@link TimeUnit#MINUTES}.
      */
-    public static void scheduleElasticsearchWorker(Context context, long interval, TimeUnit timeUnit) {
+    public static void scheduleElasticsearchWorker(Context context, long interval, TimeUnit timeUnit, boolean constraintBatteryNotLow) {
         AppLog.i("WorkScheduler", "Scheduling Elasticsearch put worker with interval " + interval + " " + timeUnit.toString());
         Constraints constraints = new Constraints.Builder()
                 .setRequiredNetworkType(NetworkType.CONNECTED)
+                .setRequiresBatteryNotLow(constraintBatteryNotLow)
                 .build();
 
         OneTimeWorkRequest.Builder builder = new OneTimeWorkRequest.Builder(ElasticWorker.class)
@@ -67,6 +67,7 @@ public class WorkScheduler {
                 .addTag(ELASTICSEARCH_PUT_WORK_NAME);
 
         OneTimeWorkRequest workRequest = builder.build();
+        // We need to use unique work and not a periodic worker, as the interval is dynamic and likely under the minimum scheduling interval of 15 minutes.
         WorkManager.getInstance(context).enqueueUniqueWork(ELASTICSEARCH_PUT_WORK_NAME, ExistingWorkPolicy.REPLACE, workRequest);
     }
 

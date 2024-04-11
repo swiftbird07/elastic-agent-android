@@ -1,7 +1,9 @@
 package de.swiftbird.elasticandroid;
 
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
 /**
@@ -10,7 +12,7 @@ import java.util.function.Supplier;
  * based on administrative configurations. This approach supports flexible component activation and configuration through policy settings.
  */
 public class ComponentFactory {
-    private static final Map<String, Supplier<?>> components = new HashMap<>();
+    private static final Map<String, Supplier<?>> components = new ConcurrentHashMap<>();
 
     static {
         // Initial component registration.
@@ -44,6 +46,22 @@ public class ComponentFactory {
      * @return An array of all Component instances currently registered.
      */
     public static Component[] getAllInstances() {
-        return components.values().stream().map(Supplier::get).toArray(Component[]::new);
+        List<Component> list = new ArrayList<>();
+        for (Supplier<?> supplier : components.values()) {
+            Component o = (Component) supplier.get();
+            list.add(o);
+        }
+        return list.toArray(new Component[0]);
+    }
+
+    /**
+     * Registers a new component with the factory, associating it with a unique key.
+     * The key should be a URI scheme that identifies the component type and can include configuration directives.
+     *
+     * @param key      The unique key (URI) identifying the component type only (URI until the first colon, e.g., "android://location").
+     * @param supplier A supplier function that creates a new instance of the component.
+     */
+    public static void registerComponent(String key, Supplier<Component> supplier) {
+        components.put(key, supplier);
     }
 }

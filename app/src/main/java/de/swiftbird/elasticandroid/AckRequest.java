@@ -12,13 +12,13 @@ public class AckRequest {
      * Array of events to be acknowledged. Each event contains details such as type, subtype, agent ID, action ID, and a message.
      */
     @SerializedName("events")
-    private Event[] events;
+    private final Event[] events;
 
     /**
      * Represents a single event in the acknowledgment request.
      * This nested class details the structure of an event, including its type, subtype, agent and action IDs, and a descriptive message.
      */
-    public class Event {
+    public static class Event {
         @SerializedName("type")
         private String type;
 

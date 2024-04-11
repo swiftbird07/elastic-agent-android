@@ -1,22 +1,20 @@
 package de.swiftbird.elasticandroid;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.work.WorkInfo;
 import androidx.work.WorkManager;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
-
 import de.swiftbird.elasticandroid.R.id;
 
 /**
@@ -37,7 +35,6 @@ public class DetailsActivity extends AppCompatActivity  {
     private TextView tLastPolicyUpdateValue;
 
     // Policy Texts
-
    private TextView fleetStatus;
     private TextView enabledCollectors;
     private TextView revisionValue;
@@ -52,34 +49,25 @@ public class DetailsActivity extends AppCompatActivity  {
     private TextView maxBackoffValue;
 
     // ES Texts
-
     private TextView workersValue;
     private TextView esIntervalValue;
     private TextView combinedBufferSizeValue;
     private TextView lastDocumentsSendAtValue;
     private TextView lastDocumentsSendSizeValue;
 
-    // Linear Layouts
-
+    // Enrollment Details Layout
     private LinearLayout llEnrollmentDetails;
-    private LinearLayout llPolicyDetails;
-    private Button btnBack;
-
-    private String TAG = "DetailsActivity";
-
+    private final String TAG = "DetailsActivity";
     private FleetEnrollData enrollmentData;
-
-    private Handler handler = new Handler();
-
-    private boolean failingBool = false;
-
+    private final Handler handler = new Handler();
     private final Map<String, String> workStatusMap = new HashMap<>();
 
-    private Runnable runnableCode = new Runnable() {
+    private final Runnable runnableCode = new Runnable() {
         @Override
         public void run() {
             update();
             // Repeat this runnable code again every 5 seconds
+            // TODO: Make this interval configurable
             handler.postDelayed(this, 5000);
         }
     };
@@ -123,12 +111,9 @@ public class DetailsActivity extends AppCompatActivity  {
 
         setupWorkObservation();
 
-        btnBack = findViewById(id.btnBack);
+        Button btnBack = findViewById(id.btnBack);
 
-        btnBack.setOnClickListener(view -> {
-            finish();
-        });
-
+        btnBack.setOnClickListener(view -> finish());
     }
 
     @Override
@@ -157,6 +142,7 @@ public class DetailsActivity extends AppCompatActivity  {
      * based on the current enrollment status of the agent.
      * @param enrollmentData The latest enrollment data for the agent.
      */
+    @SuppressLint("SetTextI18n")
     private void updateUIBasedOnEnrollment(FleetEnrollData enrollmentData) {
         this.enrollmentData = enrollmentData;
         if (isEnrolled()) {
@@ -173,7 +159,7 @@ public class DetailsActivity extends AppCompatActivity  {
         } else {
             // Check if agent is enrolled and show sync button
             tAgentStatusValue.setText("Ready for Enrollment");
-            tAgentStatusValue.setTextColor(getResources().getColor(android.R.color.darker_gray)); // Set text color to red if unenrolled
+            tAgentStatusValue.setTextColor(ContextCompat.getColor(this, android.R.color.darker_gray)); // Set text color to red if unenrolled
 
             // Hide the enrollment details if not enrolled
             showEnrollmentDetails(false);
@@ -215,7 +201,6 @@ public class DetailsActivity extends AppCompatActivity  {
         // Backoff
         useBackoffValue.setText(policyData.useBackoff ? "Yes" : "No");
         maxBackoffValue.setText(policyData.maxBackoffInterval != 0 ? FleetCheckinRepository.secondsToTimeInterval(policyData.maxBackoffInterval) : "Not Set");
-
     }
 
     /**
@@ -229,9 +214,8 @@ public class DetailsActivity extends AppCompatActivity  {
         lastDocumentsSendSizeValue.setText(statisticsData.lastDocumentsSentCount != -1 ? String.valueOf(statisticsData.lastDocumentsSentCount) : "Never");
         combinedBufferSizeValue.setText(statisticsData.combinedBufferSize != -1 ? String.valueOf(statisticsData.combinedBufferSize) : "0");
         tAgentStatusValue.setText(statisticsData.agentHealth != null ? statisticsData.agentHealth : "Unhealthy");
-        tAgentStatusValue.setTextColor(getResources().getColor(statisticsData.agentHealth != null && statisticsData.agentHealth.equals("Healthy") ? android.R.color.holo_green_dark : android.R.color.holo_orange_dark));
+        tAgentStatusValue.setTextColor(ContextCompat.getColor(this, statisticsData.agentHealth != null && statisticsData.agentHealth.equals("Healthy") ? android.R.color.holo_green_dark : android.R.color.holo_orange_dark));
     }
-
 
     /**
      * Controls the visibility of enrollment details within the UI based on the agent's
@@ -269,27 +253,32 @@ public class DetailsActivity extends AppCompatActivity  {
      * (enrollment, policy, and statistics).
      */
     private void update(){
-        AppLog.d(TAG, "Updating UI...");
+        // TODO: Extract this to a separate DetailsRepository class
+        AppLog.d(TAG, "Updating UI..."); // TODO: Maybe display a message visible to the user indicating the update
 
-        // Load UI based on enrollment status from database
-        AppDatabase db = AppDatabase.getDatabase(this.getApplicationContext(), "enrollment-data");
-        db.enrollmentDataDAO().getEnrollmentInfo(1).observe(this, enrollmentData -> {
-            if(enrollmentData != null) {
-                updateUIBasedOnEnrollment(enrollmentData);
-            }
-        });
+        try {
+            // Load UI based on enrollment status from database
+            AppDatabase db = AppDatabase.getDatabase(this.getApplicationContext(), "");
+            db.enrollmentDataDAO().getEnrollmentInfo(1).observe(this, enrollmentData -> {
+                if(enrollmentData != null) {
+                    updateUIBasedOnEnrollment(enrollmentData);
+                }
+            });
 
-        db.policyDataDAO().getPoliyData().observe(this, policyData -> {
-            if(policyData != null) {
-                updateUIBasedOnPolicy(policyData);
-            }
-        });
+            db.policyDataDAO().getPolicyData().observe(this, policyData -> {
+                if(policyData != null) {
+                    updateUIBasedOnPolicy(policyData);
+                }
+            });
 
-        db.statisticsDataDAO().getStatistics().observe(this, statisticsData -> {
-            if(statisticsData != null) {
-                updateUIBasedOnStatistics(statisticsData);
-            }
-        });
+            db.statisticsDataDAO().getStatistics().observe(this, statisticsData -> {
+                if(statisticsData != null) {
+                    updateUIBasedOnStatistics(statisticsData);
+                }
+            });
+        } catch (Exception e) {
+            AppLog.e(TAG, "Error updating UI: " + e.getMessage());
+        }
     }
 
     /**
@@ -300,6 +289,7 @@ public class DetailsActivity extends AppCompatActivity  {
      * @param failing A flag indicating if any work task has failed.
      */
     private void observeWorkAndSetStatus(String workName, TextView workersValue, AtomicBoolean failing) {
+        // TODO: Extract this to a separate DetailsRepository class
         WorkManager.getInstance(getApplicationContext())
                 .getWorkInfosByTagLiveData(workName)
                 .observe(this, workInfos -> {
@@ -326,7 +316,7 @@ public class DetailsActivity extends AppCompatActivity  {
                     // Update the TextView
                     workersValue.setText(statusBuilder.toString());
 
-                    AppDatabase db = AppDatabase.getDatabase(this.getApplicationContext(), "enrollment-data");
+                    AppDatabase db = AppDatabase.getDatabase(this.getApplicationContext(), "");
 
                     Executors.newSingleThreadExecutor().execute(() -> {
                         // Perform database read operation in background
@@ -338,19 +328,18 @@ public class DetailsActivity extends AppCompatActivity  {
                 });
     }
 
-
     /**
      * Sets up observation for work tasks using WorkManager, updating the UI with the current
      * status and health of the agent based on work task outcomes.
      */
     private void setupWorkObservation() {
         workersValue.setText("");
+        boolean failingBool = false;
         AtomicBoolean failing = new AtomicBoolean(failingBool);
 
         observeWorkAndSetStatus(WorkScheduler.FLEET_CHECKIN_WORK_NAME, workersValue, failing);
         observeWorkAndSetStatus(WorkScheduler.ELASTICSEARCH_PUT_WORK_NAME, workersValue, failing);
     }
-
 }
 
 

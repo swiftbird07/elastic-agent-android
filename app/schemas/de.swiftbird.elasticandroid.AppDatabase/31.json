@@ -1,12 +1,12 @@
 {
   "formatVersion": 1,
   "database": {
-    "version": 29,
-    "identityHash": "03824431b54045e7f3c117ef4f6dcf01",
+    "version": 31,
+    "identityHash": "59c36e40eb7080c5d0239ecf3dfa9702",
     "entities": [
       {
         "tableName": "FleetEnrollData",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `agent_id` TEXT, `is_enrolled` INTEGER NOT NULL, `hostname` TEXT, `fleet_url` TEXT, `verify_cert` INTEGER NOT NULL, `fleet_certificate` TEXT, `action` TEXT, `access_api_key` TEXT, `access_api_key_id` TEXT, `active` INTEGER NOT NULL, `enrolled_at` TEXT, `policy_id` TEXT, `status` TEXT, `type` TEXT, `last_checkin` TEXT, `last_policy_update` TEXT, `policy` TEXT, PRIMARY KEY(`id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `agent_id` TEXT, `is_enrolled` INTEGER NOT NULL, `hostname` TEXT, `fleet_url` TEXT, `verify_cert` INTEGER NOT NULL, `fleet_certificate` TEXT, `action` TEXT, `access_api_key_id` TEXT, `active` INTEGER NOT NULL, `enrolled_at` TEXT, `policy_id` TEXT, `status` TEXT, `type` TEXT, `last_checkin` TEXT, `last_policy_update` TEXT, `policy` TEXT, PRIMARY KEY(`id`))",
         "fields": [
           {
             "fieldPath": "id",
@@ -53,12 +53,6 @@
           {
             "fieldPath": "action",
             "columnName": "action",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "accessApiKey",
-            "columnName": "access_api_key",
             "affinity": "TEXT",
             "notNull": false
           },
@@ -128,7 +122,7 @@
       },
       {
         "tableName": "PolicyData",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `created_at` TEXT, `revision` INTEGER NOT NULL, `protection_enabled` INTEGER NOT NULL, `uninstall_token_hash` TEXT, `input_name` TEXT, `allow_user_unenroll` INTEGER NOT NULL, `log_package_name` TEXT, `log_package_version` TEXT, `data_stream_dataset` TEXT, `ignore_older` TEXT, `interval` TEXT, `checkin_interval` INTEGER NOT NULL, `backoff_checkin_interval` INTEGER NOT NULL, `put_interval` INTEGER NOT NULL, `backoff_put_interval` INTEGER NOT NULL, `max_documents_per_request` INTEGER NOT NULL, `paths` TEXT, `hosts` TEXT, `ssl_ca_trusted_fingerprint` TEXT, `ssl_ca_trusted_full` TEXT, `use_backoff` INTEGER NOT NULL, `max_backoff_interval` INTEGER NOT NULL, `backoff_on_empty_buffer` INTEGER NOT NULL, `output_policy_id` TEXT, `last_updated` TEXT, `checkin_action_id` TEXT)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `created_at` TEXT, `revision` INTEGER NOT NULL, `protection_enabled` INTEGER NOT NULL, `uninstall_token_hash` TEXT, `input_name` TEXT, `allow_user_unenroll` INTEGER NOT NULL, `log_package_name` TEXT, `log_package_version` TEXT, `data_stream_dataset` TEXT, `ignore_older` TEXT, `interval` TEXT, `checkin_interval` INTEGER NOT NULL, `backoff_checkin_interval` INTEGER NOT NULL, `put_interval` INTEGER NOT NULL, `backoff_put_interval` INTEGER NOT NULL, `max_documents_per_request` INTEGER NOT NULL, `disable_if_battery_low` INTEGER NOT NULL, `paths` TEXT, `hosts` TEXT, `ssl_ca_trusted_fingerprint` TEXT, `ssl_ca_trusted_full` TEXT, `use_backoff` INTEGER NOT NULL, `max_backoff_interval` INTEGER NOT NULL, `backoff_on_empty_buffer` INTEGER NOT NULL, `output_policy_id` TEXT, `last_updated` TEXT, `checkin_action_id` TEXT)",
         "fields": [
           {
             "fieldPath": "id",
@@ -229,6 +223,12 @@
           {
             "fieldPath": "maxDocumentsPerRequest",
             "columnName": "max_documents_per_request",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "disableIfBatteryLow",
+            "columnName": "disable_if_battery_low",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -1492,7 +1492,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '03824431b54045e7f3c117ef4f6dcf01')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '59c36e40eb7080c5d0239ecf3dfa9702')"
     ]
   }
 }

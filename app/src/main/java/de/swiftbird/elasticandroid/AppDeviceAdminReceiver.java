@@ -1,15 +1,9 @@
 package de.swiftbird.elasticandroid;
 
-
 import android.app.admin.DeviceAdminReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Build;
-import android.util.Log;
-
 import androidx.annotation.NonNull;
-
-import java.util.Objects;
 
 /**
  * Extends DeviceAdminReceiver to handle specific admin events related to the application's device management features.
@@ -19,8 +13,8 @@ public class AppDeviceAdminReceiver extends DeviceAdminReceiver {
 
     /**
      * Called when the application is granted device admin access.
-     * This method can be used to perform initial setup actions or to enable specific features upon admin activation.
-     * Currently this does nothing.
+     * This method could be used to perform some setup actions upon admin activation.
+     * Tho currently this does nothing.
      *
      * @param context The Context in which the receiver is running.
      * @param intent  The Intent being received.
@@ -28,6 +22,7 @@ public class AppDeviceAdminReceiver extends DeviceAdminReceiver {
     @Override
     public void onEnabled(@NonNull Context context, @NonNull Intent intent) {
         super.onEnabled(context, intent);
+        AppLog.i("AppDeviceAdminReceiver", "Device admin enabled");
     }
 
     /**
@@ -43,7 +38,13 @@ public class AppDeviceAdminReceiver extends DeviceAdminReceiver {
         AppLog.i("AppDeviceAdminReceiver", "Security logs available");
         SecurityLogsComp logsComp = SecurityLogsComp.getInstance();
         // New thread to handle the security logs
-        new Thread(() -> logsComp.handleSecurityLogs(context)).start();
+        new Thread(() -> {
+            try {
+                logsComp.handleSecurityLogs(context);
+            } catch (Exception e) {
+                AppLog.e("AppDeviceAdminReceiver", "Error handling security logs: " + e.getMessage());
+            }
+        }).start();
     }
 
     /**
@@ -61,6 +62,12 @@ public class AppDeviceAdminReceiver extends DeviceAdminReceiver {
         AppLog.i("AppDeviceAdminReceiver", "Network logs available from batchToken: " + batchToken + " with count: " + networkLogsCount);
         NetworkLogsComp logsComp = NetworkLogsComp.getInstance();
         // New thread to handle the network logs
-        new Thread(() -> logsComp.handleNetworkLogs(context, batchToken)).start();
+        new Thread(() -> {
+            try {
+                logsComp.handleNetworkLogs(context, batchToken);
+            } catch (Exception e) {
+                AppLog.e("AppDeviceAdminReceiver", "Error handling network logs: " + e.getMessage());
+            }
+        }).start();
     }
 }

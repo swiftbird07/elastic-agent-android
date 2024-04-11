@@ -9,15 +9,19 @@ lifecycleLivedataKtx = "2.7.0"
 material = "1.11.0"
 constraintlayout = "2.1.4"
 mockitoCore = "3.12.4"
+mockitoCoreVersion = "3.12.4"
 navigationFragment = "2.7.7"
 navigationUi = "2.7.7"
 ossLicensesPlugin = "0.10.6"
 playServicesOssLicenses = "17.0.1"
 retrofit = "2.9.0"
 robolectric = "4.12.1"
+robolectricVersion = "4.12.1"
 roomCommon = "2.6.1"
 roomVersion = "2.6.1"
 workRuntime = "2.9.0"
+firebaseFirestore = "24.11.0"
+securityCrypto = "1.1.0-alpha06"
 
 [libraries]
 converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "retrofit" }
@@ -31,17 +35,21 @@ lifecycle-viewmodel-ktx = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
 mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockitoCore" }
+mockito-core-v3112 = { module = "org.mockito:mockito-core", version.ref = "mockitoCoreVersion" }
 navigation-fragment = { group = "androidx.navigation", name = "navigation-fragment", version.ref = "navigationFragment" }
 navigation-ui = { group = "androidx.navigation", name = "navigation-ui", version.ref = "navigationUi" }
 oss-licenses-plugin = { module = "com.google.android.gms:oss-licenses-plugin", version.ref = "ossLicensesPlugin" }
 play-services-oss-licenses = { module = "com.google.android.gms:play-services-oss-licenses", version.ref = "playServicesOssLicenses" }
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
 robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
+robolectric-v46 = { module = "org.robolectric:robolectric", version.ref = "robolectricVersion" }
 room-common = { group = "androidx.room", name = "room-common", version.ref = "roomCommon" }
 room-compiler = { module = "androidx.room:room-compiler", version.ref = "roomVersion" }
 room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomVersion" }
 work-runtime = { module = "androidx.work:work-runtime", version.ref = "workRuntime" }
 work-testing = { module = "androidx.work:work-testing", version.ref = "workRuntime" }
+firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore", version.ref = "firebaseFirestore" }
+security-crypto = { group = "androidx.security", name = "security-crypto", version.ref = "securityCrypto" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

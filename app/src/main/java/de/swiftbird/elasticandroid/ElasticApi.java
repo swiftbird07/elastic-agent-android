@@ -21,7 +21,7 @@ public interface ElasticApi {
          * @param elasticDocument The document to insert or update, wrapped in an {@link ElasticDocument} object.
          * @return A {@link Call} object for the network request, with {@link ElasticResponse} as the expected response type.
          */
-        @PUT("/{index}/_doc/{id}")
+        @PUT("/{index}/_doc")
         Call<ElasticResponse> put(
                 @Header("Authorization") String accessApiKeyHeader,
                 @Path("index") String index,
@@ -42,7 +42,4 @@ public interface ElasticApi {
                 @Header("Authorization") String accessApiKeyHeader,
                 @Path("index") String index,
                 @Body RequestBody elasticDocument);
-
-
-
 }

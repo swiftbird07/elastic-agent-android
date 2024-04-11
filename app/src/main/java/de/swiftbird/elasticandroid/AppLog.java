@@ -1,6 +1,9 @@
 package de.swiftbird.elasticandroid;
 
+import android.os.Build;
 import android.util.Log;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Provides a unified logging interface that extends Android's Log class functionalities.
@@ -8,7 +11,7 @@ import android.util.Log;
  * database for persistence and further processing, depending on configured policies.
  */
 public class AppLog {
-    private static SelfLogCompBuffer logDao; // DAO for logging component, used for inserting logs into the database.
+    private static final ExecutorService executor = Executors.newSingleThreadExecutor();
 
     /**
      * Logs an informational message both to the console and the application's log storage.
@@ -68,7 +71,10 @@ public class AppLog {
      */
     public static int d(String tag, String msg) {
         insertLog("DEBUG", tag, msg);
-        return Log.d(tag, msg);
+        if(BuildConfig.DEBUG){ // Only log debug messages to logcat in debug builds
+            return Log.d(tag, msg);
+        }
+        return 0;
     }
 
     /**
@@ -80,51 +86,58 @@ public class AppLog {
      * @param message The log message.
      */
     private static void insertLog(String level, String tag, String message) {
-            // Execute on a background thread to avoid blocking the main thread
-            new Thread(() -> {
-                try {
-                    AppDatabase db = AppDatabase.getDatabase(AppInstance.getAppContext(), "");
-                    FleetEnrollData enrollmentData = db.enrollmentDataDAO().getEnrollmentInfoSync(1);
-                    PolicyData policyData = db.policyDataDAO().getPolicyDataSync();
-                    boolean selfLogEnabled = policyData != null && policyData.paths != null && policyData.paths.contains("android://self-log");
-                    if(!selfLogEnabled) {
-                        return;
-                    }
+        // Execute on a background thread to avoid blocking the main thread
+        executor.submit(() -> {
+            try {
+                AppDatabase db = AppDatabase.getDatabase(AppInstance.getAppContext(), "agent-data");
+                FleetEnrollData enrollmentData = db.enrollmentDataDAO().getEnrollmentInfoSync(1);
+                PolicyData policyData = db.policyDataDAO().getPolicyDataSync();
+                boolean selfLogEnabled = policyData != null && policyData.paths != null && policyData.paths.contains("android://self-log");
+                if(!selfLogEnabled) {
+                    return;
+                }
 
-                    // Get the path from the policy data for self-log in the "," separated format
-                    String[] paths = policyData.paths.split(",");
-                    for (String path : paths) {
-                        if (path.startsWith("android://self-log")) {
-                            // The path is in the format "android://self-log.INFO"
-                            String[] pathParts = path.split("\\.");
-                            if (pathParts.length > 1) {
-                                // Check if the log level is high enough to be sent
-                                if (level.equals("DEBUG") && pathParts[1].equals("info")) {
-                                    return;
-                                }
-                                if ((level.equals("DEBUG") || level.equals("INFO")) && pathParts[1].equals("warn")) {
-                                    return;
-                                }
-                                if ((level.equals("DEBUG") || level.equals("INFO") || level.equals("WARN")) && pathParts[1].equals("error")) {
-                                    return;
-                                }
-                            } else {
-                                // If no log level is specified, send only INFO logs
-                                if (!level.equals("INFO")) {
-                                    return;
-                                }
+                // Get the path from the policy data for self-log in the "," separated format
+                String[] paths = policyData.paths.split(",");
+                for (String path : paths) {
+                    if (path.startsWith("android://self-log")) {
+                        // The path is in the format "android://self-log.INFO"
+                        String[] pathParts = path.split("\\.");
+                        if (pathParts.length > 1) {
+                            // Check if the log level is high enough to be sent
+                            if (level.equals("DEBUG") && pathParts[1].equals("info")) {
+                                return;
+                            }
+                            if ((level.equals("DEBUG") || level.equals("INFO")) && pathParts[1].equals("warn")) {
+                                return;
+                            }
+                            if ((level.equals("DEBUG") || level.equals("INFO") || level.equals("WARN")) && pathParts[1].equals("error")) {
+                                return;
+                            }
+                        } else {
+                            // If no log level is specified, send only INFO logs
+                            if (!level.equals("INFO")) {
+                                return;
                             }
                         }
                     }
-
-                    SelfLogCompDocument document = new SelfLogCompDocument(enrollmentData, policyData, level, tag, message);
-                    SelfLogComp selfLogComp = SelfLogComp.getInstance();
-                    selfLogComp.setup(AppInstance.getAppContext() , null, null, "");
-                    selfLogComp.addDocumentToBuffer(document);
-                } catch (Exception e) {
-                    // Ignore any exceptions, as it may be that the agent is not enrolled yet and therefor can't send logs anyway
-                    return;
                 }
-            }).start();
+
+                SelfLogCompDocument document = new SelfLogCompDocument(enrollmentData, policyData, level, tag, message);
+                SelfLogComp selfLogComp = SelfLogComp.getInstance();
+                selfLogComp.setup(AppInstance.getAppContext() , null, null, "");
+                selfLogComp.addDocumentToBuffer(document);
+            } catch (Exception e) {
+                // Ignore any exceptions, as it may be that the agent is not enrolled yet and therefor can't send logs anyway
+            }
+        });
+
+    }
+
+    /**
+     * Shuts down the logger by stopping the executor service.
+     */
+    public static void shutdownLogger() {
+        executor.shutdown();
     }
 }

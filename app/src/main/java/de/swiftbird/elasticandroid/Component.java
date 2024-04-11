@@ -9,6 +9,7 @@ import java.util.List;
  * Each component must be initialized with setup() before use, providing a consistent lifecycle across components.
  */
 public interface Component {
+
     /**
      * Prepares the component for operation, initializing it with necessary data.
      *
@@ -28,7 +29,7 @@ public interface Component {
      * @param enrollmentData Data regarding the agent's enrollment.
      * @param policyData Policy configurations affecting data collection.
      */
-    void collectEvents(FleetEnrollData enrollmentData, PolicyData policyData);
+    default void collectEvents(FleetEnrollData enrollmentData, PolicyData policyData) {}
 
     /**
      * Adds a document to the component's internal buffer for later processing or transmission.
@@ -57,7 +58,9 @@ public interface Component {
      *
      * @return A list of permissions required by the component.
      */
-    List<String> getRequiredPermissions();
+    default List<String> getRequiredPermissions() {
+        return List.of();
+    }
 
     /**
      * Returns the path name (without sub-component or parameters) associated with the policy configuration for the component.
@@ -73,5 +76,5 @@ public interface Component {
      * @param enrollmentData Data regarding the agent's enrollment.
      * @param policyData Policy configurations affecting the component's behavior.
      */
-    void disable(Context context, FleetEnrollData enrollmentData, PolicyData policyData);
+    default void disable(Context context, FleetEnrollData enrollmentData, PolicyData policyData) {}
 }

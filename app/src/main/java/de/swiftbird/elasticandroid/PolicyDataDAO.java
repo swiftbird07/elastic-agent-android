@@ -6,7 +6,6 @@ import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 
-
 /**
  * Data Access Object (DAO) for managing {@link PolicyData} in the application's database.
  * Provides methods to insert, query, update, and delete policy data, allowing for real-time
@@ -37,7 +36,7 @@ public interface PolicyDataDAO {
      * @return A LiveData object containing the {@link PolicyData} record.
      */
     @Query("SELECT * FROM PolicyData")
-    LiveData<PolicyData> getPoliyData();
+    LiveData<PolicyData> getPolicyData();
 
     /**
      * Queries the database synchronously for the {@link PolicyData} record.
@@ -46,7 +45,6 @@ public interface PolicyDataDAO {
      */
     @Query("SELECT * FROM PolicyData")
     PolicyData getPolicyDataSync();
-
 
     /**
      * Updates the last updated timestamp and checkin action ID in the {@link PolicyData} record.

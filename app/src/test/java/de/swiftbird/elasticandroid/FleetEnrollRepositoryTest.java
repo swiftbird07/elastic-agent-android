@@ -1,63 +1,59 @@
 package de.swiftbird.elasticandroid;
 
 import static org.mockito.Mockito.*;
-
 import android.content.Context;
 import android.os.Build;
 import android.widget.TextView;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InOrder;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
-
 import java.io.IOException;
 import java.lang.reflect.Field;
-
 import okhttp3.MediaType;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+import androidx.test.core.app.ApplicationProvider;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = {Build.VERSION_CODES.LOLLIPOP})
+@Config(sdk = {Build.VERSION_CODES.N})  // API 24
 public class FleetEnrollRepositoryTest {
 
     @Mock
     private Context mockContext;
-
     @Mock
     private TextView mockStatusTextView;
-
     @Mock
     private TextView mockErrorTextView;
-
     @Mock
     private FleetApi mockFleetApi;
     @Mock
     private AppEnrollRequest mockRequest;
     @Mock
     private StatusCallback mockCallback;
-
     @Mock
     private Call<FleetStatusResponse> mockStatusCall;
     @Mock
     private Call<FleetEnrollResponse> mockEnrollCall;
-
+    @Mock
+    private AppSecurePreferences mockSecurePreferences;
     private FleetEnrollRepository enrollmentRepository;
+
 
     // Initialize mocks before each test
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
+        MockitoAnnotations.openMocks(this);
 
-        // Given
         String serverUrl = "https://fleet.example.com/";
         String token = "token123";
         boolean checkCert = true;
@@ -66,15 +62,44 @@ public class FleetEnrollRepositoryTest {
                 mockContext,
                 serverUrl,
                 token,
+                "",
                 checkCert,
                 mockStatusTextView,
-                mockErrorTextView
-        );
+                mockErrorTextView);
+
+        try (MockedStatic<AppSecurePreferences> mockedStatic = Mockito.mockStatic(AppSecurePreferences.class)) {
+            mockedStatic.when(() -> AppSecurePreferences.getInstance(any(Context.class)))
+                    .thenReturn(mockSecurePreferences);
+        }
 
         // Inject mockFleetApi using reflection or adjust FleetEnrollRepository to allow setting this dependency more directly
         Field fleetApiField = FleetEnrollRepository.class.getDeclaredField("fleetApi");
         fleetApiField.setAccessible(true);
         fleetApiField.set(enrollmentRepository, mockFleetApi);
+
+        when(mockRequest.getServerUrl()).thenReturn("https://fleet.example.com/");
+        when(mockFleetApi.getFleetStatus()).thenReturn(mockStatusCall);
+        when(mockFleetApi.enrollAgent(anyString(), any(FleetEnrollRequest.class))).thenReturn(mockEnrollCall);
+
+        doAnswer(invocation -> {
+            Callback<FleetStatusResponse> callback = invocation.getArgument(0);
+            FleetStatusResponse mockResponse = new FleetStatusResponse("HEALTHY");
+            callback.onResponse(null, Response.success(mockResponse));
+            return null; // Suitable for void methods
+        }).when(mockStatusCall).enqueue(any(Callback.class));
+
+        doAnswer(invocation -> {
+            Callback<FleetEnrollResponse> callback = invocation.getArgument(0);
+            FleetEnrollResponse.Item item = new FleetEnrollResponse.Item("123", "1", true, "2024-03-20T19:52:33Z", "eb0088c0", "eb0088c0-e635-11ee-8207-1b9b3acd8589", "online", null, "PERMANENT");
+            callback.onResponse(null, Response.success(new FleetEnrollResponse("created", item)));
+            return null;
+        }).when(mockEnrollCall).enqueue(any());
+
+
+        // Do nothing when saveFleetApiKey is called
+        //doNothing().when(mockSecurePreferences).saveFleetApiKey(anyString());
+        //doNothing().when(mockSecurePreferences).getFleetApiKey();
+
     }
 
     // Test constructor behavior with valid inputs
@@ -109,24 +134,6 @@ public class FleetEnrollRepositoryTest {
 
     @Test
     public void enrollAgent_success() {
-        when(mockRequest.getServerUrl()).thenReturn("https://fleet.example.com/");
-        when(mockFleetApi.getFleetStatus()).thenReturn(mockStatusCall);
-        when(mockFleetApi.enrollAgent(anyString(), any(FleetEnrollRequest.class))).thenReturn(mockEnrollCall);
-
-        doAnswer(invocation -> {
-            Callback<FleetStatusResponse> callback = invocation.getArgument(0);
-            FleetStatusResponse mockResponse = new FleetStatusResponse("HEALTHY");
-            callback.onResponse(null, Response.success(mockResponse));
-            return null; // Suitable for void methods
-        }).when(mockStatusCall).enqueue(any(Callback.class));
-
-        doAnswer(invocation -> {
-            Callback<FleetEnrollResponse> callback = invocation.getArgument(0);
-            FleetEnrollResponse.Item item = new FleetEnrollResponse.Item("123", "1", true, "2024-03-20T19:52:33Z", "eb0088c0", "eb0088c0-e635-11ee-8207-1b9b3acd8589", "online", null, "PERMANENT");
-            callback.onResponse(null, Response.success(new FleetEnrollResponse("created", item)));
-            return null;
-        }).when(mockEnrollCall).enqueue(any());
-
         enrollmentRepository.enrollAgent(mockRequest, mockCallback);
 
         // Verify that no error message was set

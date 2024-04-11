@@ -1,14 +1,11 @@
 package de.swiftbird.elasticandroid;
 
-import static androidx.core.content.ContextCompat.getSystemService;
-
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.SecurityLog;
 import android.content.ComponentName;
 import android.content.Context;
 import android.os.Build;
 import android.util.Log; // We don't use AppLog for non-warnings/errors because this would double-log the messages that are sent anyway
-
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -29,21 +26,15 @@ import java.util.Set;
  * <p>Important: The capability to enable security logging and retrieve logs is available only on devices running
  * Android Oreo (API level 26) or newer. This reflects the Android platform's evolving approach to security and device management.</p>
  *
- * <p>This component plays a critical role in maintaining device security, offering insights into the device's operational
- * integrity and the actions of users and apps that could impact security posture.</p>
- *
  * <p>For missing documentation, refer to the Component interface.
  */
 public class SecurityLogsComp implements Component {
-
     private static final String TAG = "SecurityLogsComp";
-
     private SecurityLogsCompBuffer buffer;
-
     private AppStatisticsDataDAO statistic;
     private static SecurityLogsComp securityLogsComp;
 
-    public static SecurityLogsComp getInstance() {
+    public static synchronized SecurityLogsComp getInstance() {
         // Singleton pattern
         if (securityLogsComp == null) {
             securityLogsComp = new SecurityLogsComp();
@@ -85,25 +76,15 @@ public class SecurityLogsComp implements Component {
                         }
 
                         // Case statement to convert log level int to string
-                        String logLevelName;
-                        switch (logLevel) {
-                            case SecurityLog.LEVEL_ERROR:
-                                logLevelName = "ERROR";
-                                break;
-                            case SecurityLog.LEVEL_WARNING:
-                                logLevelName = "WARNING";
-                                break;
-                            case SecurityLog.LEVEL_INFO:
-                                logLevelName = "INFO";
-                                break;
-                            default:
-                                logLevelName = "UNKNOWN";
-                                break;
-                        }
+                        String logLevelName = switch (logLevel) {
+                            case SecurityLog.LEVEL_ERROR -> "ERROR";
+                            case SecurityLog.LEVEL_WARNING -> "WARNING";
+                            case SecurityLog.LEVEL_INFO -> "INFO";
+                            default -> "UNKNOWN";
+                        };
 
                         int tag = event.getTag();
                         String tagName = getSecurityEventTagName(tag);
-
                         String message = event.toString();
 
                         addDocumentToBuffer(new SecurityLogsCompDocument(enrollmentData, policyData, logLevelName, tagName, message));
@@ -117,7 +98,6 @@ public class SecurityLogsComp implements Component {
         } catch (Exception e) {
             AppLog.e(TAG, "Failed to retrieve security logs: " + Arrays.toString(e.getStackTrace()));
         }
-
     }
 
     /**
@@ -168,14 +148,20 @@ public class SecurityLogsComp implements Component {
 
     @Override
     public void addDocumentToBuffer(ElasticDocument document) {
-        if (document instanceof SecurityLogsCompDocument && buffer != null) {
-            buffer.insertDocument((SecurityLogsCompDocument) document);
-            statistic.increaseCombinedBufferSize(1);
-        }
-        else {
-            Log.w(TAG, "Invalid document type or buffer not initialized");
+        if (document instanceof SecurityLogsCompDocument) {
+            if (buffer != null) {
+                buffer.insertDocument((SecurityLogsCompDocument) document);
+                statistic.increaseCombinedBufferSize(1);
+            } else {
+                Log.e("SecurityLogsComp", "Buffer not initialized");
+                throw new IllegalStateException("SecurityLogComp buffer has not been initialized.");
+            }
+        } else {
+            Log.e("SecurityLogsComp", "Invalid document type provided");
+            throw new IllegalArgumentException("Only SecurityLogsCompDocument instances can be added to the buffer.");
         }
     }
+
 
     @Override
     public <T extends ElasticDocument> List<T> getDocumentsFromBuffer(int maxDocuments) {
@@ -214,9 +200,16 @@ public class SecurityLogsComp implements Component {
     @Override
     public void disable(Context context, FleetEnrollData enrollmentData, PolicyData policyData) {
         AppLog.d(TAG, "Disabling security logs component");
-        DevicePolicyManager dpm = (DevicePolicyManager) context.getSystemService(Context.DEVICE_POLICY_SERVICE);
-        ComponentName adminComponentName = new ComponentName(context, AppDeviceAdminReceiver.class);
-        dpm.setSecurityLoggingEnabled(adminComponentName, false);
+        try {
+            DevicePolicyManager dpm = (DevicePolicyManager) context.getSystemService(Context.DEVICE_POLICY_SERVICE);
+            ComponentName adminComponentName = new ComponentName(context, AppDeviceAdminReceiver.class);
+            dpm.setSecurityLoggingEnabled(adminComponentName, false);
+            this.statistic = null;
+            this.buffer = null;
+        } catch (Exception e) {
+            AppLog.e(TAG, "Failed to disable security logging: " + e.getMessage());
+        }
+
     }
 
     /**
@@ -226,96 +219,52 @@ public class SecurityLogsComp implements Component {
      * @return The name of the security event tag.
      */
     public String getSecurityEventTagName(int tag) {
-        switch (tag) {
-            case 210002:
-                return "TAG_ADB_SHELL_CMD";
-            case 210001:
-                return "TAG_ADB_SHELL_INTERACTIVE";
-            case 210005:
-                return "TAG_APP_PROCESS_START";
-            case 210039:
-                return "TAG_BLUETOOTH_CONNECTION";
-            case 210040:
-                return "TAG_BLUETOOTH_DISCONNECTION";
-            case 210034:
-                return "TAG_CAMERA_POLICY_SET";
-            case 210029:
-                return "TAG_CERT_AUTHORITY_INSTALLED";
-            case 210030:
-                return "TAG_CERT_AUTHORITY_REMOVED";
-            case 210033:
-                return "TAG_CERT_VALIDATION_FAILURE";
-            case 210031:
-                return "TAG_CRYPTO_SELF_TEST_COMPLETED";
-            case 210021:
-                return "TAG_KEYGUARD_DISABLED_FEATURES_SET";
-            case 210006:
-                return "TAG_KEYGUARD_DISMISSED";
-            case 210007:
-                return "TAG_KEYGUARD_DISMISS_AUTH_ATTEMPT";
-            case 210008:
-                return "TAG_KEYGUARD_SECURED";
-            case 210026:
-                return "TAG_KEY_DESTRUCTION";
-            case 210024:
-                return "TAG_KEY_GENERATED";
-            case 210025:
-                return "TAG_KEY_IMPORT";
-            case 210032:
-                return "TAG_KEY_INTEGRITY_VIOLATION";
-            case 210011:
-                return "TAG_LOGGING_STARTED";
-            case 210012:
-                return "TAG_LOGGING_STOPPED";
-            case 210015:
-                return "TAG_LOG_BUFFER_SIZE_CRITICAL";
-            case 210020:
-                return "TAG_MAX_PASSWORD_ATTEMPTS_SET";
-            case 210019:
-                return "TAG_MAX_SCREEN_LOCK_TIMEOUT_SET";
-            case 210013:
-                return "TAG_MEDIA_MOUNT";
-            case 210014:
-                return "TAG_MEDIA_UNMOUNT";
-            case 210010:
-                return "TAG_OS_SHUTDOWN";
-            case 210009:
-                return "TAG_OS_STARTUP";
-            case 210041:
-                return "TAG_PACKAGE_INSTALLED";
-            case 210043:
-                return "TAG_PACKAGE_UNINSTALLED";
-            case 210042:
-                return "TAG_PACKAGE_UPDATED";
-            case 210036:
-                return "TAG_PASSWORD_CHANGED";
-            case 210035:
-                return "TAG_PASSWORD_COMPLEXITY_REQUIRED";
-            case 210017:
-                return "TAG_PASSWORD_COMPLEXITY_SET";
-            case 210016:
-                return "TAG_PASSWORD_EXPIRATION_SET";
-            case 210018:
-                return "TAG_PASSWORD_HISTORY_LENGTH_SET";
-            case 210022:
-                return "TAG_REMOTE_LOCK";
-            case 210003:
-                return "TAG_SYNC_RECV_FILE";
-            case 210004:
-                return "TAG_SYNC_SEND_FILE";
-            case 210027:
-                return "TAG_USER_RESTRICTION_ADDED";
-            case 210028:
-                return "TAG_USER_RESTRICTION_REMOVED";
-            case 210037:
-                return "TAG_WIFI_CONNECTION";
-            case 210038:
-                return "TAG_WIFI_DISCONNECTION";
-            case 210023:
-                return "TAG_WIPE_FAILURE";
-            default:
-                return "UNKNOWN_TAG";
-        }
+        return switch (tag) {
+            case 210002 -> "TAG_ADB_SHELL_CMD";
+            case 210001 -> "TAG_ADB_SHELL_INTERACTIVE";
+            case 210005 -> "TAG_APP_PROCESS_START";
+            case 210039 -> "TAG_BLUETOOTH_CONNECTION";
+            case 210040 -> "TAG_BLUETOOTH_DISCONNECTION";
+            case 210034 -> "TAG_CAMERA_POLICY_SET";
+            case 210029 -> "TAG_CERT_AUTHORITY_INSTALLED";
+            case 210030 -> "TAG_CERT_AUTHORITY_REMOVED";
+            case 210033 -> "TAG_CERT_VALIDATION_FAILURE";
+            case 210031 -> "TAG_CRYPTO_SELF_TEST_COMPLETED";
+            case 210021 -> "TAG_KEYGUARD_DISABLED_FEATURES_SET";
+            case 210006 -> "TAG_KEYGUARD_DISMISSED";
+            case 210007 -> "TAG_KEYGUARD_DISMISS_AUTH_ATTEMPT";
+            case 210008 -> "TAG_KEYGUARD_SECURED";
+            case 210026 -> "TAG_KEY_DESTRUCTION";
+            case 210024 -> "TAG_KEY_GENERATED";
+            case 210025 -> "TAG_KEY_IMPORT";
+            case 210032 -> "TAG_KEY_INTEGRITY_VIOLATION";
+            case 210011 -> "TAG_LOGGING_STARTED";
+            case 210012 -> "TAG_LOGGING_STOPPED";
+            case 210015 -> "TAG_LOG_BUFFER_SIZE_CRITICAL";
+            case 210020 -> "TAG_MAX_PASSWORD_ATTEMPTS_SET";
+            case 210019 -> "TAG_MAX_SCREEN_LOCK_TIMEOUT_SET";
+            case 210013 -> "TAG_MEDIA_MOUNT";
+            case 210014 -> "TAG_MEDIA_UNMOUNT";
+            case 210010 -> "TAG_OS_SHUTDOWN";
+            case 210009 -> "TAG_OS_STARTUP";
+            case 210041 -> "TAG_PACKAGE_INSTALLED";
+            case 210043 -> "TAG_PACKAGE_UNINSTALLED";
+            case 210042 -> "TAG_PACKAGE_UPDATED";
+            case 210036 -> "TAG_PASSWORD_CHANGED";
+            case 210035 -> "TAG_PASSWORD_COMPLEXITY_REQUIRED";
+            case 210017 -> "TAG_PASSWORD_COMPLEXITY_SET";
+            case 210016 -> "TAG_PASSWORD_EXPIRATION_SET";
+            case 210018 -> "TAG_PASSWORD_HISTORY_LENGTH_SET";
+            case 210022 -> "TAG_REMOTE_LOCK";
+            case 210003 -> "TAG_SYNC_RECV_FILE";
+            case 210004 -> "TAG_SYNC_SEND_FILE";
+            case 210027 -> "TAG_USER_RESTRICTION_ADDED";
+            case 210028 -> "TAG_USER_RESTRICTION_REMOVED";
+            case 210037 -> "TAG_WIFI_CONNECTION";
+            case 210038 -> "TAG_WIFI_DISCONNECTION";
+            case 210023 -> "TAG_WIPE_FAILURE";
+            default -> "UNKNOWN_TAG";
+        };
     }
 
 

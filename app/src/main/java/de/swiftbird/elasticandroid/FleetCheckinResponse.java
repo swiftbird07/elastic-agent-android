@@ -1,7 +1,6 @@
 package de.swiftbird.elasticandroid;
 
 import com.google.gson.annotations.SerializedName;
-
 import java.util.List;
 import java.util.Map;
 
@@ -21,10 +20,6 @@ public class FleetCheckinResponse {
     @SerializedName("actions")
     private List<Action> actions;
 
-    protected String getAckToken() {
-        return ackToken;
-    }
-
     protected  List<Action> getActions() {
         return actions;
     }
@@ -33,7 +28,7 @@ public class FleetCheckinResponse {
      * Represents an individual action item within the check-in response.
      * Actions can include policy updates, diagnostic requests, or other commands.
      */
-    public class Action {
+    public static class Action {
         @SerializedName("agent_id")
         private String agentId;
 
@@ -48,10 +43,6 @@ public class FleetCheckinResponse {
 
         @SerializedName("type")
         private String type;
-
-        protected String getAgentId() {
-            return agentId;
-        }
 
         protected String getCreatedAt() {
             return createdAt;
@@ -71,7 +62,7 @@ public class FleetCheckinResponse {
          * Contains the detailed policy data associated with a POLICY_CHANGE action.
          * This includes the agent configuration, input streams, and output settings.
          */
-        public class PolicyData {
+        public static class PolicyData {
             @SerializedName("policy")
             private Policy policy;
 
@@ -79,7 +70,7 @@ public class FleetCheckinResponse {
                 return policy;
             }
 
-            public class Policy {
+            public static class Policy {
                 @SerializedName("agent")
                 private Agent agent;
 
@@ -109,10 +100,6 @@ public class FleetCheckinResponse {
                     return inputs;
                 }
 
-                protected Map<String, OutputPermissions> getOutputPermissions() {
-                    return outputPermissions;
-                }
-
                 protected Map<String, Output> getOutputs() {
                     return outputs;
                 }
@@ -121,29 +108,24 @@ public class FleetCheckinResponse {
                     return revision;
                 }
 
-                protected Signed getSigned() {
-                    return signed;
-                }
-
-                public class OutputPermissions {
+                public static class OutputPermissions {
                     @SerializedName("default")
                     private Permissions defaultPermissions;
 
-                    public class Permissions {
+                    public static class Permissions {
                         @SerializedName("_elastic_agent_monitoring")
                         private ElasticAgentMonitoring elasticAgentMonitoring;
 
                         @SerializedName("_elastic_agent_checks")
                         private ElasticAgentChecks elasticAgentChecks;
-
                     }
 
-                    public class ElasticAgentMonitoring {
+                    public static class ElasticAgentMonitoring {
                         @SerializedName("indices")
                         private List<String> indices;
                     }
 
-                    public class ElasticAgentChecks {
+                    public static class ElasticAgentChecks {
                         @SerializedName("cluster")
                         private List<String> cluster;
                     }
@@ -153,7 +135,7 @@ public class FleetCheckinResponse {
                  * Defines an output target for the agent, typically an Elasticsearch
                  * cluster, including connection and authentication details.
                  */
-                public class Output {
+                public static class Output {
                     @SerializedName("api_key")
                     private String apiKey;
 
@@ -184,15 +166,12 @@ public class FleetCheckinResponse {
                     protected List<String> getSslCertificateAuthorities() {
                         return sslCertificateAuthorities;
                     }
-
-                    protected String getType() {
-                        return type;
-                    }
-
                 }
 
-
-                public class Signed {
+                /**
+                 * Contains the signed policy data, including the data and signature.
+                 */
+                public static class Signed {
                     @SerializedName("data")
                     private String data;
 
@@ -200,17 +179,14 @@ public class FleetCheckinResponse {
                     private String signature;
 
                 }
-
-
             }
         }
-
 
         /**
          * Contains the detailed agent configuration, including protection settings
          * and other agent-specific details.
          */
-        public class Agent {
+        public static class Agent {
             @SerializedName("protection")
             private Protection protection;
 
@@ -224,7 +200,7 @@ public class FleetCheckinResponse {
          * Contains the protection settings for the agent, including the uninstall
          * token hash and whether protection is enabled.
          */
-        public class Protection {
+        public static class Protection {
             @SerializedName("enabled")
             private boolean enabled;
 
@@ -245,7 +221,7 @@ public class FleetCheckinResponse {
          * Defines an input within the policy, potentially including multiple
          * data streams for the agent to monitor and report.
          */
-        public class Input {
+        public static class Input {
             @SerializedName("type")
             private String type;
 
@@ -273,20 +249,8 @@ public class FleetCheckinResponse {
             @SerializedName("use_output")
             private String useOutput;
 
-            protected String getType() {
-                return type;
-            }
-
             protected List<Stream> getStreams() {
                 return streams;
-            }
-
-            protected DataStream getDataStream() {
-                return dataStream;
-            }
-
-            protected String getId() {
-                return id;
             }
 
             protected Meta getMeta() {
@@ -297,23 +261,11 @@ public class FleetCheckinResponse {
                 return name;
             }
 
-            protected String getPackagePolicyId() {
-                return packagePolicyId;
-            }
-
-            protected int getRevision() {
-                return revision;
-            }
-
-            protected String getUseOutput() {
-                return useOutput;
-            }
-
-            public class Meta {
+            public static class Meta {
                 @SerializedName("package")
                 private Package packageInfo;
 
-                public class Package {
+                public static class Package {
                     @SerializedName("name")
                     private String name;
 
@@ -327,11 +279,10 @@ public class FleetCheckinResponse {
                     protected String getVersion() {
                         return version;
                     }
+                }
 
-                    protected Package getPackageInfo() {
-                        return packageInfo;
-                    }
-
+                protected Package getPackageInfo() {
+                    return packageInfo;
                 }
             }
 
@@ -339,7 +290,7 @@ public class FleetCheckinResponse {
              * Represents a single stream within an input, detailing the specific
              * data collection or reporting behavior expected of the agent.
              */
-            public class Stream {
+            public static class Stream {
                 @SerializedName("data_stream")
                 private DataStream dataStream;
 
@@ -378,20 +329,15 @@ public class FleetCheckinResponse {
                @SerializedName("backoff_on_empty_buffer")
                 private boolean backoffOnEmptyBuffer;
 
+               @SerializedName("disable_on_low_battery")
+                private boolean disableIfBatteryLow;
+
                 protected DataStream getDataStream() {
                     return dataStream;
                 }
 
-                protected String getId() {
-                    return id;
-                }
-
                 protected String getIgnoreOlder() {
                     return ignoreOlder;
-                }
-
-                protected String getInterval() {
-                    return interval;
                 }
 
                 protected List<String> getPaths() {
@@ -419,6 +365,8 @@ public class FleetCheckinResponse {
                 public String getMaxBackoffInterval() { return maxBackoffInterval; }
 
                 public boolean getBackoffOnEmptyBuffer() { return backoffOnEmptyBuffer; }
+
+                public boolean getDisableIfBatteryLow() { return disableIfBatteryLow; }
             }
 
 
@@ -426,7 +374,7 @@ public class FleetCheckinResponse {
              * Details the Elasticsearch data stream to which collected data
              * should be reported.
              */
-            public class DataStream {
+            public static class DataStream {
                 @SerializedName("dataset")
                 private String dataset;
 
@@ -436,15 +384,7 @@ public class FleetCheckinResponse {
                 protected String getDataset() {
                     return dataset;
                 }
-
-                protected String getNamespace() {
-                    return namespace;
-                }
             }
-
-
         }
-
     }
-
 }

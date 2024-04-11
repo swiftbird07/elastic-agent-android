@@ -3,7 +3,6 @@ package de.swiftbird.elasticandroid;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
-
 import com.google.gson.annotations.SerializedName;
 
 /**
@@ -17,8 +16,7 @@ import com.google.gson.annotations.SerializedName;
  * to these log documents. The {@link AppLog} class, in conjunction with {@link SelfLogComp}, is used to add entries to the log,
  * demonstrating a decoupled approach to logging within the application.</p>
  *
- * <p>Note: The {@code eventAction} and {@code eventCategory} fields are preset to "syslog" and "log" respectively, reflecting
- * the nature of these entries as system logs.</p>
+ * <p>Note: The {@code eventAction} and {@code eventCategory} fields are preset to "syslog" and "log" respectively.</p>
  */
 @Entity
 public class SelfLogCompDocument extends ElasticDocument {

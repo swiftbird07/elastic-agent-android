@@ -1,7 +1,6 @@
 package de.swiftbird.elasticandroid;
 
 import com.google.gson.annotations.SerializedName;
-
 import java.util.List;
 
 /**
@@ -13,16 +12,16 @@ import java.util.List;
  */
 public class FleetCheckinRequest {
     @SerializedName("status")
-    private String status;
+    private final String status;
 
     @SerializedName("ack_token")
-    private String ackToken;
+    private final String ackToken;
 
     @SerializedName("local_metadata")
-    private AgentMetadata metadata;
+    private final AgentMetadata metadata;
 
     @SerializedName("message")
-    private String message;
+    private final String message;
 
     @SerializedName("components")
     private List<String> components;

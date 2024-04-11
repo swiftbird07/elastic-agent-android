@@ -2,12 +2,10 @@ package de.swiftbird.elasticandroid;
 
 import android.content.Context;
 
-import androidx.room.AutoMigration;
 import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
 import androidx.room.TypeConverters;
-
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -33,10 +31,10 @@ import java.util.concurrent.Executors;
                 NetworkLogsCompDocument.class,
                 LocationCompDocument.class,
         },
-        version = 29,
+        version = 31,
         exportSchema = true,
         autoMigrations = {
-                @AutoMigration(from = 28, to = 29),
+                //@AutoMigration(from = 30, to = 31),
         }
 )
 @TypeConverters({AppConverters.class})
@@ -50,30 +48,37 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract NetworkLogsCompBuffer networkLogsCompBuffer();
     public abstract LocationCompBuffer locationCompBuffer();
 
-    private static volatile AppDatabase INSTANCE; // Singleton instance of the database
+    private static final boolean FALLBACK_TO_DESTRUCTIVE_MIGRATION = BuildConfig.DEBUG; // Flag to enable destructive migration in debug mode
     private static final int NUMBER_OF_THREADS = 4; // Thread pool size for database write operations
     static final ExecutorService databaseWriteExecutor =
             Executors.newFixedThreadPool(NUMBER_OF_THREADS); // Executor service for asynchronous database operations
+    private static volatile AppDatabase appDatabase; // Singleton instance of the database
+
 
 
     /**
      * Gets the singleton instance of the AppDatabase.
      * This method uses a double-checked locking pattern to initialize the AppDatabase instance in a thread-safe manner.
-     * It opts for a destructive migration strategy for simplicity, which should be replaced with a proper migration strategy for production.
+     * Debug builds opt for a destructive migration strategy for simplicity, while release builds use the default migration strategy.
      *
      * @param context The context used to build the database instance.
-     * @param name The name of the database file.
      * @return The singleton instance of AppDatabase.
      */
-    protected static AppDatabase getDatabase(final Context context, String name) {
-        if (INSTANCE == null) {
+    protected static AppDatabase getDatabase(final Context context, String dbName) {
+        if (appDatabase == null) {
             synchronized (AppDatabase.class) {
-                if (INSTANCE == null) {
-                    INSTANCE = Room.databaseBuilder(context.getApplicationContext(),
-                            AppDatabase.class, "agent-data").fallbackToDestructiveMigration().build();
+                if (appDatabase == null) {
+                    Builder<AppDatabase> builder = Room.databaseBuilder(context.getApplicationContext(),
+                            AppDatabase.class, "agent-data");
+
+                    if(FALLBACK_TO_DESTRUCTIVE_MIGRATION){
+                        builder.fallbackToDestructiveMigration();
+                    }
+
+                    appDatabase = builder.build();
                 }
             }
         }
-        return INSTANCE;
+        return appDatabase;
     }
 }

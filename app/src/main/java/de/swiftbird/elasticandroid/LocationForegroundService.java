@@ -6,12 +6,8 @@ import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
-import android.location.Location;
-import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.IBinder;
-import android.os.Bundle;
-
 import androidx.core.app.NotificationCompat;
 
 /**
@@ -23,6 +19,12 @@ import androidx.core.app.NotificationCompat;
  * which is a requirement from Android Oreo onwards to allow background location tracking.
  */
 public class LocationForegroundService extends Service {
+    // Channel ID for the notification
+    private static final String CHANNEL_ID = "location_service";
+
+    // Default values for requesting location updates (in case they are not provided)
+    private static final long MIN_TIME_MS = 30000; // 30 seconds
+    private static final float MIN_DISTANCE_METERS = 10; // 10 meters
 
     private LocationManager locationManager;
 
@@ -55,9 +57,9 @@ public class LocationForegroundService extends Service {
             minDistanceMeters = intent.getFloatExtra("minDistanceMeters", 10);
             provider = intent.getStringExtra("provider");
         } catch (Exception e) {
-            AppLog.e("LocationForegroundService", "Failed to get minTimeMs and minDistanceMeters from intent: " + e.getMessage());
-            minTimeMs = 300000;
-            minDistanceMeters = 10;
+            AppLog.e("LocationForegroundService", "Failed to get minTimeMs, minDistanceMeters, or provider from intent. Using default values. Error: " + e.getMessage());
+            minTimeMs = MIN_TIME_MS;
+            minDistanceMeters = MIN_DISTANCE_METERS;
             provider = null;
         }
         if(provider == null) {
@@ -90,7 +92,7 @@ public class LocationForegroundService extends Service {
     private Notification buildForegroundNotification() {
         NotificationChannel channel;
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            channel = new NotificationChannel("location_service", "Location Service", NotificationManager.IMPORTANCE_LOW);
+            channel = new NotificationChannel(CHANNEL_ID, "Location Service", NotificationManager.IMPORTANCE_LOW);
             channel.setDescription("No sound");
             channel.setSound(null, null); // No sound for this channel
             NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
@@ -99,14 +101,10 @@ public class LocationForegroundService extends Service {
             }
         }
 
-        boolean setOngoing = true;
-
         // If this is a debug build we allow the notification to be swiped away
-        if (BuildConfig.DEBUG) {
-            setOngoing = false;
-        }
+        boolean setOngoing = !BuildConfig.DEBUG;
 
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "location_service")
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setContentTitle("Elastic Agent Android")
                 .setContentText("Location service is running")
                 .setSmallIcon(R.drawable.icon)
@@ -114,5 +112,4 @@ public class LocationForegroundService extends Service {
                 .setOngoing(setOngoing);
         return builder.build();
     }
-
 }

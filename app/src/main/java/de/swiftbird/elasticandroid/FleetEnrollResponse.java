@@ -1,4 +1,5 @@
 package de.swiftbird.elasticandroid;
+
 import com.google.gson.annotations.SerializedName;
 import java.util.List;
 
@@ -48,15 +49,15 @@ public class FleetEnrollResponse {
 
         /**
          * Constrctor only used for testing
-         * @param accessApiKey
-         * @param accessApiKeyId
-         * @param active
-         * @param enrolledAt
-         * @param id
-         * @param policyId
-         * @param status
-         * @param tags
-         * @param type
+         * @param accessApiKey The access API key
+         * @param accessApiKeyId The access API key ID
+         * @param active The active status
+         * @param enrolledAt The enrollment date
+         * @param id The ID
+         * @param policyId The policy ID
+         * @param status The status
+         * @param tags The tags
+         * @param type The type
          */
         public Item(String accessApiKey, String accessApiKeyId, Boolean active, String enrolledAt, String id, String policyId, String status, List<String> tags, String type) {
             this.accessApiKey = accessApiKey;
@@ -76,32 +77,16 @@ public class FleetEnrollResponse {
             return accessApiKey;
         }
 
-        public void setAccessApiKey(String accessApiKey) {
-            this.accessApiKey = accessApiKey;
-        }
-
         public String getAccessApiKeyId() {
             return accessApiKeyId;
-        }
-
-        public void setAccessApiKeyId(String accessApiKeyId) {
-            this.accessApiKeyId = accessApiKeyId;
         }
 
         public Boolean getActive() {
             return active;
         }
 
-        public void setActive(Boolean active) {
-            this.active = active;
-        }
-
         public String getEnrolledAt() {
             return enrolledAt;
-        }
-
-        public void setEnrolledAt(String enrolledAt) {
-            this.enrolledAt = enrolledAt;
         }
 
         public String getId() {
@@ -116,10 +101,6 @@ public class FleetEnrollResponse {
             return policyId;
         }
 
-        public void setPolicyId(String policyId) {
-            this.policyId = policyId;
-        }
-
         public String getStatus() {
             return status;
         }
@@ -127,11 +108,9 @@ public class FleetEnrollResponse {
         public void setStatus(String status) {
             this.status = status;
         }
-
     }
 
     // Getters and Setters
-
     public String getAction() {
         return action;
     }
@@ -143,9 +122,4 @@ public class FleetEnrollResponse {
     public Item getItem() {
         return item;
     }
-
-    public void setItem(Item item) {
-        this.item = item;
-    }
-
 }

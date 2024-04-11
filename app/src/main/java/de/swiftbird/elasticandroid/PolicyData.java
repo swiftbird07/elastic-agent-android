@@ -43,6 +43,13 @@ public class PolicyData {
     @ColumnInfo(name = "allow_user_unenroll")
     public boolean allowUserUnenroll;
 
+    // Identifies the log package name- and version for data submission.
+    @ColumnInfo(name = "log_package_name")
+    public String logPackageName;
+
+    @ColumnInfo(name = "log_package_version")
+    public String logPackageVersion;
+
     // Identifies the data stream dataset for document submission.
     @ColumnInfo(name = "data_stream_dataset")
     public String dataStreamDataset;
@@ -75,13 +82,13 @@ public class PolicyData {
     @ColumnInfo(name = "max_documents_per_request")
     public int maxDocumentsPerRequest;
 
+    // Disable data submission when the device has low battery.
+    @ColumnInfo(name = "disable_if_battery_low")
+    public boolean disableIfBatteryLow;
+
     // Concatenated list of component paths included in the policy.
     @ColumnInfo(name = "paths")
     public String paths;
-
-    // API key for authenticating to the data stream.
-    @ColumnInfo(name = "api_key")
-    public String apiKey;
 
     // Elasticsearch host for data submission.
     @ColumnInfo(name = "hosts")

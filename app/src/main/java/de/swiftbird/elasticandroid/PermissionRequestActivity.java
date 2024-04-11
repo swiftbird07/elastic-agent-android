@@ -9,13 +9,12 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.widget.Toast;
-
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -60,6 +59,7 @@ public class PermissionRequestActivity extends Activity {
      *
      * @param permissionsNeeded An array of permissions the app needs to function correctly.
      */
+    @SuppressWarnings("ConstantConditions")
     private void checkAndRequestPermissions(String[] permissionsNeeded) {
         List<String> permissionsToRequest = new ArrayList<>();
         boolean backgroundLocationNeeded = false;
@@ -79,7 +79,7 @@ public class PermissionRequestActivity extends Activity {
         if (!permissionsToRequest.isEmpty()) {
             AppLog.i("PermissionRequestActivity", "Requesting permissions: " + permissionsToRequest);
             ActivityCompat.requestPermissions(this, permissionsToRequest.toArray(new String[0]), PERMISSION_REQUEST_CODE);
-        } else if (backgroundLocationNeeded) {
+        } else if (backgroundLocationNeeded && Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             AppLog.i("PermissionRequestActivity", "Requesting background location permission");
             Toast.makeText(this, "Please enable background location permission", Toast.LENGTH_LONG).show();
             requestBackgroundLocationPermission();
@@ -92,6 +92,7 @@ public class PermissionRequestActivity extends Activity {
      * Specifically requests the background location permission from the user.
      * This is separate due to its special handling post-Android Q (API level 29).
      */
+    @RequiresApi(api = Build.VERSION_CODES.Q)
     private void requestBackgroundLocationPermission() {
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_BACKGROUND_LOCATION}, PERMISSION_BACKGROUND_REQUEST_CODE);
     }

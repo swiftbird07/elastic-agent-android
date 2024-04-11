@@ -31,13 +31,16 @@ public class LocationComp implements Component {
     private LocationManager locationManager;
     private LocationListener locationListener;
     private HandlerThread locationHandlerThread;
-    private Handler locationHandler;
+
+    // Default values for location updates
+    private static final long DEFAULT_MIN_TIME_MS = 1000 * 60 * 15; // 15 minutes
+    private static final float DEFAULT_MIN_DISTANCE_METERS = 1000; // 1 km
 
     /**
      * Provides access to the singleton instance of LocationComp, creating it if necessary.
      * @return The singleton instance of LocationComp.
      */
-    public static LocationComp getInstance() {
+    public static synchronized LocationComp getInstance() {
         // Singleton pattern
         if (locationComp == null) {
             locationComp = new LocationComp();
@@ -67,7 +70,7 @@ public class LocationComp implements Component {
         locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
         locationHandlerThread = new HandlerThread("LocationHandlerThread");
         locationHandlerThread.start();
-        locationHandler = new Handler(locationHandlerThread.getLooper());
+        Handler locationHandler = new Handler(locationHandlerThread.getLooper());
         locationListener = new LocationReceiver(context);
 
         // Parse subComponent as url parameters for minTimeMs and minDistanceMeters.
@@ -88,27 +91,31 @@ public class LocationComp implements Component {
 
         long minTimeMs = 0;
         float minDistanceMeters = 0;
-
-        if (paramsSet) {
-            for (String paramPair : paramPairs) {
-                String[] pair = paramPair.split("=");
-                if (pair.length != 2) {
-                    AppLog.w(TAG, "Can't setup. Parameters set and invalid parameter in path: " + subComponent);
-                    return false;
+        try {
+            if (paramsSet) {
+                for (String paramPair : paramPairs) {
+                    String[] pair = paramPair.split("=");
+                    if (pair.length != 2) {
+                        AppLog.w(TAG, "Can't setup. Parameters set and invalid parameter in path: " + subComponent);
+                        return false;
+                    }
+                    if ("minTimeMs".equals(pair[0])) {
+                        minTimeMs = Integer.parseInt(pair[1]);
+                    } else if ("minDistanceMeters".equals(pair[0])) {
+                        minDistanceMeters = Integer.parseInt(pair[1]);
+                    } else {
+                        AppLog.w(TAG, "Can't setup. Unknown parameter: " + pair[0] + " in path: " + subComponent);
+                        return false;
+                    }
                 }
-                if ("minTimeMs".equals(pair[0])) {
-                    minTimeMs = Integer.parseInt(pair[1]);
-                } else if ("minDistanceMeters".equals(pair[0])) {
-                    minDistanceMeters = Integer.parseInt(pair[1]);
-                } else {
-                    AppLog.w(TAG, "Can't setup. Unknown parameter: " + pair[0] + " in path: " + subComponent);
-                    return false;
-                }
+            } else {
+                AppLog.w(TAG, "No parameters set. Using default values for minTimeMs and minDistanceMeters");
+                minTimeMs = DEFAULT_MIN_TIME_MS;
+                minDistanceMeters = DEFAULT_MIN_DISTANCE_METERS;
             }
-        } else {
-            AppLog.w(TAG, "No parameters set. Using default values for minTimeMs and minDistanceMeters");
-            minTimeMs = 30000; // 30 seconds
-            minDistanceMeters = 10; // 10 meters
+        } catch (NumberFormatException e) {
+            AppLog.w(TAG, "Can't setup. Invalid number format in path: " + subComponent);
+            return false;
         }
 
         subComponent = params[0]; // get the subComponent without parameters
@@ -141,6 +148,9 @@ public class LocationComp implements Component {
             serviceIntent.putExtra("minDistanceMeters", finalMinDistanceMeters);
             serviceIntent.putExtra("provider", provider);
             context.startForegroundService(serviceIntent);
+        } else {
+            AppLog.w(TAG, "Can't setup. Background location updates are not supported on this device");
+            return false;
         }
         return true;
     }
@@ -216,6 +226,7 @@ public class LocationComp implements Component {
     public void disable(Context context, FleetEnrollData enrollmentData, PolicyData policyData) {
         AppLog.d(TAG, "Disabling location updates");
         locationManager.removeUpdates(locationListener);
+        locationHandlerThread.quitSafely();
     }
 
 }

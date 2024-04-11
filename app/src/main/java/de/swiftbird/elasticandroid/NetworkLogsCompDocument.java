@@ -4,9 +4,7 @@ import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 import androidx.room.TypeConverters;
-
 import com.google.gson.annotations.SerializedName;
-
 import java.net.InetAddress;
 import java.util.List;
 import java.util.Objects;

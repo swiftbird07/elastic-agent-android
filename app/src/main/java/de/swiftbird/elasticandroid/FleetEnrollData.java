@@ -27,14 +27,14 @@ public class FleetEnrollData {
     @ColumnInfo(name = "fleet_url")
     public String fleetUrl;
 
-    @ColumnInfo(name = "veryify_cert")
+    @ColumnInfo(name = "verify_cert")
     public boolean verifyCert;
+
+    @ColumnInfo(name = "fleet_certificate")
+    public String fleetCertificate;
 
     @ColumnInfo(name = "action")
     public String action;
-
-    @ColumnInfo(name = "access_api_key")
-    public String accessApiKey;
 
     @ColumnInfo(name = "access_api_key_id")
     public String accessApiKeyId;

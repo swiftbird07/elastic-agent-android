@@ -10,9 +10,7 @@ import com.google.gson.annotations.SerializedName;
  */
 public class ElasticResponse {
 
-    private String errors;
-    private int took;
-
+    private final String errors;
     private Error error;
 
     /**
@@ -35,8 +33,6 @@ public class ElasticResponse {
         }
     }
 
-
-
     /**
      * Constructs an instance of ElasticResponse, primarily for testing purposes,
      * allowing manual creation of response objects.
@@ -46,12 +42,9 @@ public class ElasticResponse {
      */
     public ElasticResponse(String errors, int took) {
         this.errors = errors;
-        this.took = took;
     }
 
     public String getErrors() {
         return errors;
     }
-
-
 }

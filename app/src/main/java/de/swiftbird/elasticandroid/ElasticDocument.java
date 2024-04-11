@@ -2,9 +2,7 @@ package de.swiftbird.elasticandroid;
 
 import androidx.room.ColumnInfo;
 import androidx.room.TypeConverters;
-
 import com.google.gson.annotations.SerializedName;
-
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -171,8 +169,8 @@ public abstract class ElasticDocument {
         this.hostOsBuild = metadata.getLocal().system.kernel;
         this.hostOsFamily = metadata.getLocal().system.family;
         this.hostOsKernel = metadata.getLocal().system.kernel;
-        //this.hostOsName = metadata.getLocal().system.name; // DOES NOT WORK
-        //this.hostOsNameText = metadata.getLocal().system.name; // DOES NOT WORK
+        //this.hostOsName = metadata.getLocal().system.name; // DOES NOT WORK. Elastic does not accept this field to be set to "Android"
+        //this.hostOsNameText = metadata.getLocal().system.name; // DOES NOT WORK. Elastic does not accept this field to be set to "Android"
         this.hostOsPlatform = metadata.getLocal().system.platform;
         this.hostOsVersion = metadata.getLocal().system.version;
 

@@ -8,9 +8,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.os.Build;
 import android.util.Log; // We don't use AppLog for non-warnings/errors because this would double-log the messages that are sent anyway
-
-import androidx.annotation.Nullable;
-
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -40,7 +37,7 @@ public class NetworkLogsComp implements Component {
     private AppStatisticsDataDAO statistic;
     private static NetworkLogsComp NetworkLogsComp;
 
-    public static NetworkLogsComp getInstance() {
+    public static synchronized NetworkLogsComp getInstance() {
         // Singleton pattern
         if (NetworkLogsComp == null) {
             NetworkLogsComp = new NetworkLogsComp();
@@ -80,11 +77,11 @@ public class NetworkLogsComp implements Component {
                             PolicyData policyData = db.policyDataDAO().getPolicyDataSync();
 
                             if (event instanceof DnsEvent) {
-                                Log.d(TAG, "Creating DNS event: " + event.toString());
+                                Log.d(TAG, "Creating DNS event: " + event);
                                 DnsEvent dnsEvent = (DnsEvent) event;
                                 addDocumentToBuffer(new NetworkLogsCompDocument(enrollmentData, policyData, "DNS", dnsEvent.getPackageName(), dnsEvent.getHostname(), dnsEvent.getInetAddresses(), dnsEvent.toString()));
                             } else if (event instanceof ConnectEvent) {
-                                Log.d(TAG, "Creating CONNECT event: " + event.toString());
+                                Log.d(TAG, "Creating CONNECT event: " + event);
                                 ConnectEvent connectEvent = (ConnectEvent) event;
                                 addDocumentToBuffer(new NetworkLogsCompDocument(enrollmentData, policyData, "CONNECT", connectEvent.getPackageName(), connectEvent.getInetAddress(), connectEvent.getPort(), connectEvent.toString()));
                             } else {
@@ -131,7 +128,7 @@ public class NetworkLogsComp implements Component {
             if (dpm.isDeviceOwnerApp(context.getPackageName())) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     Set<String> affiliationIds = new HashSet<>();
-                    affiliationIds.add("de.swiftbird.elasticandroid");
+                    affiliationIds.add(BuildConfig.APPLICATION_ID);
                     dpm.setAffiliationIds(adminComponentName, affiliationIds);
 
                     dpm.setNetworkLoggingEnabled(adminComponentName, true);
@@ -157,14 +154,20 @@ public class NetworkLogsComp implements Component {
 
     @Override
     public void addDocumentToBuffer(ElasticDocument document) {
-        if (document instanceof NetworkLogsCompDocument && buffer != null) {
-            buffer.insertDocument((NetworkLogsCompDocument) document);
-            statistic.increaseCombinedBufferSize(1);
-        }
-        else {
-            Log.w(TAG, "Invalid document type or buffer not initialized");
+        if (document instanceof NetworkLogsCompDocument) {
+            if (buffer != null) {
+                buffer.insertDocument((NetworkLogsCompDocument) document);
+                statistic.increaseCombinedBufferSize(1);
+            } else {
+                Log.e("NetworkLogsComp", "Buffer not initialized");
+                throw new IllegalStateException("NetworkLogsComp buffer has not been initialized.");
+            }
+        } else {
+            Log.e("NetworkLogsComp", "Invalid document type provided");
+            throw new IllegalArgumentException("Only NetworkLogsCompDocument instances can be added to the buffer.");
         }
     }
+
 
     @Override
     public <T extends ElasticDocument> List<T> getDocumentsFromBuffer(int maxDocuments) {
@@ -202,11 +205,17 @@ public class NetworkLogsComp implements Component {
      */
     @Override
     public void disable(Context context, FleetEnrollData enrollmentData, PolicyData policyData) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            AppLog.d(TAG, "Disabling network logs component");
-            DevicePolicyManager dpm = (DevicePolicyManager) context.getSystemService(Context.DEVICE_POLICY_SERVICE);
-            ComponentName adminComponentName = new ComponentName(context, AppDeviceAdminReceiver.class);
-            dpm.setNetworkLoggingEnabled(adminComponentName, false);
+        try{
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                AppLog.d(TAG, "Disabling network logs component");
+                DevicePolicyManager dpm = (DevicePolicyManager) context.getSystemService(Context.DEVICE_POLICY_SERVICE);
+                ComponentName adminComponentName = new ComponentName(context, AppDeviceAdminReceiver.class);
+                dpm.setNetworkLoggingEnabled(adminComponentName, false);
+            }
+            this.buffer = null;
+            this.statistic = null;
+        } catch (Exception e) {
+            AppLog.e(TAG, "Unhandled exception when disabling network logs: " + e.getMessage());
         }
     }
 

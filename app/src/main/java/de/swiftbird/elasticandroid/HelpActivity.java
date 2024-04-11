@@ -1,5 +1,6 @@
 package de.swiftbird.elasticandroid;
 
+import android.annotation.SuppressLint;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
@@ -33,17 +34,13 @@ import de.swiftbird.elasticandroid.R.id;
  * Be aware that the static help text is written in the layout file.
  */
 public class HelpActivity extends AppCompatActivity  {
-
-    private TextView tvVersionInfo;
-    private Button btnBack;
-
+    @SuppressLint("SetTextI18n")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_help);
-        btnBack = findViewById(id.btnBack);
-        tvVersionInfo = findViewById(id.tvVersionInfo);
-
+        Button btnBack = findViewById(id.btnBack);
+        TextView tvVersionInfo = findViewById(id.tvVersionInfo);
         tvVersionInfo.setText("App Version: " + BuildConfig.VERSION_NAME + "\nElastic Agent Compatibility: " + BuildConfig.AGENT_VERSION);
 
         btnBack.setOnClickListener(view -> {

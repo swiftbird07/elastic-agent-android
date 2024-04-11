@@ -11,7 +11,7 @@ import androidx.work.WorkerParameters;
  * This worker iterates over all components specified in the application's policy data, initializes them,
  * and triggers their event collection routines.
  *
- * Note: This class is part of the application's background execution strategy but is not yet integrated into the application's workflow.
+ * <p></p>Note: This class is part of the application's background execution strategy but is not yet integrated into the application's workflow.
  * TODO: Integrate this worker into the application's workflow to enable background data collection for components.
  */
 public class ComponentWorker extends Worker {
@@ -38,16 +38,24 @@ public class ComponentWorker extends Worker {
         AppLog.i("ComponentWorker", "Performing component worker tasks in the background");
 
         // Retrieves enrollment and policy data to configure and operate on components.
-        FleetEnrollData enrollmentData = AppDatabase.getDatabase(getApplicationContext(), "enrollment-data").enrollmentDataDAO().getEnrollmentInfoSync(1);
-        PolicyData policyData = AppDatabase.getDatabase(getApplicationContext(), "policy-data").policyDataDAO().getPolicyDataSync();
+        FleetEnrollData enrollmentData = AppDatabase.getDatabase(getApplicationContext(), "").enrollmentDataDAO().getEnrollmentInfoSync(1);
+        PolicyData policyData = AppDatabase.getDatabase(getApplicationContext(), "").policyDataDAO().getPolicyDataSync();
 
         // Iterates over components defined in policy data, initializing and collecting events for each.
         for(String componentPath : policyData.paths.split(",")) {
-            Component component = ComponentFactory.createInstance(componentPath);
-            component.setup(getApplicationContext(), enrollmentData, policyData, "");
-            component.collectEvents(enrollmentData, policyData);
-        }
+            try {
+                if (!componentPath.startsWith("android://")) {
+                    AppLog.w("ComponentWorker", "Invalid component path: " + componentPath);
+                    continue;
+                }
+                Component component = ComponentFactory.createInstance(componentPath);
+                component.setup(getApplicationContext(), enrollmentData, policyData, "");
+                component.collectEvents(enrollmentData, policyData);
 
+            } catch (Exception e) {
+                AppLog.e("ComponentWorker", "Error processing component: " + componentPath);
+            }
+        }
         return Result.success(); // Indicates successful completion of worker tasks.
     }
 }

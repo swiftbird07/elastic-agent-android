@@ -3,14 +3,11 @@ package de.swiftbird.elasticandroid;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.util.Log;
-
 import androidx.annotation.NonNull;
 import androidx.work.ListenableWorker;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
-
 import com.google.gson.Gson;
-
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -20,14 +17,12 @@ import java.util.Objects;
 import java.util.TimeZone;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 /**
  * Background worker responsible for transmitting buffered documents from all active components
@@ -37,7 +32,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
  */
 public class ElasticWorker extends Worker {
 
-    private static final String TAG = "ElasticWorker"; //TODO: Make this static final for every class
+    private static final String TAG = "ElasticWorker";
 
     public ElasticWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
@@ -45,7 +40,7 @@ public class ElasticWorker extends Worker {
 
     /**
      * Executes the background task. This is where the worker iterates over available components,
-     * performs setup and triggers data collection based on the current policy data.
+     * performs setup and triggers data collection from their buffer based on the current policy data.
      *
      * @return The result of the background work; {@link Result#success()} if the operation completes successfully.
      */
@@ -59,13 +54,12 @@ public class ElasticWorker extends Worker {
 
         // Synchronously fetch the enrollment data; adjust the method call as necessary based on the DAO
         FleetEnrollData enrollmentData = db.enrollmentDataDAO().getEnrollmentInfoSync(1);
-        AgentMetadata agentMetadata = AgentMetadata.getMetadataFromDeviceAndDB(enrollmentData.agentId, enrollmentData.hostname);
         PolicyData policyData = db.policyDataDAO().getPolicyDataSync();
-        AppStatisticsData statisticsData = db.statisticsDataDAO().getStatisticsSync();
         StatusCallback callback = new StatusCallback() {
 
             /**
              * Callback method to handle the result of the Elasticsearch PUT operation.
+             * It adjusts the backoff interval based on the outcome of the operation.
              *
              * @param success True if the operation was successful, false otherwise.
              */
@@ -79,17 +73,9 @@ public class ElasticWorker extends Worker {
 
                         // Use exponential backoff for the next check-in if enanbled
                         if (policyData.useBackoff) {
-                            int intendedBackoff = policyData.backoffPutInterval * 2;
-
-                            // Use old backoff interval if the current interval is greater than the max interval
-                            if (intendedBackoff > policyData.maxBackoffInterval) {
-                                policyData.backoffPutInterval = policyData.maxBackoffInterval;
-                                db.policyDataDAO().setBackoffPutInterval(policyData.maxBackoffInterval);
-                            } else {
-                                // Configure the new backoff interval
-                                policyData.backoffPutInterval = intendedBackoff;
-                                db.policyDataDAO().setBackoffPutInterval(intendedBackoff);
-                            }
+                            int intendedBackoff = getIntendedBackoff(policyData);
+                            policyData.backoffPutInterval = intendedBackoff;
+                            db.policyDataDAO().setBackoffPutInterval(intendedBackoff);
 
                             // Set agent health status to unhealthy
                             db.statisticsDataDAO().setAgentHealth("Unhealthy");
@@ -106,15 +92,34 @@ public class ElasticWorker extends Worker {
                         db.policyDataDAO().resetBackoffPutInterval();
                     }
 
-                    // Schedule the next check-in
+                    // Schedule the next Elasticsearch PUT
+                    // Notice that we can't use a periodic worker, as the interval is dynamic and likely also under the minimum scheduling interval of 15 minutes.
                     AppLog.i("ElasticWorker", "Scheduling next Elasticsearch PUT in " + policyData.backoffPutInterval + " seconds");
-                    WorkScheduler.scheduleElasticsearchWorker(getApplicationContext(), policyData.backoffPutInterval, TimeUnit.SECONDS);
+                    WorkScheduler.scheduleElasticsearchWorker(getApplicationContext(), policyData.backoffPutInterval, TimeUnit.SECONDS, policyData.disableIfBatteryLow);
                 });
             }
         };
 
         // Perform the Elasticsearch PUT operation
         return getDocumentsFromComponents(db, enrollmentData, policyData, callback);
+    }
+
+    /**
+     * Calculates the intended backoff interval based on the current policy data.
+     * Normally, the backoff interval is doubled, but if a maximum backoff interval is set,
+     * the minimum of the intended backoff and the maxBackoffInterval is used.
+     *
+     * @return The intended backoff interval in seconds.
+     */
+    private static int getIntendedBackoff(PolicyData policyData) {
+        int intendedBackoff;
+
+        if (policyData.maxBackoffInterval == 0) {
+            intendedBackoff = policyData.backoffPutInterval * 2;
+        } else {
+            intendedBackoff = Math.min(policyData.backoffPutInterval * 2, policyData.maxBackoffInterval);
+        }
+        return intendedBackoff;
     }
 
     /**
@@ -209,29 +214,26 @@ public class ElasticWorker extends Worker {
         String sslFullCert = policyData.sslCaTrustedFull;
         String esUrl = policyData.hosts;
         boolean verifyCert = true; // we use the full cert provided by fleet anyway
-        String elasticAccessApiKey = policyData.apiKey;
+        String elasticAccessApiKey = AppSecurePreferences.getInstance(getApplicationContext()).getElasticApiKey();
         int timeoutSeconds = 30;
 
         // Base64 encode the API key
         String elasticAccessApiKeyEncoded = android.util.Base64.encodeToString(elasticAccessApiKey.getBytes(), android.util.Base64.NO_WRAP);
 
         String indexName = policyData.dataStreamDataset;
+        String logPackageName = policyData.logPackageName;
+        String logPackageVersion = policyData.logPackageVersion;
 
-        // Prepend logs- to the index name
-        if (!indexName.startsWith("logs-")) {
-            indexName = "logs-" + indexName + "-2.3.0"; // TODO: Make this dynamic
+        // Parse index name
+        indexName = logPackageName + "s-" + indexName + "-" + logPackageVersion;
+        if(!indexName.startsWith("logs-")) {
+            AppLog.w(TAG, "Probably wrong index name: " + indexName);
         }
 
         Gson gson = new Gson();
         RequestBody requestBody = createBulkRequestBody(newDocuments, gson);
 
-        // Initialize Retrofit instance
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(esUrl)
-                .client(NetworkBuilder.getOkHttpClient(verifyCert, sslFullCert, timeoutSeconds))
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-
+        Retrofit retrofit = NetworkBuilder.getClientElasticsearch(esUrl, verifyCert, sslFullCert, timeoutSeconds);
         ElasticApi elasticApi = retrofit.create(ElasticApi.class);
         elasticApi.putBulk("ApiKey " + elasticAccessApiKeyEncoded, indexName, requestBody).enqueue(new Callback<ElasticResponse>() {
             @Override
@@ -276,7 +278,6 @@ public class ElasticWorker extends Worker {
         return Result.success();
     }
 
-
     /**
      * Creates the body for a bulk request to Elasticsearch. Each document is preprocessed
      * with necessary action metadata before serialization.
@@ -298,7 +299,6 @@ public class ElasticWorker extends Worker {
         Log.d(TAG, "Bulk payload: " + bulkPayload.toString());
         return RequestBody.create(MediaType.parse("application/x-ndjson"), bulkPayload.toString());
     }
-
 
     /**
      * Generates action metadata for a document to be included in a bulk operation.

@@ -1,13 +1,14 @@
 package de.swiftbird.elasticandroid;
 
 import android.content.Context;
-
 import androidx.annotation.NonNull;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * A background worker that handles periodic check-in with the Fleet server.
@@ -16,6 +17,7 @@ import java.util.concurrent.TimeUnit;
  * it might adjust the check-in frequency or mark the agent as unhealthy.
  */
 public class FleetCheckinWorker extends Worker {
+    private static final ExecutorService executor = Executors.newFixedThreadPool(4);
 
     /**
      * Initializes a new instance of the FleetCheckinWorker.
@@ -38,39 +40,32 @@ public class FleetCheckinWorker extends Worker {
         AppLog.i("FleetCheckinWorker", "Performing check-in from background worker");
 
         // Using FleetCheckinRepository for periodic check-in
-        FleetCheckinRepository repository = FleetCheckinRepository.getInstance(getApplicationContext());
+        FleetCheckinRepository repository = new FleetCheckinRepository(null, null);
 
         // Obtain an instance of the AppDatabase
-        AppDatabase db = AppDatabase.getDatabase(this.getApplicationContext(), "enrollment-data");
+        AppDatabase db = AppDatabase.getDatabase(this.getApplicationContext(), "elastic-android-db");
 
         // Synchronously fetch the enrollment data
         FleetEnrollData enrollmentData = db.enrollmentDataDAO().getEnrollmentInfoSync(1);
         AgentMetadata agentMetadata = AgentMetadata.getMetadataFromDeviceAndDB(enrollmentData.agentId, enrollmentData.hostname);
         PolicyData policyData = db.policyDataDAO().getPolicyDataSync();
-        int nextIntervalInSeconds = db.policyDataDAO().getPolicyDataSync().checkinInterval;
+        AtomicBoolean finished = new AtomicBoolean(false);
 
-        StatusCallback callback = new StatusCallback() {
-            @Override
-            public void onCallback(boolean success) {
-                // Create new thread to handle the callback
-                Executors.newSingleThreadExecutor().execute(() -> {
+        StatusCallback callback = success -> {
+            // Create new thread to handle the callback
+            executor.execute(() -> {
+                try {
                     if (!success) {
+
                         AppStatisticsDataDAO statisticsData = db.statisticsDataDAO();
                         statisticsData.increaseTotalFailures();
 
-                        // Use exponential backoff for the next check-in if enanbled
+                        // Use exponential backoff for the next check-in if enabled
                         if (policyData.useBackoff) {
-                            int intendedBackoff = policyData.backoffCheckinInterval * 2;
-
-                            // Use old backoff interval if the current interval is greater than the max interval
-                            if (intendedBackoff > policyData.maxBackoffInterval) {
-                                policyData.backoffCheckinInterval = policyData.maxBackoffInterval;
-                                db.policyDataDAO().setBackoffCheckinInterval(policyData.maxBackoffInterval);
-                            } else {
-                                // Configure the new backoff interval
-                                policyData.backoffCheckinInterval = intendedBackoff;
-                                db.policyDataDAO().setBackoffCheckinInterval(intendedBackoff);
-                            }
+                            // Calculate the intended backoff interval
+                            int intendedBackoff = getIntendedBackoff(policyData);
+                            policyData.backoffCheckinInterval = intendedBackoff;
+                            db.policyDataDAO().setBackoffCheckinInterval(intendedBackoff);
 
                             // Set agent health status to unhealthy
                             db.statisticsDataDAO().setAgentHealth("Unhealthy");
@@ -85,23 +80,43 @@ public class FleetCheckinWorker extends Worker {
                         policyData.backoffCheckinInterval = policyData.checkinInterval;
                         db.policyDataDAO().resetBackoffCheckinInterval();
                     }
+                } catch (Exception e) {
+                    AppLog.e("FleetCheckinWorker", "Unhandled app error during check-in worker: " + e.getMessage());
+                }
 
-                    // Schedule the next check-in
-                    AppLog.i("FleetCheckinWorker", "Scheduling next Fleet checkin in " + policyData.backoffCheckinInterval + " seconds");
-                    WorkScheduler.scheduleFleetCheckinWorker(getApplicationContext(), policyData.backoffCheckinInterval, TimeUnit.SECONDS);
-                });
-
-            }
+                // Schedule the next check-in.
+                // Notice that we can't use a periodic worker, as the interval is dynamic and likely also under the minimum scheduling interval of 15 minutes.
+                AppLog.i("FleetCheckinWorker", "Scheduling next Fleet checkin in " + policyData.backoffCheckinInterval + " seconds");
+                WorkScheduler.scheduleFleetCheckinWorker(getApplicationContext(), policyData.backoffCheckinInterval, TimeUnit.SECONDS, policyData.disableIfBatteryLow);
+                finished.set(true);
+            });
         };
 
-
         try {
-            repository.checkinAgent(enrollmentData, agentMetadata, callback, null, null, getApplicationContext());
+            repository.checkinAgent(getApplicationContext(), enrollmentData, agentMetadata, callback);
         } catch (Exception e) {
             AppLog.e("FleetCheckinWorker", "Unhandled app error during check-in worker: " + e.getMessage());
             callback.onCallback(false);
         }
 
         return Result.success();
+    }
+
+    /**
+     * Calculates the intended backoff interval based on the current policy data.
+     * Normally, the backoff interval is doubled, but if a maximum backoff interval is set,
+     * the minimum of the intended backoff and the maxBackoffInterval is used.
+     *
+     * @return The intended backoff interval in seconds.
+     */
+    private static int getIntendedBackoff(PolicyData policyData) {
+        int intendedBackoff;
+
+        if (policyData.maxBackoffInterval == 0) {
+            intendedBackoff = policyData.backoffCheckinInterval * 2;
+        } else {
+            intendedBackoff = Math.min(policyData.backoffCheckinInterval * 2, policyData.maxBackoffInterval);
+        }
+        return intendedBackoff;
     }
 }

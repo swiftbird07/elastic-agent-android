@@ -1,5 +1,6 @@
 package de.swiftbird.elasticandroid;
 
+import android.annotation.SuppressLint;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
@@ -9,18 +10,18 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import androidx.appcompat.app.AppCompatActivity;
-
 import org.json.JSONObject;
-
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.security.cert.CertificateException;
 import java.text.MessageFormat;
-
 import de.swiftbird.elasticandroid.R.id;
 import kotlin.NotImplementedError;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
+import java.io.ByteArrayInputStream;
 
 /**
  * Activity for handling the enrollment process of an Elastic Agent with a Fleet server.
@@ -32,20 +33,12 @@ public class FleetEnrollActivity extends AppCompatActivity implements StatusCall
     private EditText etServerUrl, etToken, etHostname, etFleetCert;
     private androidx.appcompat.widget.SwitchCompat swCheckCA, swPinRootCA;
     private TextView tError, tStatus;
-
     private Button btnEnrollNow;
 
-    /**
-     * Initializes the activity, setting up the UI components and their event listeners.
-     * @param savedInstanceState If the activity is being re-initialized after previously being shut down,
-     *                           this Bundle contains the data it most recently supplied in onSaveInstanceState(Bundle).
-     *                           Note: Otherwise it is null.
-     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_enrollment);
-
 
         etServerUrl = findViewById(R.id.etServerUrl);
         etToken = findViewById(R.id.etToken);
@@ -64,13 +57,11 @@ public class FleetEnrollActivity extends AppCompatActivity implements StatusCall
         // Disable camera feature for now TODO
         btnLoadFromQR.setEnabled(false);
 
-        // Disable certificate input for now TODO
-        etFleetCert.setEnabled(false);
-
         // Disable cert pinning option for now TODO
         swPinRootCA.setEnabled(false);
 
         // Check build config and enable button if set
+        @SuppressWarnings("ConstantConditions") // Always true/false at compile time, but changes depending on build variant
         boolean isBuildConfigSet = BuildConfig.ENROLLMENT_STRING != null && !BuildConfig.ENROLLMENT_STRING.isEmpty();
         btnLoadFromConfig.setEnabled(isBuildConfigSet);
 
@@ -129,6 +120,7 @@ public class FleetEnrollActivity extends AppCompatActivity implements StatusCall
     /**
      * Initiates the enrollment process by validating the input fields and sending an enrollment request to the Fleet server.
      */
+    @SuppressLint("SetTextI18n") // Suppress warning for hardcoded text (App is English-only anyway)
     private void attemptEnrollment() {
         tError.setText("");
         String serverUrl = etServerUrl.getText().toString().trim();
@@ -152,6 +144,7 @@ public class FleetEnrollActivity extends AppCompatActivity implements StatusCall
         }
 
         // Define a pattern that allows letters, digits, underscore, hyphen, and period for token and hostname
+        @SuppressWarnings("RegExpRedundantEscape") // Not redundant, removing escape will error "Unclosed character class"
         String base64Pattern = "^[A-Za-z0-9_\\-\\.=]+$";
 
         // Validate token
@@ -170,25 +163,18 @@ public class FleetEnrollActivity extends AppCompatActivity implements StatusCall
             return;
         }
 
-        // Match default encoded certificate pattern (---BEGIN CERTIFICATE--- to ---END CERTIFICATE---)
-        String certificatePattern = "-----BEGIN CERTIFICATE-----.+-----END CERTIFICATE-----";
-
         // Validate certificate
-        if (!certificate.matches(certificatePattern) && !certificate.isEmpty()) {
-            AppLog.w(TAG, "Invalid characters in certificate.");
-            Toast.makeText(this, "Certificate contains invalid characters. Please provide a valid certificate.", Toast.LENGTH_LONG).show();
+        if (!certificate.isEmpty() && !validatePEMCertString(certificate)) {
+            AppLog.w(TAG, "Certificate is invalid.");
+            Toast.makeText(this, "Certificate could not be parsed. Please check the format.", Toast.LENGTH_LONG).show();
             btnEnrollNow.setEnabled(true);
             return;
         }
 
-
-
         if (!serverUrl.isEmpty() && !token.isEmpty() && !hostname.isEmpty()) {
-
             tStatus.setText("Starting enrollment process...");
-
             AppEnrollRequest request = new AppEnrollRequest(serverUrl, token, hostname, certificate, checkCA, pinRootCA);
-            FleetEnrollRepository repository = new FleetEnrollRepository(getApplicationContext(), request.getServerUrl(), request.getToken(), request.getCheckCert(),  tStatus, tError);
+            FleetEnrollRepository repository = new FleetEnrollRepository(getApplicationContext(), request.getServerUrl(), request.getToken(), request.getCertificate(), request.isCheckCert(),  tStatus, tError);
             repository.enrollAgent(request, this); // will callback onCallback
 
         } else {
@@ -230,33 +216,22 @@ public class FleetEnrollActivity extends AppCompatActivity implements StatusCall
     public void onCallback(boolean success) {
         if (success) {
             AppLog.i(TAG, "Enrollment successful. Going back to main activity.");
+
             // Wait for the user to see the success message
             try {
                 Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                AppLog.w(TAG, "Thread sleep interrupted: " + e.getMessage());
+            } catch (InterruptedException ignored) { // Ignore the exception, as it is not critical
             }
             finish();
         } else {
             AppLog.w(TAG, "Enrollment failed. Check logs for details.");
+
             // Delete enrollment data from database (as it is invalid)
             AppDatabase db = AppDatabase.getDatabase(this.getApplicationContext(), "enrollment-data");
-
-            AppDatabase.databaseWriteExecutor.execute(() -> {
-                db.enrollmentDataDAO().delete();
-            });
-
-            AppDatabase.databaseWriteExecutor.execute(() -> {
-                db.policyDataDAO().delete();
-            });
-
-            AppDatabase.databaseWriteExecutor.execute(() -> {
-                db.selfLogCompBuffer().deleteAllDocuments();
-            });
-
-            AppDatabase.databaseWriteExecutor.execute(() -> {
-                db.statisticsDataDAO().delete();
-            });
+            AppDatabase.databaseWriteExecutor.execute(() -> db.enrollmentDataDAO().delete());
+            AppDatabase.databaseWriteExecutor.execute(() -> db.policyDataDAO().delete());
+            AppDatabase.databaseWriteExecutor.execute(() -> db.selfLogCompBuffer().deleteAllDocuments());
+            AppDatabase.databaseWriteExecutor.execute(() -> db.statisticsDataDAO().delete());
 
             // Remove all registered workers
             WorkScheduler.cancelAllWork(getApplicationContext());
@@ -265,4 +240,42 @@ public class FleetEnrollActivity extends AppCompatActivity implements StatusCall
 
         }
     }
+
+
+    private static boolean validatePEMCertString(String certificate)
+    {
+        String BEGIN_CERT = "-----BEGIN CERTIFICATE-----";
+        String END_CERT = "-----END CERTIFICATE-----";
+
+        try {
+            // Check for BEGIN/END markers
+            if (!certificate.contains(BEGIN_CERT) || !certificate.contains(END_CERT)) {
+                AppLog.w(TAG, "Certificate is missing BEGIN/END markers.");
+                return false;
+            }
+
+            // Extract base64 encoded part by removing possible headers and footers
+            String encodedCert = certificate
+                    .replaceAll(BEGIN_CERT, "")
+                    .replaceAll(END_CERT, "")
+                    .replaceAll("\\s", ""); // Remove whitespace
+
+            // Decode the base64 encoded certificate
+            byte[] decodedBytes = android.util.Base64.decode(encodedCert, android.util.Base64.DEFAULT);
+
+            // Generate certificate object
+            CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
+            X509Certificate cert = (X509Certificate) certFactory.generateCertificate(new ByteArrayInputStream(decodedBytes));
+
+            // Check certificate validity
+            cert.checkValidity(); // This will throw a CertificateExpiredException or CertificateNotYetValidException if not valid
+            AppLog.d(TAG, "Certificate is valid: " + cert.getSubjectDN().getName());
+            return true;
+
+        } catch (IllegalArgumentException | CertificateException e) {
+            AppLog.w(TAG, "Invalid certificate: " + e.getMessage());
+            return false;
+        }
+    }
+
 }

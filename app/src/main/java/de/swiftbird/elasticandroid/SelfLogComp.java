@@ -1,10 +1,7 @@
 package de.swiftbird.elasticandroid;
 
-
 import android.content.Context;
 import android.util.Log;
-
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -26,7 +23,7 @@ public class SelfLogComp implements Component {
     private SelfLogCompBuffer buffer;
     private AppStatisticsDataDAO statistic;
 
-    public static SelfLogComp getInstance() {
+    public static synchronized SelfLogComp getInstance() {
         // Singleton pattern
         if (selfLogComp == null) {
             selfLogComp = new SelfLogComp();
@@ -37,27 +34,28 @@ public class SelfLogComp implements Component {
     @Override
     public boolean setup(Context context, FleetEnrollData enrollmentData, PolicyData policyData, String subComponent) {
         // Initialize Room database and get the DAO
-        AppDatabase db = AppDatabase.getDatabase(context, "");
+        AppDatabase db = AppDatabase.getDatabase(context, "elastic-android-db");
         buffer = db.selfLogCompBuffer();
         statistic = db.statisticsDataDAO();
         return true;
     }
 
     @Override
-    public void collectEvents(FleetEnrollData enrollmentData, PolicyData policyData) {
-        return; // No-op for this component (logs are collected in real-time)
+    public void addDocumentToBuffer(ElasticDocument document) {
+        if (document instanceof SelfLogCompDocument) {
+            if (buffer != null) {
+                buffer.insertDocument((SelfLogCompDocument) document);
+                statistic.increaseCombinedBufferSize(1);
+            } else {
+                Log.e("SelfLogComp", "Buffer not initialized");
+                throw new IllegalStateException("SelfLogComp buffer has not been initialized.");
+            }
+        } else {
+            Log.e("SelfLogComp", "Invalid document type provided");
+            throw new IllegalArgumentException("Only SelfLogCompDocument instances can be added to the buffer.");
+        }
     }
 
-    @Override
-    public void addDocumentToBuffer(ElasticDocument document) {
-        if (document instanceof SelfLogCompDocument && buffer != null) {
-            buffer.insertDocument((SelfLogCompDocument) document);
-            statistic.increaseCombinedBufferSize(1);
-        }
-        else {
-            Log.w("SelfLogComp", "Invalid document type or buffer not initialized");
-        }
-    }
 
     @Override
     public <T extends ElasticDocument> List<T> getDocumentsFromBuffer(int maxDocuments) {
@@ -75,17 +73,18 @@ public class SelfLogComp implements Component {
     }
 
     @Override
-    public List<String> getRequiredPermissions() {
-        return null;
-    }
-
-    @Override
     public String getPathName() {
         return "self-log";
     }
 
     @Override
     public void disable(Context context, FleetEnrollData enrollmentData, PolicyData policyData) {
-        // No-op for this component
+        try {
+            AppLog.shutdownLogger();
+            this.statistic = null;
+            this.buffer = null;
+        } catch (Exception e) {
+            Log.e("SelfLogComp", "Failed to shut down logger properly", e);
+        }
     }
 }

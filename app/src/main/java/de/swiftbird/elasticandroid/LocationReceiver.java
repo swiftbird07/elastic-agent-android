@@ -2,6 +2,8 @@ package de.swiftbird.elasticandroid;
 
 import androidx.annotation.NonNull;
 import android.content.Context;
+import android.os.Handler;
+import android.os.HandlerThread;
 
 /**
  * LocationReceiver is a custom {@link android.location.LocationListener} implementation designed to
@@ -9,12 +11,14 @@ import android.content.Context;
  * manages the creation and buffering of {@link LocationCompDocument} instances, which are then stored
  * for later use or transmission.
  *
- * This class initiates a new Thread to handle each location update to ensure that the processing
+ * <p>This class initiates a new Thread to handle each location update to ensure that the processing
  * does not interfere with the UI or other main thread operations, promoting smoother performance
  * and better user experience.
  */
 public class LocationReceiver implements android.location.LocationListener{
     private final Context context;
+    private final Handler handler;
+    private final LocationComp locationComp;
 
     /**
      * Constructs a LocationReceiver with the specified application context.
@@ -26,6 +30,13 @@ public class LocationReceiver implements android.location.LocationListener{
     public LocationReceiver(Context context) {
         // Use application context to avoid potential memory leaks
         this.context = context.getApplicationContext();
+        HandlerThread handlerThread = new HandlerThread("LocationHandler");
+        handlerThread.start();
+        handler = new Handler(handlerThread.getLooper());
+
+        // Initialize the location component
+        locationComp = LocationComp.getInstance();
+        locationComp.setup_light(context);
     }
 
     /**
@@ -36,8 +47,8 @@ public class LocationReceiver implements android.location.LocationListener{
      */
     @Override
     public void onLocationChanged(@NonNull android.location.Location location) {
-        // New thread to handle the location update
-        new Thread(() -> handleLocationUpdate(location)).start();
+        // Handle location update on a new thread
+        handler.post(() -> handleLocationUpdate(location));
     }
 
     /**
@@ -48,13 +59,11 @@ public class LocationReceiver implements android.location.LocationListener{
      * @param location The location data to be processed.
      */
     private void handleLocationUpdate(android.location.Location location) {
-        // Handle each location update
         AppLog.d("LocationReceiver", "Location changed: " + location);
-        LocationComp locationComp = LocationComp.getInstance();
-        locationComp.setup_light(context);
         AppDatabase db = AppDatabase.getDatabase(context, "");
         PolicyData policyData = db.policyDataDAO().getPolicyDataSync();
         FleetEnrollData enrollmentData = db.enrollmentDataDAO().getEnrollmentInfoSync(1);
+
         try {
             locationComp.addDocumentToBuffer(new LocationCompDocument(location, enrollmentData, policyData, context));
         } catch (Exception e) {
@@ -70,5 +79,5 @@ public class LocationReceiver implements android.location.LocationListener{
 
     @Override
     public void onProviderDisabled(@NonNull String provider) {}
-};
+}
 

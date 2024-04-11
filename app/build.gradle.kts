@@ -1,5 +1,6 @@
 import java.util.Properties
 
+// Load the .env file if it exists
 val props = Properties()
 val envFile = rootProject.file(".env")
 if (envFile.exists()) {
@@ -36,8 +37,14 @@ android {
             }
         }
 
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+    }
+
+    testOptions {
+        unitTests.apply {
+            isIncludeAndroidResources = true
+        }
     }
 
     buildTypes {
@@ -66,7 +73,6 @@ dependencies {
     implementation(libs.constraintlayout)
     implementation(libs.navigation.fragment)
     implementation(libs.navigation.ui)
-    //implementation(libs.room.common)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
@@ -83,7 +89,6 @@ dependencies {
     implementation(libs.lifecycle.viewmodel.ktx)
 
     implementation(libs.room.runtime)
-    //kapt(libs.room.compiler)
 
     //noinspection UseTomlInstead
     implementation("com.google.android.material:material")
@@ -101,6 +106,15 @@ dependencies {
 
     implementation(libs.room.runtime)
     annotationProcessor(libs.room.compiler)
+
+    implementation(libs.security.crypto)
+
+    testImplementation(libs.mockito.core)
+    testImplementation(libs.robolectric)
+    //noinspection UseTomlInstead
+    testImplementation("androidx.test:core:1.5.0")
+    //noinspection UseTomlInstead
+    testImplementation("org.mockito:mockito-inline:4.0.0")
 
 }
 

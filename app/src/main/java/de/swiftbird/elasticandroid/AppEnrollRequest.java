@@ -1,28 +1,33 @@
 package de.swiftbird.elasticandroid;
 
 /**
- * Represents a request to enroll an application with a server, containing all necessary information for the enrollment process.
+ * Represents a request to enroll the app to the fleet server, containing all necessary information for the enrollment process.
  * This class encapsulates details such as the server URL, enrollment token, hostname, certificate, and security checks to be performed.
+ * Don't confuse this class with the FleetEnrollRequest class, which is the final parsed request send used by retrofit (this is an intermediate representation).
  */
 public class AppEnrollRequest {
-    private String serverUrl;
-    private String token;
-    private String hostname;
-    private String certificate;
-    private boolean checkCert;
-    private boolean fingerprintRootCA;
+    private final String serverUrl;
+    private final String token;
+    private final String hostname;
+    private final String certificate;
+    private final boolean checkCert;
+    private final boolean fingerprintRootCA;
 
     /**
      * Constructs an AppEnrollRequest with all necessary information for enrolling the app.
+     * Warning: Expects parameters to be sanitized and validated *before* calling this constructor.
      *
-     * @param serverUrl URL of the server.
+     * @param serverUrl URL of the fleet server.
      * @param token Enrollment token.
-     * @param hostname Hostname of the device/system.
-     * @param certificate Certificate information.
-     * @param checkCert Whether to check the server's certificate.
-     * @param fingerprintRootCA Whether to check for a fingerprint match with the root CA.
+     * @param hostname Hostname of the device.
+     * @param certificate Certificate of the fleet server in PEM format (UTF-8, Raw). Effective only if checkCert is true.
+     *                    If empty, the server's certificate will be checked against the system's trust store.
+     *                    Currently not implemented.
+     * @param checkCert Whether to check the server's certificate (either against system trust store or the provided certificate if not empty).
+     * @param fingerprintRootCA Whether to save the fingerprint of the fleet server's root CA certificate after successful enrollment and validate future connections against it.
+     *                          Currently not implemented.
      */
-    protected AppEnrollRequest(String serverUrl, String token, String hostname, String certificate, boolean checkCert, boolean fingerprintRootCA){
+    public AppEnrollRequest(String serverUrl, String token, String hostname, String certificate, boolean checkCert, boolean fingerprintRootCA){
         this.serverUrl = serverUrl;
         this.token = token;
         this.hostname = hostname;
@@ -31,7 +36,7 @@ public class AppEnrollRequest {
         this.fingerprintRootCA = fingerprintRootCA;
     }
 
-    protected String getServerUrl() {
+    public String getServerUrl() {
         return serverUrl;
     }
 
@@ -44,23 +49,15 @@ public class AppEnrollRequest {
         return certificate;
     }
 
-    public boolean getCheckCert() {
+    public boolean isCheckCert() {
         return checkCert;
     }
 
-    public void setCheckCert(boolean checkCert) {
-        this.checkCert = checkCert;
-    }
-
-    public boolean isFingerprintRootCA() {
+    public boolean isCheckFingerprintCert() {
         return fingerprintRootCA;
     }
 
-    public void setFingerprintRootCA(boolean fingerprintRootCA) {
-        this.fingerprintRootCA = fingerprintRootCA;
-    }
-
-    protected String getToken() {
+    public String getToken() {
         return token;
     }
 }

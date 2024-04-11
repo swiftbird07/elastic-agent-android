@@ -2,17 +2,12 @@ package de.swiftbird.elasticandroid;
 
 import android.os.Build;
 import android.util.Log;
-
 import androidx.annotation.Nullable;
-
-import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
-
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
@@ -193,8 +188,7 @@ public class AgentMetadata {
         systemECSMeta.fullName = Build.MODEL + " " + Build.VERSION.RELEASE; // Concatenated model and version
 
         // Construct and return the LocalMeta object with filled-in metadata
-        AgentMetadata metadata = new AgentMetadata(new Local(elasticECSMeta, hostECSMeta, systemECSMeta));
-        return metadata;
+        return new AgentMetadata(new Local(elasticECSMeta, hostECSMeta, systemECSMeta));
     }
 
     /**
@@ -223,7 +217,4 @@ public class AgentMetadata {
         }
         return ipAddresses;
     }
-
-
-
 }

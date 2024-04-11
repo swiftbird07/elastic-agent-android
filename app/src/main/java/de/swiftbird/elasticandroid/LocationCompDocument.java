@@ -3,13 +3,10 @@ package de.swiftbird.elasticandroid;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
-
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
-
 import com.google.gson.annotations.SerializedName;
-
 import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
@@ -30,13 +27,15 @@ import java.util.Locale;
  */
 @Entity
 public class LocationCompDocument extends ElasticDocument {
+    // Event action and category for location updates
+    private static final String EVENT_ACTION = "location-update";
+    private static final String EVENT_CATEGORY = "location";
 
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "id")
     public int id;
 
     // ECS fields
-
     @SerializedName("event.action")
     @ColumnInfo(name = "eventAction")
     public String eventAction;
@@ -147,8 +146,8 @@ public class LocationCompDocument extends ElasticDocument {
      */
     public LocationCompDocument(Location location, FleetEnrollData enrollmentData, PolicyData policyData, android.content.Context context) {
         super(enrollmentData, policyData);
-        this.eventAction = "location-update";
-        this.eventCategory = "location";
+        this.eventAction = EVENT_ACTION;
+        this.eventCategory = EVENT_CATEGORY;
         this.observerGeoLocation = new GeoLocation(location.getLatitude(), location.getLongitude());
         this.locationProvider = location.getProvider();
         this.locationAccuracy = location.getAccuracy();
@@ -158,7 +157,7 @@ public class LocationCompDocument extends ElasticDocument {
         this.locationTime = location.getTime();
         this.locationProvider = location.getProvider();
 
-        // Parse the location data using GeoCoder
+        // Parse the location data using GeoCoder. Location updates are coming from a background service, so it's safe to use the Geocoder here.
         Geocoder geocoder = new Geocoder(context, Locale.getDefault());
         try {
             List<Address> addresses = geocoder.getFromLocation(location.getLatitude(), location.getLongitude(), 1);

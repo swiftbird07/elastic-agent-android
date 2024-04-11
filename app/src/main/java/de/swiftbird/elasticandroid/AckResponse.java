@@ -23,7 +23,7 @@ public class AckResponse {
         return items;
     }
 
-    public class Item {
+    public static class Item {
         @SerializedName("message")
         private String message; // Descriptive message of the acknowledgment outcome.
 

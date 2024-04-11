@@ -52,6 +52,7 @@ This policy will define which components of the Elastic Agent Android will be ac
   use_backoff: true
   max_backoff_interval: 5m
   backoff_on_empty_buffer: false
+  disable_on_low_battery: false
 ```
 These settings control how documents are batched and sent to Elasticsearch, with options for backoff strategies.
 

@@ -50,7 +50,7 @@ public class ElasticWorker extends Worker {
         AppLog.i("FleetCheckinWorker", "Performing elasticsearch PUT from background worker");
 
         // Obtain an instance of the AppDatabase
-        AppDatabase db = AppDatabase.getDatabase(this.getApplicationContext(), "enrollment-data");
+        AppDatabase db = AppDatabase.getDatabase(this.getApplicationContext());
 
         // Synchronously fetch the enrollment data; adjust the method call as necessary based on the DAO
         FleetEnrollData enrollmentData = db.enrollmentDataDAO().getEnrollmentInfoSync(1);

@@ -38,8 +38,8 @@ public class ComponentWorker extends Worker {
         AppLog.i("ComponentWorker", "Performing component worker tasks in the background");
 
         // Retrieves enrollment and policy data to configure and operate on components.
-        FleetEnrollData enrollmentData = AppDatabase.getDatabase(getApplicationContext(), "").enrollmentDataDAO().getEnrollmentInfoSync(1);
-        PolicyData policyData = AppDatabase.getDatabase(getApplicationContext(), "").policyDataDAO().getPolicyDataSync();
+        FleetEnrollData enrollmentData = AppDatabase.getDatabase(getApplicationContext()).enrollmentDataDAO().getEnrollmentInfoSync(1);
+        PolicyData policyData = AppDatabase.getDatabase(getApplicationContext()).policyDataDAO().getPolicyDataSync();
 
         // Iterates over components defined in policy data, initializing and collecting events for each.
         for(String componentPath : policyData.paths.split(",")) {

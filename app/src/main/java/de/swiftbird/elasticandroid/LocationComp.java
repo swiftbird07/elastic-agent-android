@@ -63,7 +63,7 @@ public class LocationComp implements Component {
     @Override
     public boolean setup(Context context, FleetEnrollData enrollmentData, PolicyData policyData, String subComponent) {
         AppLog.d(TAG, "Setting up location component");
-        AppDatabase db = AppDatabase.getDatabase(context, "");
+        AppDatabase db = AppDatabase.getDatabase(context);
         this.buffer = db.locationCompBuffer();
         this.statistic = db.statisticsDataDAO();
 
@@ -162,7 +162,7 @@ public class LocationComp implements Component {
      * @param context The application context.
      */
     public void setup_light(Context context) {
-        AppDatabase db = AppDatabase.getDatabase(context, "");
+        AppDatabase db = AppDatabase.getDatabase(context);
         this.buffer = db.locationCompBuffer();
         this.statistic = db.statisticsDataDAO();
     }

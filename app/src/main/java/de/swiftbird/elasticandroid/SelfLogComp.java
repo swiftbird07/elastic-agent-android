@@ -34,7 +34,7 @@ public class SelfLogComp implements Component {
     @Override
     public boolean setup(Context context, FleetEnrollData enrollmentData, PolicyData policyData, String subComponent) {
         // Initialize Room database and get the DAO
-        AppDatabase db = AppDatabase.getDatabase(context, "elastic-android-db");
+        AppDatabase db = AppDatabase.getDatabase(context);
         buffer = db.selfLogCompBuffer();
         statistic = db.statisticsDataDAO();
         return true;

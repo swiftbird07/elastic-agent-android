@@ -43,7 +43,7 @@ public class FleetCheckinWorker extends Worker {
         FleetCheckinRepository repository = new FleetCheckinRepository(null, null);
 
         // Obtain an instance of the AppDatabase
-        AppDatabase db = AppDatabase.getDatabase(this.getApplicationContext(), "elastic-android-db");
+        AppDatabase db = AppDatabase.getDatabase(this.getApplicationContext());
 
         // Synchronously fetch the enrollment data
         FleetEnrollData enrollmentData = db.enrollmentDataDAO().getEnrollmentInfoSync(1);

@@ -89,7 +89,7 @@ public class AppLog {
         // Execute on a background thread to avoid blocking the main thread
         executor.submit(() -> {
             try {
-                AppDatabase db = AppDatabase.getDatabase(AppInstance.getAppContext(), "agent-data");
+                AppDatabase db = AppDatabase.getDatabase(AppInstance.getAppContext());
                 FleetEnrollData enrollmentData = db.enrollmentDataDAO().getEnrollmentInfoSync(1);
                 PolicyData policyData = db.policyDataDAO().getPolicyDataSync();
                 boolean selfLogEnabled = policyData != null && policyData.paths != null && policyData.paths.contains("android://self-log");

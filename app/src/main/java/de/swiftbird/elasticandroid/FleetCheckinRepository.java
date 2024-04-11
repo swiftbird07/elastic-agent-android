@@ -151,7 +151,7 @@ public class FleetCheckinRepository {
                     sdf.setTimeZone(TimeZone.getTimeZone("UTC")); // Ensure the time is in UTC
 
                     AppDatabase.databaseWriteExecutor.execute(() -> {
-                        AppDatabase db = AppDatabase.getDatabase(context, "policy-data");
+                        AppDatabase db = AppDatabase.getDatabase(context);
                         // Update lastUpdated to current time format 2024-03-19T21:25:27.937Z API 24
                         @SuppressLint("SimpleDateFormat") SimpleDateFormat sdf_2 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
                         sdf_2.setTimeZone(TimeZone.getTimeZone("UTC")); // Ensure the time is in UTC
@@ -217,7 +217,7 @@ public class FleetCheckinRepository {
         }
 
         AppDatabase.databaseWriteExecutor.execute(() -> {
-            AppDatabase db = AppDatabase.getDatabase(context, "policy-data");
+            AppDatabase db = AppDatabase.getDatabase(context);
             PolicyData currentPolicyData = db.policyDataDAO().getPolicyDataSync();
 
             if (currentPolicyData != null && currentPolicyData.revision >= policyData.revision) {
@@ -263,7 +263,7 @@ public class FleetCheckinRepository {
         WorkScheduler.cancelAllWork(context);
         // Delete the enrollment data from the database
         AppLog.i(TAG, "Deleting enrollment data from database...");
-        AppDatabase db = AppDatabase.getDatabase(context, "enrollment-data");
+        AppDatabase db = AppDatabase.getDatabase(context);
         AppDatabase.databaseWriteExecutor.execute(() -> {
             db.enrollmentDataDAO().delete();
             db.policyDataDAO().delete();

@@ -64,7 +64,7 @@ public abstract class AppDatabase extends RoomDatabase {
      * @param context The context used to build the database instance.
      * @return The singleton instance of AppDatabase.
      */
-    protected static AppDatabase getDatabase(final Context context, String dbName) {
+    protected static AppDatabase getDatabase(final Context context) {
         if (appDatabase == null) {
             synchronized (AppDatabase.class) {
                 if (appDatabase == null) {

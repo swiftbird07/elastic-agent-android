@@ -81,7 +81,7 @@ public class MainActivity extends AppCompatActivity implements StatusCallback {
 
         // Load UI based on enrollment status from database
         try {
-            AppDatabase db = AppDatabase.getDatabase(this.getApplicationContext(), "enrollment-data");
+            AppDatabase db = AppDatabase.getDatabase(this.getApplicationContext());
             db.enrollmentDataDAO().getEnrollmentInfo(1).observe(this, enrollmentData -> {
 
                 // Set the click listener for the sync button after the enrollment data is loaded
@@ -131,7 +131,7 @@ public class MainActivity extends AppCompatActivity implements StatusCallback {
         super.onResume();
 
         // Load UI based on enrollment status from database
-        AppDatabase db = AppDatabase.getDatabase(this.getApplicationContext(), "enrollment-data");
+        AppDatabase db = AppDatabase.getDatabase(this.getApplicationContext());
         db.enrollmentDataDAO().getEnrollmentInfo(1).observe(this, enrollmentData -> {
             if(enrollmentData != null) {
                 updateUIBasedOnEnrollment(enrollmentData);
@@ -155,7 +155,7 @@ public class MainActivity extends AppCompatActivity implements StatusCallback {
     protected void onDestroy() {
         super.onDestroy();
         // Remove all LiveData observers
-        AppDatabase db = AppDatabase.getDatabase(this.getApplicationContext(), "enrollment-data");
+        AppDatabase db = AppDatabase.getDatabase(this.getApplicationContext());
         db.enrollmentDataDAO().getEnrollmentInfo(1).removeObservers(this);
         db.policyDataDAO().getPolicyData().removeObservers(this);
     }
@@ -319,7 +319,7 @@ public class MainActivity extends AppCompatActivity implements StatusCallback {
         WorkScheduler.cancelAllWork(getApplicationContext());
 
         // Delete the enrollment data from the database
-        AppDatabase db = AppDatabase.getDatabase(this.getApplicationContext(), "enrollment-data");
+        AppDatabase db = AppDatabase.getDatabase(this.getApplicationContext());
         AppDatabase.databaseWriteExecutor.execute(() -> db.enrollmentDataDAO().delete());
         AppDatabase.databaseWriteExecutor.execute(() -> db.policyDataDAO().delete());
         AppDatabase.databaseWriteExecutor.execute(() -> db.selfLogCompBuffer().deleteAllDocuments());

@@ -258,7 +258,7 @@ public class DetailsActivity extends AppCompatActivity  {
 
         try {
             // Load UI based on enrollment status from database
-            AppDatabase db = AppDatabase.getDatabase(this.getApplicationContext(), "");
+            AppDatabase db = AppDatabase.getDatabase(this.getApplicationContext());
             db.enrollmentDataDAO().getEnrollmentInfo(1).observe(this, enrollmentData -> {
                 if(enrollmentData != null) {
                     updateUIBasedOnEnrollment(enrollmentData);
@@ -316,7 +316,7 @@ public class DetailsActivity extends AppCompatActivity  {
                     // Update the TextView
                     workersValue.setText(statusBuilder.toString());
 
-                    AppDatabase db = AppDatabase.getDatabase(this.getApplicationContext(), "");
+                    AppDatabase db = AppDatabase.getDatabase(this.getApplicationContext());
 
                     Executors.newSingleThreadExecutor().execute(() -> {
                         // Perform database read operation in background

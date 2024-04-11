@@ -50,7 +50,7 @@ public class SecurityLogsComp implements Component {
      */
     public void handleSecurityLogs(Context context) {
         // First setup the component
-        AppDatabase db = AppDatabase.getDatabase(context, "");
+        AppDatabase db = AppDatabase.getDatabase(context);
         this.buffer = db.securityLogCompBuffer();
         this.statistic = db.statisticsDataDAO();
 
@@ -113,7 +113,7 @@ public class SecurityLogsComp implements Component {
     @Override
     public boolean setup(Context context, FleetEnrollData enrollmentData, PolicyData policyData, String subComponent) {
         // Initialize Room database and get the DAO
-        AppDatabase db = AppDatabase.getDatabase(context, "");
+        AppDatabase db = AppDatabase.getDatabase(context);
         buffer = db.securityLogCompBuffer();
         statistic = db.statisticsDataDAO();
 

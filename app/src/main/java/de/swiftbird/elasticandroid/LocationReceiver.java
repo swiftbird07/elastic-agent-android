@@ -60,7 +60,7 @@ public class LocationReceiver implements android.location.LocationListener{
      */
     private void handleLocationUpdate(android.location.Location location) {
         AppLog.d("LocationReceiver", "Location changed: " + location);
-        AppDatabase db = AppDatabase.getDatabase(context, "");
+        AppDatabase db = AppDatabase.getDatabase(context);
         PolicyData policyData = db.policyDataDAO().getPolicyDataSync();
         FleetEnrollData enrollmentData = db.enrollmentDataDAO().getEnrollmentInfoSync(1);
 

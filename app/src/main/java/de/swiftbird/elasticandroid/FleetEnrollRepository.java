@@ -226,7 +226,7 @@ public class FleetEnrollRepository {
         enrollmentData.fleetCertificate = request.getCertificate();
 
         new Thread(() -> {
-            AppDatabase db = AppDatabase.getDatabase(context, "enrollment-data");
+            AppDatabase db = AppDatabase.getDatabase(context);
             db.enrollmentDataDAO().insertEnrollmentInfo(enrollmentData);
             AppLog.i(TAG, "Saving Enrollment data to db successful.");
             // Saving initial statistics data

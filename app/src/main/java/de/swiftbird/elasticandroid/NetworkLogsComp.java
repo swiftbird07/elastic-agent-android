@@ -54,7 +54,7 @@ public class NetworkLogsComp implements Component {
      */
     public void handleNetworkLogs(Context context, long batchToken) {
         // First setup the component
-        AppDatabase db = AppDatabase.getDatabase(context, "");
+        AppDatabase db = AppDatabase.getDatabase(context);
         this.buffer = db.networkLogsCompBuffer();
         this.statistic = db.statisticsDataDAO();
 
@@ -116,7 +116,7 @@ public class NetworkLogsComp implements Component {
     @Override
     public boolean setup(Context context, FleetEnrollData enrollmentData, PolicyData policyData, String subComponent) {
         // Initialize Room database and get the DAO
-        AppDatabase db = AppDatabase.getDatabase(context, "");
+        AppDatabase db = AppDatabase.getDatabase(context);
         buffer = db.networkLogsCompBuffer();
         statistic = db.statisticsDataDAO();
 

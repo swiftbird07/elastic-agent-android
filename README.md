@@ -71,6 +71,7 @@ After enrolling, the agent should report as "Healthy" within a few seconds, and 
 ## Contributions and Feedback
 
 We are open to feature requests, contributions, questions, and any feedback. If you're interested in contributing or have suggestions for improvement, please feel free to reach out or submit an issue/pull request on our GitHub repository. 
+See [CONTRIBUTE.md](CONTRIBUTE.md) for more info about how to contribute, as well as for a general overview of the app's architecture.
 
  
 ---

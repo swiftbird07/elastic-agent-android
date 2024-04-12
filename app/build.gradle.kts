@@ -24,7 +24,7 @@ android {
         minSdk = 24
         targetSdk = 34
         versionCode = 1
-        versionName = "1.2"
+        versionName = "1.3.0"
         android.buildFeatures.buildConfig = true
 
         val enrollmentString = props.getProperty("ENROLLMENT_STRING") ?: ""

@@ -7,6 +7,8 @@ PERSISTENT_VALUES_FILE="enrollment_values.env"
 save_values() {
     echo "serverUrl='$serverUrl'" > "$PERSISTENT_VALUES_FILE"
     echo "hostname='$hostname'" >> "$PERSISTENT_VALUES_FILE"
+    # For certificate, read the file and save it as a string
+    certificate=$(cat "$certificatePath")
     echo "certificate='$certificate'" >> "$PERSISTENT_VALUES_FILE"
     echo "verifyServerCert=$verifyServerCert" >> "$PERSISTENT_VALUES_FILE"
     echo "pinRootCert=$pinRootCert" >> "$PERSISTENT_VALUES_FILE"
@@ -52,8 +54,8 @@ echo "Enter token:"
 read token
 echo "Enter hostname (you can use %DEVICENAME% as a placeholder):"
 read hostname
-echo "Enter certificate:"
-read certificate
+echo "Enter path to certificate file:"
+read certificatePath
 echo "Verify server certificate? (true/false):"
 read verifyServerCert
 echo "Pin root certificate after enrollment? (true/false):"

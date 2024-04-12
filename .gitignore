@@ -29,3 +29,5 @@ gradle-app.setting
 
 # IntelliJ IDEA / Android Studio project files
 .idea/
+
+*.crt

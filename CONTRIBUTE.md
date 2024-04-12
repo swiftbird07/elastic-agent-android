@@ -63,7 +63,7 @@ The app classes are organized into several functional areas:
 - **FleetEnrollmentX**: Manages the enrollment process to fleet.
 - **FleetCheckinX**: Manages the check-in process to fleet.
 - **AppX**: Handles general app functionality (e.g., database, converters).
-- **ComponentNameX**: Manages components that fetch data from the device and send it to the Elasticsearch server.
+- **ComponentNameX**: Manages components that fetch various data from the device and send these data to an internal buffer (which is then emptied by the ElasticWorker mentioned above).
 
 Within each functional area, the classes are further organized into the following categories:
 
@@ -71,7 +71,7 @@ Within each functional area, the classes are further organized into the followin
 - **XRepository**: Classes handling business logic, typically linked to an Activity.
 - **XRequest/XResponse**: Retrofit classes for API call requests and responses.
 - **XWorker**: Background task handlers (see above).
-- **XComponent**: Modular classes fetching data from the device and sending it to Elasticsearch.
+- **XComp**: Implementations of the `Component` interface.
 - **XData**: Classes defining the Room database structure for local data storage.
 
 ## Developing a New Component

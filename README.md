@@ -15,7 +15,10 @@ Elastic Agent Android supports a variety of components that collect different ty
 
 - **Location:** Sends periodic location updates to Elasticsearch, with configurable intervals.
 - **Network Logs:** Collects network logs (DNS, TCP connections) provided by the Android OS.
-- **Security Logs:** Gathers security-related logs, offering insights into the device's security posture.
+- **Security Logs:** Gathers security-related logs, like app (un-) installation, failed PIN attempts etc.
+
+  
+   >**Note**: Currently not working on any tested devices. See Issue [#01](https://github.com/swiftbird07/elastic-agent-android/issues/1).
 - **Self Log:** Logs the agent's own operational logs for diagnostics and monitoring.
 
 > **Note:** The Network Logs and Security Logs components require the device to be configured as a device owner. More details can be found in our [wiki page](#).

@@ -21,7 +21,7 @@ Elastic Agent Android supports a variety of components that collect different ty
    >**Note**: Currently not working on any tested devices. See Issue [#01](https://github.com/swiftbird07/elastic-agent-android/issues/1).
 - **Self Log:** Logs the agent's own operational logs for diagnostics and monitoring.
 
-> **Note:** The Network Logs and Security Logs components require the device to be configured as a device owner. More details can be found in our [wiki page](#).
+> **Note:** The Network Logs and Security Logs components require the device to be configured as a device owner. Instructions on how to do that can be found [here](https://github.com/swiftbird07/elastic-agent-android/wiki/Register-App-as-Device-Owner).
 
 ## Compatibility
 
@@ -60,7 +60,9 @@ This policy will define which components of the Elastic Agent Android will be ac
 These settings control how documents are batched and sent to Elasticsearch, with options for backoff strategies.
 
 ### 4. Install the App
-Install the downloaded APK on your target Android device.
+Install the downloaded APK on your target Android device. 
+
+If you want to use the security- or network logs you need to configure the app as device owner as well. See [here](https://github.com/swiftbird07/elastic-agent-android/wiki/Register-App-as-Device-Owner) for instructions.
 
 ### 5. Enroll the Agent
 Open the app and tap on "Enroll Agent". Fill in the server URL, enrollment token, and hostname. You can also toggle SSL verification as needed. For mass enrollment, these fields can be autofilled using the clipboard or build configurations.
@@ -71,7 +73,7 @@ After enrolling, the agent should report as "Healthy" within a few seconds, and 
 ## Contributions and Feedback
 
 We are open to feature requests, contributions, questions, and any feedback. If you're interested in contributing or have suggestions for improvement, please feel free to reach out or submit an issue/pull request on our GitHub repository. 
-See [CONTRIBUTE.md](CONTRIBUTE.md) for more info about how to contribute, as well as for a general overview of the app's architecture.
+See [here](CONTRIBUTE.md) for more info about how to contribute, as well as for a general overview of the app's architecture.
 
  
 ---

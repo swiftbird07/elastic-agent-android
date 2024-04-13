@@ -8,4 +8,4 @@
 
 ## Reporting a Vulnerability
 
-Please directly message @swiftbird07.
+Send a mail to info[at]swiftbird.de

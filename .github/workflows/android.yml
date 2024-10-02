@@ -32,7 +32,7 @@ jobs:
         ./gradlew assembleRelease
 
     - name: Upload APK
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: elastic-agent-android.apk
         path: app/build/outputs/apk/debug/app-debug.apk

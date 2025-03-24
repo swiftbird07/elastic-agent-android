@@ -3,7 +3,7 @@
 ![Elastic Agent Android Logo](logo_elastic_agent.png)
 
 
-Elastic Agent Android is an unofficial implementation of the Elastic Agent for Android devices, bringing the powerful observability and management features of the Elastic Stack to the Android ecosystem. With Elastic Agent Android, you can enroll your Android devices into a Fleet server and start collecting a wide range of data directly into Elasticsearch, allowing for real-time monitoring, alerting, and analysis.
+Elastic Agent Android is an unofficial implementation of the Elastic Agent for Android devices, bringing the powerful observability and management features of the Elastic Stack to the Android ecosystem. With Elastic Agent Android, you can enroll your Android devices into a Fleet server and start collecting a wide range of data directly into Elasticsearch, allowing for real-time monitoring, alerting, and analysis. 
 
 ## Use Cases
 
